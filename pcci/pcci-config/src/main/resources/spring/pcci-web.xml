@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
+
+	<import resource="classpath*:config/spring-service.xml" />
+	<import resource="classpath*:config/spring-dal.xml" />
+
+	<beans profile="dev">
+		<bean id="placeHolder"
+			class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+			p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
+			<property name="locations">
+				<list>
+					<value>classpath:common/dev.properties</value>
+					<value>classpath:common/jdbc_dev.properties</value>
+					<value>classpath:common/hbn_dev.properties</value>
+					<value>classpath:common/log4j_dev.properties</value>
+				</list>
+			</property>
+		</bean>
+		<bean id="settings"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="ignoreResourceNotFound" value="true" />
+			<property name="locations">
+				<list>
+					<value>classpath:common/dev.properties</value>
+				</list>
+			</property>
+		</bean>
+	</beans>
+	<beans profile="sandbox">
+		<bean id="placeHolder"
+			class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+			p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
+			<property name="locations">
+				<list>
+					<value>classpath:common/sandbox.properties</value>
+					<value>classpath:common/jdbc_sandbox.properties</value>
+					<value>classpath:common/hbn_sandbox.properties</value>
+					<value>classpath:common/log4j_sandbox.properties</value>
+				</list>
+			</property>
+		</bean>
+		<bean id="settings"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="ignoreResourceNotFound" value="true" />
+			<property name="locations">
+				<list>
+					<value>classpath:common/sandbox.properties</value>
+				</list>
+			</property>
+		</bean>
+	</beans>
+	<beans profile="production">
+		<bean id="placeHolder"
+			class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer"
+			p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
+			<property name="locations">
+				<list>
+					<value>classpath:common/pduc.properties</value>
+					<value>classpath:common/jdbc_pduc.properties</value>
+					<value>classpath:common/hbn_pduc.properties</value>
+					<value>classpath:common/log4j_pduc.properties</value>
+				</list>
+			</property>
+		</bean>
+		<bean id="settings"
+			class="org.springframework.beans.factory.config.PropertiesFactoryBean">
+			<property name="ignoreResourceNotFound" value="true" />
+			<property name="locations">
+				<list>
+					<value>classpath:common/pduc.properties</value>
+				</list>
+			</property>
+		</bean>
+	</beans>
+</beans>
