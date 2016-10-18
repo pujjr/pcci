@@ -1,0 +1,43 @@
+package com.pujjr.pcci.common.hundredcredit.type;
+
+import java.util.HashMap;
+import java.util.Map;
+
+/**
+ * @author wen
+ * @date 创建时间：2016年10月13日 15:07:11 申请渠道类型
+ */
+public enum MealType {
+	/** 借款反欺诈规则—特殊名单 */
+	RuleSpecialList,
+	/** 借款反欺诈规则—多次申请 */
+	RuleApplyLoan,
+	/** 借款反欺诈规则—法院执行人 */
+	RuleExecution,
+	/** 特殊名单核查 */
+	SpecialList_c,
+	/** 多次申请核查 */
+	ApplyLoan,
+	/** 法院被执行人 */
+	Execution,
+	/** 个人不良信息查询 */
+	CrimeInfo,
+	/** 个人对外投资查询 */
+	PerInvest;
+
+	private static Map<MealType, MealType> codeMappingCache = new HashMap<MealType, MealType>();
+	static {
+		for (MealType type : MealType.values()) {
+			codeMappingCache.put(type, type);
+		}
+	}
+
+	public static boolean contains(String code) {
+		return codeMappingCache.get(code) != null;
+	}
+
+	public static MealType fromCode(String code) {
+		return codeMappingCache.get(code);
+	}
+
+}

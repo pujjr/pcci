@@ -68,8 +68,11 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.35</version>
 		</dependency>
-		<!-- 二级缓存ehcache -->
-		<!-- c3p0数据源 -->
+		<dependency>
+			<groupId>100credit</groupId>
+			<artifactId>100credit</artifactId>
+			<version>2.5.0.test</version>
+		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid</artifactId>
