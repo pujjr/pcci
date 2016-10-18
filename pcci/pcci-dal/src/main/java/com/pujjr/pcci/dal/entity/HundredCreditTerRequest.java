@@ -401,6 +401,12 @@ public class HundredCreditTerRequest implements Serializable {
 	@Column
 	private Apply_source applySource;
 
+	/**
+	 * 请求结果
+	 */
+	@Column(length = 2048)
+	private String result;
+
 	public Long getRequestId() {
 		return requestId;
 	}
@@ -895,6 +901,14 @@ public class HundredCreditTerRequest implements Serializable {
 
 	public void setApplySource(Apply_source applySource) {
 		this.applySource = applySource;
+	}
+
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
 	}
 
 }

@@ -173,6 +173,12 @@ public class HundredCreditDasRequest implements Serializable {
 	@Column
 	private String meal;
 
+	/**
+	 * 请求结果
+	 */
+	@Column(length = 2048)
+	private String result;
+
 	public Long getRequestId() {
 		return requestId;
 	}
@@ -373,4 +379,11 @@ public class HundredCreditDasRequest implements Serializable {
 		this.meal = meal;
 	}
 
+	public String getResult() {
+		return result;
+	}
+
+	public void setResult(String result) {
+		this.result = result;
+	}
 }

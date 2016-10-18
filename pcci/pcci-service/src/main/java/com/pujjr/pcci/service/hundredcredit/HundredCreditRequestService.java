@@ -15,12 +15,12 @@ import com.bfd.facade.MerchantServer;
 import com.br.bean.DasBean;
 import com.br.bean.TerBean;
 import com.pujjr.pcci.common.hundredcredit.type.MealType;
+import com.pujjr.pcci.common.pager.Paged;
+import com.pujjr.pcci.common.pager.PagedResult;
 import com.pujjr.pcci.common.result.ResultInfo;
 import com.pujjr.pcci.dal.dao.HundredCreditDasRequestDAO;
-import com.pujjr.pcci.dal.dao.HundredCreditResultDAO;
 import com.pujjr.pcci.dal.dao.HundredCreditTerRequestDAO;
 import com.pujjr.pcci.dal.entity.HundredCreditDasRequest;
-import com.pujjr.pcci.dal.entity.HundredCreditResult;
 import com.pujjr.pcci.dal.entity.HundredCreditTerRequest;
 import com.pujjr.pcci.service.ParameterizedBaseService;
 
@@ -41,9 +41,6 @@ public class HundredCreditRequestService extends ParameterizedBaseService<Hundre
 
 	@Autowired
 	HundredCreditDasRequestDAO dasRequestDAO;
-
-	@Autowired
-	HundredCreditResultDAO resultRecordDAO;
 
 	@Value("#{settings['account.100credit.username']}")
 	private String username;
@@ -122,16 +119,12 @@ public class HundredCreditRequestService extends ParameterizedBaseService<Hundre
 			terRequest.setRequestDate(new Date());
 			// 复制bean数据
 			BeanUtils.copyProperties(terRequest, terBean);
-			// 保存请求操作记录
-			terRequestDAO.save(terRequest);
 			// 调用百融借口
 			String portrait_result = ms.getApiData(terBean);
 			// 保存请求结果
-			HundredCreditResult resultRecord = new HundredCreditResult();
-			BeanUtils.copyProperties(terRequest, resultRecord);
-			resultRecord.setResultDate(new Date());
-			resultRecord.setResult(portrait_result);
-			resultRecordDAO.save(resultRecord);
+			terRequest.setResult(portrait_result);
+			terRequestDAO.save(terRequest);
+			// 返回结果
 			resultInfo.success(portrait_result);
 		} catch (Exception e) {
 			logger.error(e.getMessage());
@@ -166,16 +159,11 @@ public class HundredCreditRequestService extends ParameterizedBaseService<Hundre
 			dasRequest.setRequestDate(new Date());
 			// 复制bean数据
 			BeanUtils.copyProperties(dasRequest, dasBean);
-			// 保存请求操作记录
-			dasRequestDAO.save(dasRequest);
 			// 调用百融借口
 			String portrait_result = ms.getApiData(dasBean);
 			// 保存请求结果
-			HundredCreditResult resultRecord = new HundredCreditResult();
-			BeanUtils.copyProperties(dasRequest, resultRecord);
-			resultRecord.setResultDate(new Date());
-			resultRecord.setResult(portrait_result);
-			resultRecordDAO.save(resultRecord);
+			dasRequest.setResult(portrait_result);
+			dasRequestDAO.save(dasRequest);
 			resultInfo.success(portrait_result);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -224,5 +212,33 @@ public class HundredCreditRequestService extends ParameterizedBaseService<Hundre
 			resultInfo.fail(e);
 		}
 		return resultInfo.success();
+	}
+
+	/**
+	 * 根据调用请求用户工号,被查询人的姓名/手机号/身份证 查询单独调用请求记录
+	 * 
+	 * @param paged
+	 * @param requestUserId
+	 * @param name
+	 * @param cell
+	 * @param id
+	 * @return
+	 */
+	public PagedResult<HundredCreditDasRequest> searchDasRequest(Paged paged, String requestUserId, String name, String cell, String id) {
+		return dasRequestDAO.searchRequestResultRecord(paged, requestUserId, name, cell, id);
+	}
+
+	/**
+	 * 根据调用请求用户工号,被查询人的姓名/手机号/身份证 查询批量调用请求记录
+	 * 
+	 * @param paged
+	 * @param requestUserId
+	 * @param name
+	 * @param cell
+	 * @param id
+	 * @return
+	 */
+	public PagedResult<HundredCreditTerRequest> searchTerRequest(Paged paged, String requestUserId, String name, String cell, String id) {
+		return terRequestDAO.searchRequestResultRecord(paged, requestUserId, name, cell, id);
 	}
 }
