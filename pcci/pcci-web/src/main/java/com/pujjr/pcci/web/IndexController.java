@@ -12,14 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class IndexController extends BaseController {
 
-	@Value("#{settings['pcci.xx']}")
-	String xx;
-
-	@Value("#{settings['pcci.xxx']}")
-	String xxx;
+	@Value("#{settings['test.text']}")
+	String text;
 
 	@RequestMapping("/index")
 	public String index() {
+		System.out.println(text);
 		return "index";
 	}
 

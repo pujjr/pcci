@@ -205,7 +205,7 @@ public class Record {
 	}
 
 	public void setQuasiDrivingVehicle(DrivingVehicleType drivingVehicleType) {
-		this.quasiDrivingVehicle = drivingVehicleType.getCode();
+		this.quasiDrivingVehicle = drivingVehicleType.name();
 	}
 
 	public String getNationality() {

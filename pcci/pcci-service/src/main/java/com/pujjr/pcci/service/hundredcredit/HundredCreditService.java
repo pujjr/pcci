@@ -2,8 +2,8 @@ package com.pujjr.pcci.service.hundredcredit;
 
 import java.util.Date;
 
+import org.apache.commons.beanutils.BeanUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -30,7 +30,7 @@ import com.pujjr.pcci.service.ParameterizedBaseService;
  *
  */
 @Service
-public class HundredCreditRequestService extends ParameterizedBaseService<HundredCreditRequestService> {
+public class HundredCreditService extends ParameterizedBaseService<HundredCreditService> {
 
 	public static final String API_TYPE_TER = "ter";
 

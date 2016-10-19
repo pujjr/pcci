@@ -1,7 +1,6 @@
 package com.pujjr.pcci.service.qhcs;
 
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +24,9 @@ import com.pujjr.pcci.common.qhcs.utils.HttpRequestUtil;
  * @date 创建时间：2016年10月10日 下午2:01:14
  *
  */
-public class QianHaiRequestTest {
+public class QianHaiService {
 	private static final String CHECK_CODE = "SK803@!QLF-D25WEDA5E52DA";
 	private static final String SERVICE_URL = "https://test-qhzx.pingan.com.cn:5443/do/";
-
-	public static void main(String[] args) throws Exception {
-		QianHaiRequestTest test = new QianHaiRequestTest();
-		test.test();
-	}
 
 	@Test
 	public void test() throws Exception {
@@ -89,7 +83,8 @@ public class QianHaiRequestTest {
 		HeaderBean header = new HeaderBean();
 		header.setOrgCode(setting.getOrgCode());
 		header.setChnlId(setting.getChnlId());
-		header.setTransNo("Trands" + (new Date().getTime()));
+		// header.setTransNo("Trands" + (new Date().getTime()));
+		header.setTransNo("0000000002");
 		header.setTransDate("2015-02-02 14:12:14");
 		header.setAuthCode(setting.getAuthCode());
 		header.setAuthDate("2015-12-02 14:12:14");
@@ -98,15 +93,15 @@ public class QianHaiRequestTest {
 
 	public static String getBusiData_MSC8004() {
 		BusiData busiData = new BusiData();
-		busiData.setBatchNo("33adfsf323233");
+		busiData.setBatchNo("0000000002");
 		List<Record> list = new ArrayList<Record>();
 		Record record = new Record();
 		record.setReasonCode(QueryReasonType.LOAN_APPROVAL);
 		record.setIdNo("440102198301114447");
 		record.setIdType(IdentityType.ID_CARD);
 		record.setName("米么联调");
-		record.setSeqNo("r231545334546");
-		record.setEntityAuthCode("entityAuthCode" + (new Date().getTime()));
+		record.setSeqNo("1");
+		record.setEntityAuthCode("asd-123456789-asd456");
 		record.setEntityAuthDate("2016-10-10");
 		// record.set
 		list.add(record);

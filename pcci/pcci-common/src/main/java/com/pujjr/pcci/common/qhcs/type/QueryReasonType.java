@@ -9,29 +9,17 @@ import java.util.Map;
  *
  */
 public enum QueryReasonType {
-	/**
-	 * 贷款审批 01
-	 */
+	/** 贷款审批 01 */
 	LOAN_APPROVAL("01", "贷款审批"),
-	/**
-	 * 贷中管理 02
-	 */
+	/** 贷中管理 02 */
 	LOAN_MID_MANAGE("02", "贷中管理"),
-	/**
-	 * 贷后管理 03
-	 */
+	/** 贷后管理 03 */
 	LOAN_LATER_MANAGE("03", "贷后管理"),
-	/**
-	 * 本人查询 04
-	 */
+	/** 本人查询 04 */
 	SELF_QUERY("04", "本人查询"),
-	/**
-	 * 异议查询 05
-	 */
+	/** 异议查询 05 */
 	OBJECTION_QUERY("05", "异议查询"),
-	/**
-	 * 其他 99
-	 */
+	/** 其他 99 */
 	OTHER("99", "其他");
 
 	private String code;

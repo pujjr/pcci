@@ -32,12 +32,12 @@ public enum MealType {
 		}
 	}
 
-	public static boolean contains(String code) {
-		return codeMappingCache.get(code) != null;
+	public static boolean contains(String name) {
+		return codeMappingCache.get(name) != null;
 	}
 
-	public static MealType fromCode(String code) {
-		return codeMappingCache.get(code);
+	public static MealType fromCode(String name) {
+		return codeMappingCache.get(name);
 	}
 
 }
