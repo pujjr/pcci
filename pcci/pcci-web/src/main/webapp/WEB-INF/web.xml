@@ -25,6 +25,10 @@
 		<servlet-name>dispatcher</servlet-name>
 		<url-pattern>/</url-pattern>
 	</servlet-mapping>
+	
+	<listener>  
+		<listener-class>com.pujjr.pcci.api.MotanListener</listener-class>  
+	</listener> 
 
 	<!-- 字符集过滤器 -->
 	<filter>

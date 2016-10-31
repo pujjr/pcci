@@ -80,7 +80,6 @@ public class DataSecurityUtil {
 			if (!sig.verify(signValueByte)) {
 				throw new Exception("E000013");
 			}
-			System.out.println("验签OK！");
 		} catch (Exception e) {
 			throw new Exception("E000014", e);
 		}

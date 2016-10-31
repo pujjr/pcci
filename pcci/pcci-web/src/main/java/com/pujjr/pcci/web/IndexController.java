@@ -1,8 +1,12 @@
 package com.pujjr.pcci.web;
 
-import org.springframework.beans.factory.annotation.Value;
+import org.pcci.api.bean.request.CreditRequestData;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import com.pujjr.pcci.service.credit.CreditService;
 
 /**
  * @author wen
@@ -12,13 +16,19 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 public class IndexController extends BaseController {
 
-	@Value("#{settings['test.text']}")
-	String text;
+	@Autowired
+	CreditService creditService;
 
 	@RequestMapping("/index")
 	public String index() {
-		System.out.println(text);
 		return "index";
+	}
+
+	@RequestMapping("/credit")
+	@ResponseBody
+	public Object credit() {
+		return creditService.creditQuery(new CreditRequestData());
+
 	}
 
 }

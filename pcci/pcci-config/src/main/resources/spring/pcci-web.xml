@@ -6,6 +6,8 @@
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
+	<import resource="classpath:spring/spring-cache.xml" />
+	<import resource="classpath:spring/motan_server.xml" />
 	<import resource="classpath*:config/spring-service.xml" />
 	<import resource="classpath*:config/spring-dal.xml" />
 

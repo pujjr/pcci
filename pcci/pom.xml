@@ -259,5 +259,6 @@
 		<module>pcci-service</module>
 		<module>pcci-dal</module>
     <module>pcci-config</module>
+    <module>pcci-api</module>
   </modules>
 </project>

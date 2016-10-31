@@ -16,8 +16,8 @@ import org.hibernate.metadata.ClassMetadata;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
-import com.pujjr.pcci.common.pager.Paged;
-import com.pujjr.pcci.common.pager.PagedResult;
+import com.pujjr.common.pager.Paged;
+import com.pujjr.common.pager.PagedResult;
 
 /**
  * @author wen

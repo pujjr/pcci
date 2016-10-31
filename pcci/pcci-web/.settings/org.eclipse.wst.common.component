@@ -16,6 +16,12 @@
         <dependent-module archiveName="pcci-config-0.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pcci-config/pcci-config">
             <dependency-type>uses</dependency-type>
         </dependent-module>
+        <dependent-module archiveName="pcci-api-0.0.1.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pcci-api/pcci-api">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+        <dependent-module archiveName="pujjr-common-1.0.jar" deploy-path="/WEB-INF/lib" handle="module:/resource/pujjr-common/pujjr-common">
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
         <property name="context-root" value="pcci-web"/>
         <property name="java-output-path" value="/pcci-web/target/classes"/>
     </wb-module>
