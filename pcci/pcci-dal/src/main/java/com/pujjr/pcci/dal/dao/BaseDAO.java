@@ -20,7 +20,7 @@ import com.pujjr.common.pager.Paged;
 import com.pujjr.common.pager.PagedResult;
 
 /**
- * @author wen
+ * @author wen 基础DAO
  * @date 创建时间：2016年10月14日 上午11:19:11
  *
  */

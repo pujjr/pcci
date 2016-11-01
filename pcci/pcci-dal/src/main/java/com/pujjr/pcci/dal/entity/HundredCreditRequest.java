@@ -19,7 +19,7 @@ import com.bfd.facade.Marriage;
 
 /**
  * @author wen
- * @date 创建时间：2016年10月17日 下午3:00:48 百融打包调用查询请求数据记录表
+ * @date 创建时间：2016年10月17日 下午3:00:48 百融查询请求
  *
  */
 @Entity

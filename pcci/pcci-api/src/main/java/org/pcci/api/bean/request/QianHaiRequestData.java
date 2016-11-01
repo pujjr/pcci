@@ -1,5 +1,7 @@
 package org.pcci.api.bean.request;
 
+import java.io.Serializable;
+
 import com.pujjr.common.type.DrivingVehicleType;
 import com.pujjr.common.type.IdentityType;
 import com.pujjr.common.type.credit.QueryReasonType;
@@ -8,7 +10,12 @@ import com.pujjr.common.type.credit.QueryReasonType;
  * @author wen
  * @date 创建时间：2016年10月10日 上午10:43:35 批次记录信息
  */
-public class QianHaiRequestData {
+public class QianHaiRequestData implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 交易唯一标识
@@ -161,10 +168,7 @@ public class QianHaiRequestData {
 	/**
 	 * 子产品信息
 	 * 
-	 * 2、从右到左每一位代表一种认证模式，如下： 第1位：实名验证 第2位：地址验证 第3位：工作单位验证 第4位：手机验证(请用第十位，为升级版)
-	 * 第5位：关系人验证 第6位：车辆验证 第7位：房产验证 第8位：人脸识别 第9位：学历验证 第10位：手机验证II
-	 * 3、每位值的含义说明：'1'表示验证，'0'表示不验证 4、长度必须为16位，左补0对齐 5、举例说明：
-	 * 0000000000010101-表示本次交易进行实名认证、工作单位验证、关系人验证
+	 * 2、从右到左每一位代表一种认证模式，如下： 第1位：实名验证 第2位：地址验证 第3位：工作单位验证 第4位：手机验证(请用第十位，为升级版) 第5位：关系人验证 第6位：车辆验证 第7位：房产验证 第8位：人脸识别 第9位：学历验证 第10位：手机验证II 3、每位值的含义说明：'1'表示验证，'0'表示不验证 4、长度必须为16位，左补0对齐 5、举例说明： 0000000000010101-表示本次交易进行实名认证、工作单位验证、关系人验证
 	 */
 	private String subProductInc;
 

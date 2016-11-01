@@ -50,6 +50,14 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 
 	public final static String DEFAULT_SUBPRODUCTINC = "0000000000001000";
 
+	/**
+	 * 发送前海查询请求
+	 * 
+	 * @param transNo
+	 * @param requestData
+	 * @param productType
+	 * @return
+	 */
 	public ResultInfo<QianHaiResult> sandQianHaiRequest(String transNo, QianHaiRequestData requestData, QueryProductType productType) {
 		ResultInfo<QianHaiResult> resultInfo = new ResultInfo<>();
 		List<QianHaiRequestData> requestList = new ArrayList<>();
@@ -81,6 +89,14 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 		return resultInfo;
 	}
 
+	/**
+	 * 发送前海查询请求
+	 * 
+	 * @param transNo
+	 * @param requestList
+	 * @param productType
+	 * @return
+	 */
 	public ResultInfo<List<QianHaiResult>> sandQianHaiRequest(String transNo, List<QianHaiRequestData> requestList, QueryProductType productType) {
 
 		ResultInfo<List<QianHaiResult>> resultInfo = new ResultInfo<>();
@@ -177,6 +193,12 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 		return fullSettingBean;
 	}
 
+	/**
+	 * 获得请求头
+	 * 
+	 * @param transNo
+	 * @return
+	 */
 	private HeaderBean getHeader(String transNo) {
 		String nowDate = DateFormatUtils.format(new Date(), DEFAULT_DATE_FORMAT);
 		HeaderBean header = new HeaderBean();

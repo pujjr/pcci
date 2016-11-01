@@ -1,6 +1,5 @@
 package com.pujjr.pcci.service.credit;
 
-import java.text.ParseException;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -36,7 +35,7 @@ import com.pujjr.pcci.service.qhcs.QianHaiService;
 
 /**
  * @author wen
- * @date 创建时间：2016年10月19日 上午10:42:27
+ * @date 创建时间：2016年10月19日 上午10:42:27 征信查询服务
  *
  */
 @Service
@@ -68,6 +67,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	@Autowired
 	CreditQueryResultDAO creditQueryResultDAO;
 
+	// TODO motan测试方法
 	public CreditCrimeInfo getCreditCrimeInfo() {
 		CreditCrimeInfo creditCrimeInfo = new CreditCrimeInfo();
 		creditCrimeInfo.setCaseSource("文震");
@@ -76,10 +76,17 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		return creditCrimeInfo;
 	}
 
+	// TODO motan测试方法
 	public String getTokenid() {
 		return hundredCreditService.login();
 	}
 
+	/**
+	 * 征信查询请求参数验证
+	 * 
+	 * @param creditRequestData
+	 * @return
+	 */
 	private ResultInfo<String> CreditRequestValidate(CreditRequestData creditRequestData) {
 		ResultInfo<String> resultInfo = new ResultInfo<>();
 		try {
@@ -99,6 +106,20 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		return resultInfo.success();
 	}
 
+	/**
+	 * 获得一个征信请求数据填装bean
+	 * 
+	 * @param creditId
+	 * @param requestUserId
+	 * @param idNo
+	 * @param mobileNo
+	 * @param name
+	 * @param reasonType
+	 * @param identityType
+	 * @param entityAuthCode
+	 * @param entityAuthDate
+	 * @return
+	 */
 	private CreditRequestData getCreditRequestData(String creditId, String requestUserId, String idNo, String mobileNo, String name, QueryReasonType reasonType, IdentityType identityType, String entityAuthCode, String entityAuthDate) {
 		CreditRequestData creditRequestData = new CreditRequestData();
 		creditRequestData.setCreditId(StringUtils.leftPad(creditId, 10, "0"));
@@ -113,6 +134,12 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		return creditRequestData;
 	}
 
+	/**
+	 * 调用征信查询
+	 * 
+	 * @param creditRequestData
+	 * @return
+	 */
 	public CreditQueryResult creditQuery(CreditRequestData creditRequestData) {
 		// 临时数据
 		String requestUserId = "admin";
@@ -175,77 +202,104 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		return creditQueryResult;
 	}
 
+	/**
+	 * 个人不良信息查询
+	 * 
+	 * @param creditQueryResult
+	 * @param hcRequestData
+	 */
 	private void crimeinfoQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) {
-		ResultInfo<String> crimeInfoResult = hundredCreditService.hundredCreditDasRequest(hcRequestData, MealType.CrimeInfo);
-		if (crimeInfoResult.isSuccess()) {
-			JSONObject crimeInfoJSON = JSON.parseObject(crimeInfoResult.getData());
-			if (StringUtils.equals(crimeInfoJSON.getString("code"), "600000")) {
-				JSONArray priskChecks = crimeInfoJSON.getJSONObject("product").getJSONArray("priskChecks");
-				Set<CreditCrimeInfo> creditCrimeInfoSet = new HashSet<>();
-				for (int i = 0; priskChecks != null && i < priskChecks.size(); i++) {
-					JSONArray caseDetails = priskChecks.getJSONObject(i).getJSONArray("caseDetail");
-					for (int j = 0; caseDetails != null && j < caseDetails.size(); j++) {
-						CreditCrimeInfo creditCrimeInfo = new CreditCrimeInfo();
-						JSONObject caseDetailJSON = caseDetails.getJSONObject(j);
-						if (caseDetailJSON != null) {
-							if (caseDetailJSON.getJSONObject("caseSource") != null) {
-								creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseSource").getString("#text"));
+		try {
+			ResultInfo<String> crimeInfoResult = hundredCreditService.hundredCreditDasRequest(hcRequestData, MealType.CrimeInfo);
+			if (crimeInfoResult.isSuccess()) {
+				JSONObject crimeInfoJSON = JSON.parseObject(crimeInfoResult.getData());
+				if (StringUtils.equals(crimeInfoJSON.getString("code"), "600000")) {
+					JSONArray priskChecks = crimeInfoJSON.getJSONObject("product").getJSONArray("priskChecks");
+					Set<CreditCrimeInfo> creditCrimeInfoSet = new HashSet<>();
+					for (int i = 0; priskChecks != null && i < priskChecks.size(); i++) {
+						JSONArray caseDetails = priskChecks.getJSONObject(i).getJSONArray("caseDetail");
+						for (int j = 0; caseDetails != null && j < caseDetails.size(); j++) {
+							CreditCrimeInfo creditCrimeInfo = new CreditCrimeInfo();
+							JSONObject caseDetailJSON = caseDetails.getJSONObject(j);
+							if (caseDetailJSON != null) {
+								if (caseDetailJSON.getJSONObject("caseSource") != null) {
+									creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseSource").getString("#text"));
+								}
+								if (caseDetailJSON.getJSONObject("caseTime") != null) {
+									creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseTime").getString("#text"));
+								}
+								if (caseDetailJSON.getJSONObject("caseType") != null) {
+									creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseType").getString("#text"));
+								}
+								creditCrimeInfoSet.add(creditCrimeInfo);
 							}
-							if (caseDetailJSON.getJSONObject("caseTime") != null) {
-								creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseTime").getString("#text"));
-							}
-							if (caseDetailJSON.getJSONObject("caseType") != null) {
-								creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseType").getString("#text"));
-							}
-							creditCrimeInfoSet.add(creditCrimeInfo);
 						}
 					}
+					creditQueryResult.setCreditCrimeInfoSet(creditCrimeInfoSet);
 				}
-				creditQueryResult.setCreditCrimeInfoSet(creditCrimeInfoSet);
 			}
+		} catch (Exception e) {
+			logger.error("百融个人不良信息查询错误");
 		}
 	}
 
+	/**
+	 * 法院被执行人查询
+	 * 
+	 * @param creditQueryResult
+	 * @param hcRequestData
+	 */
 	private void executionQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) {
-		ResultInfo<String> executionResult = hundredCreditService.hundredCreditTerRequest(hcRequestData, MealType.Execution);
-		if (executionResult.isSuccess()) {
-			JSONObject executionJSON = JSON.parseObject(executionResult.getData());
-			if (StringUtils.equals(executionJSON.getString("code"), "00")) {
-				Set<CreditExecution> creditExecutionSet = new HashSet<>();
-				String ex_bad = "ex_bad";
-				String ex_execut = "ex_execut";
-				for (int i = 1; i <= 10; i++) {
-					if (StringUtils.contains(executionResult.getData(), ex_bad + i) && StringUtils.contains(executionResult.getData(), ex_execut + i)) {
-						CreditExecution creditExecution = new CreditExecution();
-						// 失信被执行记录
-						creditExecution.setEx_bad_datatype(executionJSON.getString(ex_bad + i + "_datatype"));
-						creditExecution.setEx_bad_court(executionJSON.getString(ex_bad + i + "_court"));
-						creditExecution.setEx_bad_time(executionJSON.getString(ex_bad + i + "_time"));
-						creditExecution.setEx_bad_casenum(executionJSON.getString(ex_bad + i + "_casenum"));
-						creditExecution.setEx_bad_money(executionJSON.getString(ex_bad + i + "_money"));
-						creditExecution.setEx_bad_base(executionJSON.getString(ex_bad + i + "_base"));
-						creditExecution.setEx_bad_basecompany(executionJSON.getString(ex_bad + i + "_basecompany"));
-						creditExecution.setEx_bad_performance(executionJSON.getString(ex_bad + i + "_performance"));
-						creditExecution.setEx_bad_concretesituation(executionJSON.getString(ex_bad + i + "_concretesituation"));
-						creditExecution.setEx_bad_breaktime(executionJSON.getString(ex_bad + i + "_breaktime"));
-						// 被执行记录
-						creditExecution.setEx_execut_datatype(executionJSON.getString(ex_execut + i + "_datatype"));
-						creditExecution.setEx_execut_court(executionJSON.getString(ex_execut + i + "_court"));
-						creditExecution.setEx_execut_time(executionJSON.getString(ex_execut + i + "_time"));
-						creditExecution.setEx_execut_casenum(executionJSON.getString(ex_execut + i + "_casenum"));
-						creditExecution.setEx_execut_money(executionJSON.getString(ex_execut + i + "_money"));
-						creditExecution.setEx_execut_statute(executionJSON.getString(ex_execut + i + "_statute"));
-						creditExecution.setEx_execut_basic(executionJSON.getString(ex_execut + i + "_basic"));
-						creditExecution.setEx_execut_basiccourt(executionJSON.getString(ex_execut + i + "_basiccourt"));
+		try {
+			ResultInfo<String> executionResult = hundredCreditService.hundredCreditTerRequest(hcRequestData, MealType.Execution);
+			if (executionResult.isSuccess()) {
+				JSONObject executionJSON = JSON.parseObject(executionResult.getData());
+				if (StringUtils.equals(executionJSON.getString("code"), "00")) {
+					Set<CreditExecution> creditExecutionSet = new HashSet<>();
+					String ex_bad = "ex_bad";
+					String ex_execut = "ex_execut";
+					for (int i = 1; i <= 10; i++) {
+						if (StringUtils.contains(executionResult.getData(), ex_bad + i) && StringUtils.contains(executionResult.getData(), ex_execut + i)) {
+							CreditExecution creditExecution = new CreditExecution();
+							// 失信被执行记录
+							creditExecution.setEx_bad_datatype(executionJSON.getString(ex_bad + i + "_datatype"));
+							creditExecution.setEx_bad_court(executionJSON.getString(ex_bad + i + "_court"));
+							creditExecution.setEx_bad_time(executionJSON.getString(ex_bad + i + "_time"));
+							creditExecution.setEx_bad_casenum(executionJSON.getString(ex_bad + i + "_casenum"));
+							creditExecution.setEx_bad_money(executionJSON.getString(ex_bad + i + "_money"));
+							creditExecution.setEx_bad_base(executionJSON.getString(ex_bad + i + "_base"));
+							creditExecution.setEx_bad_basecompany(executionJSON.getString(ex_bad + i + "_basecompany"));
+							creditExecution.setEx_bad_performance(executionJSON.getString(ex_bad + i + "_performance"));
+							creditExecution.setEx_bad_concretesituation(executionJSON.getString(ex_bad + i + "_concretesituation"));
+							creditExecution.setEx_bad_breaktime(executionJSON.getString(ex_bad + i + "_breaktime"));
+							// 被执行记录
+							creditExecution.setEx_execut_datatype(executionJSON.getString(ex_execut + i + "_datatype"));
+							creditExecution.setEx_execut_court(executionJSON.getString(ex_execut + i + "_court"));
+							creditExecution.setEx_execut_time(executionJSON.getString(ex_execut + i + "_time"));
+							creditExecution.setEx_execut_casenum(executionJSON.getString(ex_execut + i + "_casenum"));
+							creditExecution.setEx_execut_money(executionJSON.getString(ex_execut + i + "_money"));
+							creditExecution.setEx_execut_statute(executionJSON.getString(ex_execut + i + "_statute"));
+							creditExecution.setEx_execut_basic(executionJSON.getString(ex_execut + i + "_basic"));
+							creditExecution.setEx_execut_basiccourt(executionJSON.getString(ex_execut + i + "_basiccourt"));
 
-						creditExecutionSet.add(creditExecution);
+							creditExecutionSet.add(creditExecution);
+						}
 					}
+					creditQueryResult.setCreditExecutionSet(creditExecutionSet);
 				}
-				creditQueryResult.setCreditExecutionSet(creditExecutionSet);
 			}
+		} catch (Exception e) {
+			logger.error("百融法院被执行人查询错误");
 		}
 	}
 
+	/**
+	 * 常贷客
+	 * 
+	 * @param creditQueryResult
+	 * @param qhRequestData
+	 * @param transNo
+	 */
 	private void loaneeQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
 		try {
 			ResultInfo<QianHaiResult> qianHaiResult_8037 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8037);
@@ -265,100 +319,163 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 					creditQueryResult.setQh_m12_id_loan_num(busiDate.before(DateUtils.addMonths(nowDate, TWELVE_MONTHS_AGO)) ? amount : 0);
 				}
 			}
-		} catch (ParseException e) {
-			// TODO 自动生成的 catch 块
-			e.printStackTrace();
+		} catch (Exception e) {
+			logger.error("前海常贷客查询错误");
 		}
 
 	}
 
+	/**
+	 * 百融多次贷款记录
+	 * 
+	 * @param creditQueryResult
+	 * @param hcRequestData
+	 */
 	private void applyloanQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) {
-		ResultInfo<String> creditResult = hundredCreditService.hundredCreditTerRequest(hcRequestData, MealType.ApplyLoanStr, MealType.ApplyLoan);
-		if (creditResult.isSuccess()) {
-			CreditQueryResult creditJSON = JSON.parseObject(creditResult.getData(), CreditQueryResult.class);
-			BeanUtils.copyProperties(creditJSON, creditQueryResult);
-		}
-	}
-
-	private void antifrauddooQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
-		ResultInfo<QianHaiResult> qianHaiResult_8075 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8075);
-		if (qianHaiResult_8075.isSuccess()) {
-			QianHaiResult qianHaiResults = qianHaiResult_8075.getData();
-			creditQueryResult.setIsMachdBlMakt(qianHaiResults.getIsMachdBlMakt());
-			creditQueryResult.setIsMachFraud(qianHaiResults.getIsMachFraud());
-		}
-	}
-
-	private void rskdooQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
-		ResultInfo<QianHaiResult> qianHaiResult_8036 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8036);
-		if (qianHaiResult_8036.isSuccess()) {
-			QianHaiResult qianHaiResults = qianHaiResult_8036.getData();
-			creditQueryResult.setSourceId(qianHaiResults.getSourceId());
-			creditQueryResult.setRskScore(qianHaiResults.getRskScore());
-			creditQueryResult.setRskMark(qianHaiResults.getRskMark());
-			creditQueryResult.setDataBuildTime(qianHaiResults.getDataBuildTime());
-		}
-	}
-
-	private void eChkPkgs(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
-		ResultInfo<QianHaiResult> qianHaiResult_8107 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8107);
-		if (qianHaiResult_8107.isSuccess()) {
-			QianHaiResult qianHaiResults = qianHaiResult_8107.getData();
-			creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobile());
-			creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatus());
-			creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScore());
-		}
-	}
-
-	private void drvcert2cmpincQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
-		ResultInfo<QianHaiResult> qianHaiResult_8079 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8079);
-		if (qianHaiResult_8079.isSuccess()) {
-			QianHaiResult qianHaiResults = qianHaiResult_8079.getData();
-			creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobile());
-			creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatus());
-			creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScore());
-		}
-	}
-
-	private void perinvestQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) {
-		ResultInfo<String> perInvestResult = hundredCreditService.hundredCreditDasRequest(hcRequestData, MealType.PerInvest);
-		if (perInvestResult.isSuccess()) {
-			JSONObject creditJSON = JSON.parseObject(perInvestResult.getData());
-			if (StringUtils.equals(creditJSON.getString("code"), "600000")) {
-				// 企业法人信息
-				JSONArray ryposfrs = creditJSON.getJSONObject("product").getJSONArray("RYPOSFR");
-				Set<CreditPerInvest> ryposfrPerInvestSet = new HashSet<>();
-				for (int i = 0; ryposfrs != null && i < ryposfrs.size(); i++) {
-					CreditPerInvest creditPerInvest = new CreditPerInvest();
-					creditPerInvest.setPerinvestType(CreditPerInvest.PERINVEST_TYPE_RYPOSFR);
-					JSONObject ryposfrJSON = ryposfrs.getJSONObject(i);
-					if (ryposfrJSON != null) {
-						creditPerInvest.setEntstatus(ryposfrJSON.getString("ENTSTATUS"));
-						creditPerInvest.setRegcap(ryposfrJSON.getString("REGCAP"));
-						creditPerInvest.setEntname(ryposfrJSON.getString("ENTNAME"));
-						creditPerInvest.setEnttype(ryposfrJSON.getString("ENTTYPE"));
-						ryposfrPerInvestSet.add(creditPerInvest);
-					}
-
-				}
-				// 企业股东信息
-				JSONArray ryposshas = creditJSON.getJSONObject("product").getJSONArray("RYPOSSHA");
-				Set<CreditPerInvest> ryposshaPerInvestSet = new HashSet<>();
-				for (int i = 0; ryposshas != null && i < ryposshas.size(); i++) {
-					CreditPerInvest creditPerInvest = new CreditPerInvest();
-					creditPerInvest.setPerinvestType(CreditPerInvest.PERINVEST_TYPE_RYPOSSHA);
-					JSONObject ryposshaJSON = ryposshas.getJSONObject(i);
-					if (ryposshaJSON != null) {
-						creditPerInvest.setEntstatus(ryposshaJSON.getString("ENTSTATUS"));
-						creditPerInvest.setRegcap(ryposshaJSON.getString("REGCAP"));
-						creditPerInvest.setEntname(ryposshaJSON.getString("ENTNAME"));
-						creditPerInvest.setEnttype(ryposshaJSON.getString("ENTTYPE"));
-						ryposshaPerInvestSet.add(creditPerInvest);
-					}
-				}
-
-				creditQueryResult.setCreditPerInvestSet(ryposshaPerInvestSet);
+		try {
+			ResultInfo<String> creditResult = hundredCreditService.hundredCreditTerRequest(hcRequestData, MealType.ApplyLoanStr, MealType.ApplyLoan);
+			if (creditResult.isSuccess()) {
+				CreditQueryResult creditJSON = JSON.parseObject(creditResult.getData(), CreditQueryResult.class);
+				BeanUtils.copyProperties(creditJSON, creditQueryResult);
 			}
+		} catch (Exception e) {
+			logger.error("百融多次贷款记录查询错误");
+		}
+	}
+
+	/**
+	 * 反欺诈
+	 * 
+	 * @param creditQueryResult
+	 * @param qhRequestData
+	 * @param transNo
+	 */
+	private void antifrauddooQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
+		try {
+			ResultInfo<QianHaiResult> qianHaiResult_8075 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8075);
+			if (qianHaiResult_8075.isSuccess()) {
+				QianHaiResult qianHaiResults = qianHaiResult_8075.getData();
+				creditQueryResult.setIsMachdBlMakt(qianHaiResults.getIsMachdBlMakt());
+				creditQueryResult.setIsMachFraud(qianHaiResults.getIsMachFraud());
+			}
+		} catch (Exception e) {
+			logger.error("前海反欺诈查询错误");
+		}
+	}
+
+	/**
+	 * 风险度
+	 * 
+	 * @param creditQueryResult
+	 * @param qhRequestData
+	 * @param transNo
+	 */
+	private void rskdooQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
+		try {
+			ResultInfo<QianHaiResult> qianHaiResult_8036 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8036);
+			if (qianHaiResult_8036.isSuccess()) {
+				QianHaiResult qianHaiResults = qianHaiResult_8036.getData();
+				creditQueryResult.setSourceId(qianHaiResults.getSourceId());
+				creditQueryResult.setRskScore(qianHaiResults.getRskScore());
+				creditQueryResult.setRskMark(qianHaiResults.getRskMark());
+				creditQueryResult.setDataBuildTime(qianHaiResults.getDataBuildTime());
+			}
+		} catch (Exception e) {
+			logger.error("前海风险度查询错误");
+		}
+	}
+
+	/**
+	 * 一鉴通
+	 * 
+	 * @param creditQueryResult
+	 * @param qhRequestData
+	 * @param transNo
+	 */
+	private void eChkPkgs(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
+		try {
+			ResultInfo<QianHaiResult> qianHaiResult_8107 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8107);
+			if (qianHaiResult_8107.isSuccess()) {
+				QianHaiResult qianHaiResults = qianHaiResult_8107.getData();
+				creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobile());
+				creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatus());
+				creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScore());
+			}
+		} catch (Exception e) {
+			logger.error("前海一鉴通查询错误");
+		}
+	}
+
+	/**
+	 * 驾驶证状态
+	 * 
+	 * @param creditQueryResult
+	 * @param qhRequestData
+	 * @param transNo
+	 */
+	private void drvcert2cmpincQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) {
+		try {
+			ResultInfo<QianHaiResult> qianHaiResult_8079 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8079);
+			if (qianHaiResult_8079.isSuccess()) {
+				QianHaiResult qianHaiResults = qianHaiResult_8079.getData();
+				creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobile());
+				creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatus());
+				creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScore());
+			}
+		} catch (Exception e) {
+			logger.error("前海驾驶证状态查询错误");
+		}
+	}
+
+	/**
+	 * 对外投资
+	 * 
+	 * @param creditQueryResult
+	 * @param hcRequestData
+	 */
+	private void perinvestQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) {
+		try {
+			ResultInfo<String> perInvestResult = hundredCreditService.hundredCreditDasRequest(hcRequestData, MealType.PerInvest);
+			if (perInvestResult.isSuccess()) {
+				JSONObject creditJSON = JSON.parseObject(perInvestResult.getData());
+				if (StringUtils.equals(creditJSON.getString("code"), "600000")) {
+					// 企业法人信息
+					JSONArray ryposfrs = creditJSON.getJSONObject("product").getJSONArray("RYPOSFR");
+					Set<CreditPerInvest> ryposfrPerInvestSet = new HashSet<>();
+					for (int i = 0; ryposfrs != null && i < ryposfrs.size(); i++) {
+						CreditPerInvest creditPerInvest = new CreditPerInvest();
+						creditPerInvest.setPerinvestType(CreditPerInvest.PERINVEST_TYPE_RYPOSFR);
+						JSONObject ryposfrJSON = ryposfrs.getJSONObject(i);
+						if (ryposfrJSON != null) {
+							creditPerInvest.setEntstatus(ryposfrJSON.getString("ENTSTATUS"));
+							creditPerInvest.setRegcap(ryposfrJSON.getString("REGCAP"));
+							creditPerInvest.setEntname(ryposfrJSON.getString("ENTNAME"));
+							creditPerInvest.setEnttype(ryposfrJSON.getString("ENTTYPE"));
+							ryposfrPerInvestSet.add(creditPerInvest);
+						}
+
+					}
+					// 企业股东信息
+					JSONArray ryposshas = creditJSON.getJSONObject("product").getJSONArray("RYPOSSHA");
+					Set<CreditPerInvest> ryposshaPerInvestSet = new HashSet<>();
+					for (int i = 0; ryposshas != null && i < ryposshas.size(); i++) {
+						CreditPerInvest creditPerInvest = new CreditPerInvest();
+						creditPerInvest.setPerinvestType(CreditPerInvest.PERINVEST_TYPE_RYPOSSHA);
+						JSONObject ryposshaJSON = ryposshas.getJSONObject(i);
+						if (ryposshaJSON != null) {
+							creditPerInvest.setEntstatus(ryposshaJSON.getString("ENTSTATUS"));
+							creditPerInvest.setRegcap(ryposshaJSON.getString("REGCAP"));
+							creditPerInvest.setEntname(ryposshaJSON.getString("ENTNAME"));
+							creditPerInvest.setEnttype(ryposshaJSON.getString("ENTTYPE"));
+							ryposshaPerInvestSet.add(creditPerInvest);
+						}
+					}
+
+					creditQueryResult.setCreditPerInvestSet(ryposshaPerInvestSet);
+				}
+			}
+		} catch (Exception e) {
+			logger.error("百融对外投资查询错误");
 		}
 	}
 

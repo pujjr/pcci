@@ -1,7 +1,10 @@
 package org.pcci.api.service;
 
+import org.pcci.api.bean.request.CreditRequestData;
 import org.pcci.api.bean.vo.CreditCrimeInfoVO;
 import org.pcci.api.bean.vo.CreditQueryResultVO;
+
+import com.pujjr.common.result.ResultInfo;
 
 /**
  * @author wen
@@ -15,5 +18,13 @@ public interface CreditApi {
 	public String getTokenid();
 
 	public CreditQueryResultVO getCreditQueryResult();
+
+	/**
+	 * 征信查询
+	 * 
+	 * @param creditRequestData
+	 * @return
+	 */
+	public ResultInfo<CreditQueryResultVO> creditQuery(CreditRequestData creditRequestData);
 
 }

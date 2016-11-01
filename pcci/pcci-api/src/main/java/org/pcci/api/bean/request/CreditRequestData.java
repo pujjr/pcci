@@ -1,5 +1,6 @@
 package org.pcci.api.bean.request;
 
+import java.io.Serializable;
 import java.util.Date;
 
 import com.pujjr.common.type.IdentityType;
@@ -9,7 +10,12 @@ import com.pujjr.common.type.credit.QueryReasonType;
  * @author wen
  * @date 创建时间：2016年10月10日 上午10:43:35 征信查询请求
  */
-public class CreditRequestData {
+public class CreditRequestData implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/**
 	 * 唯一流水号ID
