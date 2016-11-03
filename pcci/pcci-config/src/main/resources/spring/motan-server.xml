@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:motan="http://api.weibo.com/schema/motan"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+   http://api.weibo.com/schema/motan http://api.weibo.com/schema/motan.xsd">
+	<!-- <motan:registry regProtocol="zookeeper" name="pcci_zookeeper" address="127.0.0.1:2181" 
+		connectTimeout="2000"/> -->
+
+	<!-- 业务具体实现类 -->
+	<bean id="creditApiImpl" class="com.pujjr.pcci.api.CreditApiImpl" />
+
+	<!-- 注册中心配置 使用不同注册中心需要依赖对应的jar包。如果不使用注册中心，可以把check属性改为false，忽略注册失败。 -->
+	<motan:registry regProtocol="direct"
+		address="127.0.0.1:8002" name="motanRegistry" />
+
+	<!-- 协议配置。为防止多个业务配置冲突，推荐使用id表示具体协议。 -->
+	<motan:protocol id="pujjrMotan" default="true" name="motan"
+		maxServerConnection="80000"
+		maxContentLength="1048576" maxWorkerThread="800"
+		minWorkerThread="20" />
+
+	<!-- 通用配置，多个rpc服务使用相同的基础配置. group和module定义具体的服务池。export格式为“protocol id:提供服务的端口” -->
+	<motan:basicService group="motan-pujjr"
+		module="motan-pujjr" application="credit"
+		accessLog="true" shareChannel="true"
+		registry="motanRegistry" id="serviceBasicConfig" />
+
+	<!-- 具体rpc服务配置，声明实现的接口类。 -->
+	<motan:service interface="org.pcci.api.service.CreditApi"
+		ref="creditApiImpl" export="pujjrMotan:8002" basicService="serviceBasicConfig">
+	</motan:service>
+
+</beans>

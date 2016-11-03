@@ -2,7 +2,7 @@ package org.pcci.api.bean.vo;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 /**
  * @author wen
@@ -30,14 +30,24 @@ public class CreditQueryResultVO implements Serializable {
 	 */
 	private Date requestDate;
 
+	/**
+	 * 被调查人姓名
+	 */
+	private String userName;
+
+	/**
+	 * 被调查人身份证号
+	 */
+	private String userIdNo;
+
 	/* 个人不良信息 */
-	private Set<CreditCrimeInfoVO> creditCrimeInfoSet;
+	private List<CreditCrimeInfoVO> creditCrimeInfoList;
 
 	/* 失信被执行记录 */
-	private Set<CreditExecutionVO> CreditExecutionSet;
+	private List<CreditExecutionVO> creditExecutionList;
 
 	/* 对外投资 */
-	private Set<CreditPerInvestVO> CreditPerInvestSet;
+	private List<CreditPerInvestVO> creditPerInvestList;
 
 	/* 信贷申请记录 */
 
@@ -827,48 +837,78 @@ public class CreditQueryResultVO implements Serializable {
 	}
 
 	/**
-	 * @return creditCrimeInfoSet
+	 * @return creditCrimeInfoList
 	 */
-	public Set<CreditCrimeInfoVO> getCreditCrimeInfoSet() {
-		return creditCrimeInfoSet;
+	public List<CreditCrimeInfoVO> getCreditCrimeInfoList() {
+		return creditCrimeInfoList;
 	}
 
 	/**
-	 * @param creditCrimeInfoSet
-	 *            要设置的 creditCrimeInfoSet
+	 * @param creditCrimeInfoList
+	 *            要设置的 creditCrimeInfoList
 	 */
-	public void setCreditCrimeInfoSet(Set<CreditCrimeInfoVO> creditCrimeInfoSet) {
-		this.creditCrimeInfoSet = creditCrimeInfoSet;
+	public void setCreditCrimeInfoList(List<CreditCrimeInfoVO> creditCrimeInfoList) {
+		this.creditCrimeInfoList = creditCrimeInfoList;
 	}
 
 	/**
-	 * @return creditExecutionSet
+	 * @return creditExecutionList
 	 */
-	public Set<CreditExecutionVO> getCreditExecutionSet() {
-		return CreditExecutionSet;
+	public List<CreditExecutionVO> getCreditExecutionList() {
+		return creditExecutionList;
 	}
 
 	/**
-	 * @param creditExecutionSet
-	 *            要设置的 creditExecutionSet
+	 * @param creditExecutionList
+	 *            要设置的 creditExecutionList
 	 */
-	public void setCreditExecutionSet(Set<CreditExecutionVO> creditExecutionSet) {
-		CreditExecutionSet = creditExecutionSet;
+	public void setCreditExecutionList(List<CreditExecutionVO> creditExecutionList) {
+		this.creditExecutionList = creditExecutionList;
 	}
 
 	/**
-	 * @return creditPerInvestSet
+	 * @return creditPerInvestList
 	 */
-	public Set<CreditPerInvestVO> getCreditPerInvestSet() {
-		return CreditPerInvestSet;
+	public List<CreditPerInvestVO> getCreditPerInvestList() {
+		return creditPerInvestList;
 	}
 
 	/**
-	 * @param creditPerInvestSet
-	 *            要设置的 creditPerInvestSet
+	 * @param creditPerInvestList
+	 *            要设置的 creditPerInvestList
 	 */
-	public void setCreditPerInvestSet(Set<CreditPerInvestVO> creditPerInvestSet) {
-		CreditPerInvestSet = creditPerInvestSet;
+	public void setCreditPerInvestList(List<CreditPerInvestVO> creditPerInvestList) {
+		this.creditPerInvestList = creditPerInvestList;
+	}
+
+	/**
+	 * @return 被调查人姓名
+	 */
+	public String getUserName() {
+		return userName;
+	}
+
+	/**
+	 * @param 被调查人姓名
+	 *            要设置的 userName
+	 */
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	/**
+	 * @return 被调查人身份证号
+	 */
+	public String getUserIdNo() {
+		return userIdNo;
+	}
+
+	/**
+	 * @param 被调查人身份证号
+	 *            要设置的 userIdNo
+	 */
+	public void setUserIdNo(String userIdNo) {
+		this.userIdNo = userIdNo;
 	}
 
 }

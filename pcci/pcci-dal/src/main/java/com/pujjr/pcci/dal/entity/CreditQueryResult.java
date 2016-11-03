@@ -2,7 +2,7 @@ package com.pujjr.pcci.dal.entity;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
+import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -47,20 +47,32 @@ public class CreditQueryResult implements Serializable {
 	@Column(nullable = false)
 	private Date requestDate;
 
+	/**
+	 * 被调查人姓名
+	 */
+	@Column(nullable = false)
+	private String userName;
+
+	/**
+	 * 被调查人身份证号
+	 */
+	@Column(nullable = false)
+	private String userIdNo;
+
 	/* 个人不良信息 */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "credit_record_Id")
-	private Set<CreditCrimeInfo> creditCrimeInfoSet;
+	private List<CreditCrimeInfo> creditCrimeInfoList;
 
 	/* 失信被执行记录 */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "credit_record_Id")
-	private Set<CreditExecution> CreditExecutionSet;
+	private List<CreditExecution> creditExecutionList;
 
 	/* 对外投资 */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "credit_record_Id")
-	private Set<CreditPerInvest> CreditPerInvestSet;
+	private List<CreditPerInvest> creditPerInvestList;
 
 	/* 信贷申请记录 */
 
@@ -306,6 +318,51 @@ public class CreditQueryResult implements Serializable {
 	 */
 	public void setRequestDate(Date requestDate) {
 		this.requestDate = requestDate;
+	}
+
+	/**
+	 * @return creditCrimeInfoList
+	 */
+	public List<CreditCrimeInfo> getCreditCrimeInfoList() {
+		return creditCrimeInfoList;
+	}
+
+	/**
+	 * @param creditCrimeInfoList
+	 *            要设置的 creditCrimeInfoList
+	 */
+	public void setCreditCrimeInfoList(List<CreditCrimeInfo> creditCrimeInfoList) {
+		this.creditCrimeInfoList = creditCrimeInfoList;
+	}
+
+	/**
+	 * @return creditExecutionList
+	 */
+	public List<CreditExecution> getCreditExecutionList() {
+		return creditExecutionList;
+	}
+
+	/**
+	 * @param creditExecutionList
+	 *            要设置的 creditExecutionList
+	 */
+	public void setCreditExecutionList(List<CreditExecution> creditExecutionList) {
+		this.creditExecutionList = creditExecutionList;
+	}
+
+	/**
+	 * @return creditPerInvestList
+	 */
+	public List<CreditPerInvest> getCreditPerInvestList() {
+		return creditPerInvestList;
+	}
+
+	/**
+	 * @param creditPerInvestList
+	 *            要设置的 creditPerInvestList
+	 */
+	public void setCreditPerInvestList(List<CreditPerInvest> creditPerInvestList) {
+		this.creditPerInvestList = creditPerInvestList;
 	}
 
 	/**
@@ -864,48 +921,33 @@ public class CreditQueryResult implements Serializable {
 	}
 
 	/**
-	 * @return creditCrimeInfoSet
+	 * @return 被调查人姓名
 	 */
-	public Set<CreditCrimeInfo> getCreditCrimeInfoSet() {
-		return creditCrimeInfoSet;
+	public String getUserName() {
+		return userName;
 	}
 
 	/**
-	 * @param creditCrimeInfoSet
-	 *            要设置的 creditCrimeInfoSet
+	 * @param 被调查人姓名
+	 *            要设置的 userName
 	 */
-	public void setCreditCrimeInfoSet(Set<CreditCrimeInfo> creditCrimeInfoSet) {
-		this.creditCrimeInfoSet = creditCrimeInfoSet;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
 	/**
-	 * @return creditExecutionSet
+	 * @return 被调查人身份证号
 	 */
-	public Set<CreditExecution> getCreditExecutionSet() {
-		return CreditExecutionSet;
+	public String getUserIdNo() {
+		return userIdNo;
 	}
 
 	/**
-	 * @param creditExecutionSet
-	 *            要设置的 creditExecutionSet
+	 * @param 被调查人身份证号
+	 *            要设置的 userIdNo
 	 */
-	public void setCreditExecutionSet(Set<CreditExecution> creditExecutionSet) {
-		CreditExecutionSet = creditExecutionSet;
-	}
-
-	/**
-	 * @return creditPerInvestSet
-	 */
-	public Set<CreditPerInvest> getCreditPerInvestSet() {
-		return CreditPerInvestSet;
-	}
-
-	/**
-	 * @param creditPerInvestSet
-	 *            要设置的 creditPerInvestSet
-	 */
-	public void setCreditPerInvestSet(Set<CreditPerInvest> creditPerInvestSet) {
-		CreditPerInvestSet = creditPerInvestSet;
+	public void setUserIdNo(String userIdNo) {
+		this.userIdNo = userIdNo;
 	}
 
 }

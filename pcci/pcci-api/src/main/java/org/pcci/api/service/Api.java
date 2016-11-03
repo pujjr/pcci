@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.pujjr.common.utils.BeanCopierUtils;
+import com.pujjr.common.utils.bean.BeanCopierUtils;
 
 /**
  * Api公共

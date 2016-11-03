@@ -1,4 +1,4 @@
-package com.pujjr.common.utils;
+package com.pujjr.common.utils.bean;
 
 import java.util.HashMap;
 import java.util.Map;
