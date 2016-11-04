@@ -354,7 +354,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 
 	// 百融多次贷款申请
 	private void applyloanTable(CreditQueryResult creditQueryResult, Document document) {
-		PdfPTable table = defaultTable(9);
+		PdfPTable table = defaultTable(5);
 		table.addCell(newTitleCell(table, "百融信贷申请记录"));
 		newSomeCell(table, "", "近1个月", "近3个月", "近6个月", "近12个月");
 		try {

@@ -12,6 +12,9 @@ import com.pujjr.common.utils.bean.BeanCopierUtils;
  */
 public class Api {
 	protected <Key, Entity, Model> Map<Key, Model> entityMapToModelMap(Map<Key, Entity> entityMap, Class<Model> modelClass) throws IllegalAccessException, InstantiationException {
+		if (entityMap == null) {
+			return null;
+		}
 		Map<Key, Model> modelMap = new LinkedHashMap<>();
 		for (Key key : entityMap.keySet()) {
 			Entity entity = entityMap.get(key);
@@ -22,6 +25,9 @@ public class Api {
 	}
 
 	protected <Entity, Model> List<Model> entityListToModelList(List<Entity> entityList, Class<Model> modelClass) throws IllegalAccessException, InstantiationException {
+		if (entityList == null) {
+			return null;
+		}
 		List<Model> modelList = new ArrayList<>();
 		for (Entity entity : entityList) {
 			Model model = entityToModel(entity, modelClass);
@@ -31,6 +37,9 @@ public class Api {
 	}
 
 	protected <Entity, Model> Model entityToModel(Entity entity, Class<Model> modelClass) throws IllegalAccessException, InstantiationException {
+		if (entity == null) {
+			return null;
+		}
 		Model model = modelClass.newInstance();
 		BeanCopierUtils.copy(entity, model);
 		return model;

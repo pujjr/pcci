@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.pcci.api.bean.request.CreditRequestData;
 import org.pcci.api.bean.request.QianHaiRequestData;
@@ -69,20 +68,6 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 
 	@Autowired
 	CreditQueryResultDAO creditQueryResultDAO;
-
-	// TODO motan测试方法
-	public CreditCrimeInfo getCreditCrimeInfo() {
-		CreditCrimeInfo creditCrimeInfo = new CreditCrimeInfo();
-		creditCrimeInfo.setCaseSource("文震");
-		creditCrimeInfo.setCaseTime(DateFormatUtils.format(new Date(), "yyyy-MM-dd"));
-		creditCrimeInfo.setCaseType("9");
-		return creditCrimeInfo;
-	}
-
-	// TODO motan测试方法
-	public String getTokenid() {
-		return hundredCreditService.login();
-	}
 
 	/**
 	 * 征信查询请求参数验证

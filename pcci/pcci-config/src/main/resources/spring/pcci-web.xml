@@ -7,10 +7,10 @@
        http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd">
 
 	
-	<import resource="classpath*:config/spring-service.xml" />
-	<import resource="classpath*:config/spring-dal.xml" />
+	<import resource="classpath:config/spring-service.xml" />
+	<import resource="classpath:config/spring-dal.xml" />
 	<import resource="classpath:spring/spring-cache.xml" />
-	<import resource="classpath:spring/motan-server.xml" />
+	<import resource="classpath:spring/dubbo-server.xml" />
 
 	<beans profile="dev">
 		<bean id="placeHolder"
@@ -29,7 +29,7 @@
 			<property name="locations">
 				<list>
 					<value>classpath:common/dev.properties</value>
-					<value>classpath:common/*_dev.properties</value>
+					<value>classpath:service/*_dev.properties</value>
 				</list>
 			</property>
 		</bean>

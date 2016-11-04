@@ -109,27 +109,18 @@
 		</dependency>
 		
 		
-		<dependency>
-		    <groupId>com.weibo</groupId>
-		    <artifactId>motan-core</artifactId>
-		    <version>0.2.1</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.weibo</groupId>
-		    <artifactId>motan-transport-netty</artifactId>
-		    <version>0.2.1</version>
-		</dependency>
-		
 		<!-- only needed for spring-based features -->
+		
 		<dependency>
-		    <groupId>com.weibo</groupId>
-		    <artifactId>motan-springsupport</artifactId>
-		    <version>0.2.1</version>
-		</dependency>
-		<dependency>
-		    <groupId>com.weibo</groupId>
-		    <artifactId>motan-registry-zookeeper</artifactId>
-		    <version>0.2.1</version>
+            <groupId>com.alibaba</groupId>
+            <artifactId>dubbo</artifactId>
+            <version>2.5.3</version>
+            <exclusions>
+                    <exclusion>
+                        <groupId>org.springframework</groupId>
+                        <artifactId>spring</artifactId>
+                    </exclusion>
+                </exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
@@ -148,6 +139,11 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-context</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.github.sgroschupf</groupId>
+			<artifactId>zkclient</artifactId>
+			<version>0.1</version>
 		</dependency>
 	</dependencies>
 	<build>
