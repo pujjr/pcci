@@ -1,7 +1,6 @@
 package com.pujjr.pcci.dal.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -13,6 +12,7 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 
 /**
  * @author wen
@@ -35,30 +35,6 @@ public class CreditQueryResult implements Serializable {
 	@Column
 	private Long creditId;
 
-	/**
-	 * 查询请求用户/员工编号
-	 */
-	@Column(nullable = false, length = 24)
-	private String requestUserId;
-
-	/**
-	 * 查询请求时间
-	 */
-	@Column(nullable = false)
-	private Date requestDate;
-
-	/**
-	 * 被调查人姓名
-	 */
-	@Column(nullable = false)
-	private String userName;
-
-	/**
-	 * 被调查人身份证号
-	 */
-	@Column(nullable = false)
-	private String userIdNo;
-
 	/* 个人不良信息 */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "credit_record_Id")
@@ -73,6 +49,10 @@ public class CreditQueryResult implements Serializable {
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "credit_record_Id")
 	private List<CreditPerInvest> creditPerInvestList;
+
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "credit_request_Id")
+	private CreditRequest creditRequest;
 
 	/* 信贷申请记录 */
 
@@ -98,109 +78,46 @@ public class CreditQueryResult implements Serializable {
 	private Integer qh_m12_id_loan_num = 0;
 
 	/**
-	 * 1个月银行次数(身份证)
+	 * 1个月百融贷款申请次数(身份证)
 	 */
 	@Column
-	private Integer als_m1_id_bank_allnum = 0;
+	private Integer br_m1_id_loan_num = 0;
 	/**
-	 * 1个月非银行次数(身份证)
+	 * 3个月百融贷款申请次数(身份证)
 	 */
 	@Column
-	private Integer als_m1_id_nbank_allnum = 0;
+	private Integer br_m3_id_loan_num = 0;
 	/**
-	 * 1个月银行次数(手机号)
+	 * 6个月百融贷款申请次数(身份证)
 	 */
 	@Column
-	private Integer als_m1_cell_bank_allnum = 0;
+	private Integer br_m6_id_loan_num = 0;
 	/**
-	 * 1个月非银行次数(手机号)
+	 * 12个月百融贷款申请次数(身份证)
 	 */
 	@Column
-	private Integer als_m1_cell_nbank_allnum = 0;
+	private Integer br_m12_id_loan_num = 0;
 
 	/**
-	 * 3个月银行次数(身份证)
+	 * 1个月百融贷款申请次数(手机号)
 	 */
 	@Column
-	private Integer als_m3_id_bank_allnum = 0;
+	private Integer br_m1_cell_loan_num = 0;
 	/**
-	 * 3个月非银行次数(身份证)
+	 * 3个月百融贷款申请次数(手机号)
 	 */
 	@Column
-	private Integer als_m3_id_nbank_allnum = 0;
+	private Integer br_m3_cell_loan_num = 0;
 	/**
-	 * 3个月银行次数(手机号)
+	 * 6个月百融贷款申请次数(手机号)
 	 */
 	@Column
-	private Integer als_m3_cell_bank_allnum = 0;
+	private Integer br_m6_cell_loan_num = 0;
 	/**
-	 * 3个月非银行次数(手机号)
+	 * 12个月百融贷款申请次数(手机号)
 	 */
 	@Column
-	private Integer als_m3_cell_nbank_allnum = 0;
-
-	/**
-	 * 6个月银行次数(身份证)
-	 */
-	@Column
-	private Integer als_m6_id_bank_allnum = 0;
-	/**
-	 * 6个月非银行次数(身份证)
-	 */
-	@Column
-	private Integer als_m6_id_nbank_allnum = 0;
-	/**
-	 * 6个月银行次数(手机号)
-	 */
-	@Column
-	private Integer als_m6_cell_bank_allnum = 0;
-	/**
-	 * 6个月非银行次数(手机号)
-	 */
-	@Column
-	private Integer als_m6_cell_nbank_allnum = 0;
-
-	/**
-	 * 12个月本银机构次数(身份证)
-	 */
-	@Column
-	private Integer al_m12_id_bank_selfnum = 0;
-	/**
-	 * 12个月银行次数(身份证)
-	 */
-	@Column
-	private Integer al_m12_id_bank_allnum = 0;
-	/**
-	 * 12个月本非银机构次数(身份证)
-	 */
-	@Column
-	private Integer al_m12_id_notbank_selfnum = 0;
-	/**
-	 * 12个月非银行次数(身份证)
-	 */
-	@Column
-	private Integer al_m12_id_notbank_allnum = 0;
-
-	/**
-	 * 12个月本银机构次数(手机号)
-	 */
-	@Column
-	private Integer al_m12_cell_bank_selfnum = 0;
-	/**
-	 * 12个月银行次数(手机号)
-	 */
-	@Column
-	private Integer al_m12_cell_bank_allnum = 0;
-	/**
-	 * 12个月本非银机构次数(手机号)
-	 */
-	@Column
-	private Integer al_m12_cell_notbank_selfnum = 0;
-	/**
-	 * 12个月非银行次数(手机号)
-	 */
-	@Column
-	private Integer al_m12_cell_notbank_allnum = 0;
+	private Integer br_m12_cell_loan_num = 0;
 
 	/* 前海反欺诈 */
 
@@ -291,36 +208,6 @@ public class CreditQueryResult implements Serializable {
 	}
 
 	/**
-	 * @return 查询请求用户员工编号
-	 */
-	public String getRequestUserId() {
-		return requestUserId;
-	}
-
-	/**
-	 * @param 查询请求用户员工编号
-	 *            要设置的 requestUserId
-	 */
-	public void setRequestUserId(String requestUserId) {
-		this.requestUserId = requestUserId;
-	}
-
-	/**
-	 * @return 查询请求时间
-	 */
-	public Date getRequestDate() {
-		return requestDate;
-	}
-
-	/**
-	 * @param 查询请求时间
-	 *            要设置的 requestDate
-	 */
-	public void setRequestDate(Date requestDate) {
-		this.requestDate = requestDate;
-	}
-
-	/**
 	 * @return creditCrimeInfoList
 	 */
 	public List<CreditCrimeInfo> getCreditCrimeInfoList() {
@@ -363,6 +250,21 @@ public class CreditQueryResult implements Serializable {
 	 */
 	public void setCreditPerInvestList(List<CreditPerInvest> creditPerInvestList) {
 		this.creditPerInvestList = creditPerInvestList;
+	}
+
+	/**
+	 * @return creditRequest
+	 */
+	public CreditRequest getCreditRequest() {
+		return creditRequest;
+	}
+
+	/**
+	 * @param creditRequest
+	 *            要设置的 creditRequest
+	 */
+	public void setCreditRequest(CreditRequest creditRequest) {
+		this.creditRequest = creditRequest;
 	}
 
 	/**
@@ -426,303 +328,123 @@ public class CreditQueryResult implements Serializable {
 	}
 
 	/**
-	 * @return 1个月银行次数(身份证)
+	 * @return 1个月百融贷款申请次数(身份证)
 	 */
-	public Integer getAls_m1_id_bank_allnum() {
-		return als_m1_id_bank_allnum;
+	public Integer getBr_m1_id_loan_num() {
+		return br_m1_id_loan_num;
 	}
 
 	/**
-	 * @param 1个月银行次数(身份证)
-	 *            要设置的 als_m1_id_bank_allnum
+	 * @param 1个月百融贷款申请次数(身份证)
+	 *            要设置的 br_m1_id_loan_num
 	 */
-	public void setAls_m1_id_bank_allnum(Integer als_m1_id_bank_allnum) {
-		this.als_m1_id_bank_allnum = als_m1_id_bank_allnum;
+	public void setBr_m1_id_loan_num(Integer br_m1_id_loan_num) {
+		this.br_m1_id_loan_num = br_m1_id_loan_num;
 	}
 
 	/**
-	 * @return 1个月非银行次数(身份证)
+	 * @return 3个月百融贷款申请次数(身份证)
 	 */
-	public Integer getAls_m1_id_nbank_allnum() {
-		return als_m1_id_nbank_allnum;
+	public Integer getBr_m3_id_loan_num() {
+		return br_m3_id_loan_num;
 	}
 
 	/**
-	 * @param 1个月非银行次数(身份证)
-	 *            要设置的 als_m1_id_nbank_allnum
+	 * @param 3个月百融贷款申请次数(身份证)
+	 *            要设置的 br_m3_id_loan_num
 	 */
-	public void setAls_m1_id_nbank_allnum(Integer als_m1_id_nbank_allnum) {
-		this.als_m1_id_nbank_allnum = als_m1_id_nbank_allnum;
+	public void setBr_m3_id_loan_num(Integer br_m3_id_loan_num) {
+		this.br_m3_id_loan_num = br_m3_id_loan_num;
 	}
 
 	/**
-	 * @return 1个月银行次数(手机号)
+	 * @return 6个月百融贷款申请次数(身份证)
 	 */
-	public Integer getAls_m1_cell_bank_allnum() {
-		return als_m1_cell_bank_allnum;
+	public Integer getBr_m6_id_loan_num() {
+		return br_m6_id_loan_num;
 	}
 
 	/**
-	 * @param 1个月银行次数(手机号)
-	 *            要设置的 als_m1_cell_bank_allnum
+	 * @param 6个月百融贷款申请次数(身份证)
+	 *            要设置的 br_m6_id_loan_num
 	 */
-	public void setAls_m1_cell_bank_allnum(Integer als_m1_cell_bank_allnum) {
-		this.als_m1_cell_bank_allnum = als_m1_cell_bank_allnum;
+	public void setBr_m6_id_loan_num(Integer br_m6_id_loan_num) {
+		this.br_m6_id_loan_num = br_m6_id_loan_num;
 	}
 
 	/**
-	 * @return 1个月非银行次数(手机号)
+	 * @return 12个月百融贷款申请次数(身份证)
 	 */
-	public Integer getAls_m1_cell_nbank_allnum() {
-		return als_m1_cell_nbank_allnum;
+	public Integer getBr_m12_id_loan_num() {
+		return br_m12_id_loan_num;
 	}
 
 	/**
-	 * @param 1个月非银行次数(手机号)
-	 *            要设置的 als_m1_cell_nbank_allnum
+	 * @param 12个月百融贷款申请次数(身份证)
+	 *            要设置的 br_m12_id_loan_num
 	 */
-	public void setAls_m1_cell_nbank_allnum(Integer als_m1_cell_nbank_allnum) {
-		this.als_m1_cell_nbank_allnum = als_m1_cell_nbank_allnum;
+	public void setBr_m12_id_loan_num(Integer br_m12_id_loan_num) {
+		this.br_m12_id_loan_num = br_m12_id_loan_num;
 	}
 
 	/**
-	 * @return 3个月银行次数(身份证)
+	 * @return 1个月百融贷款申请次数(手机号)
 	 */
-	public Integer getAls_m3_id_bank_allnum() {
-		return als_m3_id_bank_allnum;
+	public Integer getBr_m1_cell_loan_num() {
+		return br_m1_cell_loan_num;
 	}
 
 	/**
-	 * @param 3个月银行次数(身份证)
-	 *            要设置的 als_m3_id_bank_allnum
+	 * @param 1个月百融贷款申请次数(手机号)
+	 *            要设置的 br_m1_cell_loan_num
 	 */
-	public void setAls_m3_id_bank_allnum(Integer als_m3_id_bank_allnum) {
-		this.als_m3_id_bank_allnum = als_m3_id_bank_allnum;
+	public void setBr_m1_cell_loan_num(Integer br_m1_cell_loan_num) {
+		this.br_m1_cell_loan_num = br_m1_cell_loan_num;
 	}
 
 	/**
-	 * @return 3个月非银行次数(身份证)
+	 * @return 3个月百融贷款申请次数(手机号)
 	 */
-	public Integer getAls_m3_id_nbank_allnum() {
-		return als_m3_id_nbank_allnum;
+	public Integer getBr_m3_cell_loan_num() {
+		return br_m3_cell_loan_num;
 	}
 
 	/**
-	 * @param 3个月非银行次数(身份证)
-	 *            要设置的 als_m3_id_nbank_allnum
+	 * @param 3个月百融贷款申请次数(手机号)
+	 *            要设置的 br_m3_cell_loan_num
 	 */
-	public void setAls_m3_id_nbank_allnum(Integer als_m3_id_nbank_allnum) {
-		this.als_m3_id_nbank_allnum = als_m3_id_nbank_allnum;
+	public void setBr_m3_cell_loan_num(Integer br_m3_cell_loan_num) {
+		this.br_m3_cell_loan_num = br_m3_cell_loan_num;
 	}
 
 	/**
-	 * @return 3个月银行次数(手机号)
+	 * @return 6个月百融贷款申请次数(手机号)
 	 */
-	public Integer getAls_m3_cell_bank_allnum() {
-		return als_m3_cell_bank_allnum;
+	public Integer getBr_m6_cell_loan_num() {
+		return br_m6_cell_loan_num;
 	}
 
 	/**
-	 * @param 3个月银行次数(手机号)
-	 *            要设置的 als_m3_cell_bank_allnum
+	 * @param 6个月百融贷款申请次数(手机号)
+	 *            要设置的 br_m6_cell_loan_num
 	 */
-	public void setAls_m3_cell_bank_allnum(Integer als_m3_cell_bank_allnum) {
-		this.als_m3_cell_bank_allnum = als_m3_cell_bank_allnum;
+	public void setBr_m6_cell_loan_num(Integer br_m6_cell_loan_num) {
+		this.br_m6_cell_loan_num = br_m6_cell_loan_num;
 	}
 
 	/**
-	 * @return 3个月非银行次数(手机号)
+	 * @return 12个月百融贷款申请次数(手机号)
 	 */
-	public Integer getAls_m3_cell_nbank_allnum() {
-		return als_m3_cell_nbank_allnum;
+	public Integer getBr_m12_cell_loan_num() {
+		return br_m12_cell_loan_num;
 	}
 
 	/**
-	 * @param 3个月非银行次数(手机号)
-	 *            要设置的 als_m3_cell_nbank_allnum
+	 * @param 12个月百融贷款申请次数(手机号)
+	 *            要设置的 br_m12_cell_loan_num
 	 */
-	public void setAls_m3_cell_nbank_allnum(Integer als_m3_cell_nbank_allnum) {
-		this.als_m3_cell_nbank_allnum = als_m3_cell_nbank_allnum;
-	}
-
-	/**
-	 * @return 6个月银行次数(身份证)
-	 */
-	public Integer getAls_m6_id_bank_allnum() {
-		return als_m6_id_bank_allnum;
-	}
-
-	/**
-	 * @param 6个月银行次数(身份证)
-	 *            要设置的 als_m6_id_bank_allnum
-	 */
-	public void setAls_m6_id_bank_allnum(Integer als_m6_id_bank_allnum) {
-		this.als_m6_id_bank_allnum = als_m6_id_bank_allnum;
-	}
-
-	/**
-	 * @return 6个月非银行次数(身份证)
-	 */
-	public Integer getAls_m6_id_nbank_allnum() {
-		return als_m6_id_nbank_allnum;
-	}
-
-	/**
-	 * @param 6个月非银行次数(身份证)
-	 *            要设置的 als_m6_id_nbank_allnum
-	 */
-	public void setAls_m6_id_nbank_allnum(Integer als_m6_id_nbank_allnum) {
-		this.als_m6_id_nbank_allnum = als_m6_id_nbank_allnum;
-	}
-
-	/**
-	 * @return 6个月银行次数(手机号)
-	 */
-	public Integer getAls_m6_cell_bank_allnum() {
-		return als_m6_cell_bank_allnum;
-	}
-
-	/**
-	 * @param 6个月银行次数(手机号)
-	 *            要设置的 als_m6_cell_bank_allnum
-	 */
-	public void setAls_m6_cell_bank_allnum(Integer als_m6_cell_bank_allnum) {
-		this.als_m6_cell_bank_allnum = als_m6_cell_bank_allnum;
-	}
-
-	/**
-	 * @return 6个月非银行次数(手机号)
-	 */
-	public Integer getAls_m6_cell_nbank_allnum() {
-		return als_m6_cell_nbank_allnum;
-	}
-
-	/**
-	 * @param 6个月非银行次数(手机号)
-	 *            要设置的 als_m6_cell_nbank_allnum
-	 */
-	public void setAls_m6_cell_nbank_allnum(Integer als_m6_cell_nbank_allnum) {
-		this.als_m6_cell_nbank_allnum = als_m6_cell_nbank_allnum;
-	}
-
-	/**
-	 * @return 12个月本银机构次数(身份证)
-	 */
-	public Integer getAl_m12_id_bank_selfnum() {
-		return al_m12_id_bank_selfnum;
-	}
-
-	/**
-	 * @param 12个月本银机构次数(身份证)
-	 *            要设置的 al_m12_id_bank_selfnum
-	 */
-	public void setAl_m12_id_bank_selfnum(Integer al_m12_id_bank_selfnum) {
-		this.al_m12_id_bank_selfnum = al_m12_id_bank_selfnum;
-	}
-
-	/**
-	 * @return 12个月银行次数(身份证)
-	 */
-	public Integer getAl_m12_id_bank_allnum() {
-		return al_m12_id_bank_allnum;
-	}
-
-	/**
-	 * @param 12个月银行次数(身份证)
-	 *            要设置的 al_m12_id_bank_allnum
-	 */
-	public void setAl_m12_id_bank_allnum(Integer al_m12_id_bank_allnum) {
-		this.al_m12_id_bank_allnum = al_m12_id_bank_allnum;
-	}
-
-	/**
-	 * @return 12个月本非银机构次数(身份证)
-	 */
-	public Integer getAl_m12_id_notbank_selfnum() {
-		return al_m12_id_notbank_selfnum;
-	}
-
-	/**
-	 * @param 12个月本非银机构次数(身份证)
-	 *            要设置的 al_m12_id_notbank_selfnum
-	 */
-	public void setAl_m12_id_notbank_selfnum(Integer al_m12_id_notbank_selfnum) {
-		this.al_m12_id_notbank_selfnum = al_m12_id_notbank_selfnum;
-	}
-
-	/**
-	 * @return 12个月非银行次数(身份证)
-	 */
-	public Integer getAl_m12_id_notbank_allnum() {
-		return al_m12_id_notbank_allnum;
-	}
-
-	/**
-	 * @param 12个月非银行次数(身份证)
-	 *            要设置的 al_m12_id_notbank_allnum
-	 */
-	public void setAl_m12_id_notbank_allnum(Integer al_m12_id_notbank_allnum) {
-		this.al_m12_id_notbank_allnum = al_m12_id_notbank_allnum;
-	}
-
-	/**
-	 * @return 12个月本银机构次数(手机号)
-	 */
-	public Integer getAl_m12_cell_bank_selfnum() {
-		return al_m12_cell_bank_selfnum;
-	}
-
-	/**
-	 * @param 12个月本银机构次数(手机号)
-	 *            要设置的 al_m12_cell_bank_selfnum
-	 */
-	public void setAl_m12_cell_bank_selfnum(Integer al_m12_cell_bank_selfnum) {
-		this.al_m12_cell_bank_selfnum = al_m12_cell_bank_selfnum;
-	}
-
-	/**
-	 * @return 12个月银行次数(手机号)
-	 */
-	public Integer getAl_m12_cell_bank_allnum() {
-		return al_m12_cell_bank_allnum;
-	}
-
-	/**
-	 * @param 12个月银行次数(手机号)
-	 *            要设置的 al_m12_cell_bank_allnum
-	 */
-	public void setAl_m12_cell_bank_allnum(Integer al_m12_cell_bank_allnum) {
-		this.al_m12_cell_bank_allnum = al_m12_cell_bank_allnum;
-	}
-
-	/**
-	 * @return 12个月本非银机构次数(手机号)
-	 */
-	public Integer getAl_m12_cell_notbank_selfnum() {
-		return al_m12_cell_notbank_selfnum;
-	}
-
-	/**
-	 * @param 12个月本非银机构次数(手机号)
-	 *            要设置的 al_m12_cell_notbank_selfnum
-	 */
-	public void setAl_m12_cell_notbank_selfnum(Integer al_m12_cell_notbank_selfnum) {
-		this.al_m12_cell_notbank_selfnum = al_m12_cell_notbank_selfnum;
-	}
-
-	/**
-	 * @return 12个月非银行次数(手机号)
-	 */
-	public Integer getAl_m12_cell_notbank_allnum() {
-		return al_m12_cell_notbank_allnum;
-	}
-
-	/**
-	 * @param 12个月非银行次数(手机号)
-	 *            要设置的 al_m12_cell_notbank_allnum
-	 */
-	public void setAl_m12_cell_notbank_allnum(Integer al_m12_cell_notbank_allnum) {
-		this.al_m12_cell_notbank_allnum = al_m12_cell_notbank_allnum;
+	public void setBr_m12_cell_loan_num(Integer br_m12_cell_loan_num) {
+		this.br_m12_cell_loan_num = br_m12_cell_loan_num;
 	}
 
 	/**
@@ -919,35 +641,4 @@ public class CreditQueryResult implements Serializable {
 	public void setCreditId(Long creditId) {
 		this.creditId = creditId;
 	}
-
-	/**
-	 * @return 被调查人姓名
-	 */
-	public String getUserName() {
-		return userName;
-	}
-
-	/**
-	 * @param 被调查人姓名
-	 *            要设置的 userName
-	 */
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
-
-	/**
-	 * @return 被调查人身份证号
-	 */
-	public String getUserIdNo() {
-		return userIdNo;
-	}
-
-	/**
-	 * @param 被调查人身份证号
-	 *            要设置的 userIdNo
-	 */
-	public void setUserIdNo(String userIdNo) {
-		this.userIdNo = userIdNo;
-	}
-
 }

@@ -17,6 +17,10 @@ public class CreditExecution implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String EXECUTION_TYPE_BAD = "BAD";
+
+	public static final String EXECUTION_TYPE_EXECUT = "EXECUT";
+
 	/**
 	 * ID
 	 */
@@ -24,6 +28,12 @@ public class CreditExecution implements Serializable {
 	@Column(length = 64, nullable = true)
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+
+	/**
+	 * 被执行类型
+	 */
+	@Column(length = 24)
+	private String executionType;
 
 	/* 失信被执行记录 */
 
@@ -134,6 +144,21 @@ public class CreditExecution implements Serializable {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return 被执行类型
+	 */
+	public String getExecutionType() {
+		return executionType;
+	}
+
+	/**
+	 * @param 被执行类型
+	 *            要设置的 executionType
+	 */
+	public void setExecutionType(String executionType) {
+		this.executionType = executionType;
 	}
 
 	/**

@@ -9,7 +9,10 @@ import java.io.Serializable;
 public class CreditCrimeInfoVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
-
+	/**
+	 * id
+	 */
+	private Long id;
 	/**
 	 * 案件来源
 	 */
@@ -22,6 +25,21 @@ public class CreditCrimeInfoVO implements Serializable {
 	 * 案件时间
 	 */
 	private String caseTime;
+
+	/**
+	 * @return id
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param id
+	 *            要设置的 id
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	/**
 	 * @return 案件来源

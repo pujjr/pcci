@@ -5,7 +5,7 @@ import java.util.Map;
 
 /**
  * @author wen
- * @date 创建时间�?2016�?10�?10�? 上午11:33:09
+ * @date 创建时间2016年11月7日 09:57:08
  *
  */
 public enum QueryReasonType {
@@ -23,7 +23,7 @@ public enum QueryReasonType {
 	OTHER("99", "其他");
 
 	private String code;
-	private String name;
+	private String remark;
 
 	private static Map<String, QueryReasonType> codeMappingCache = new HashMap<String, QueryReasonType>();
 	static {
@@ -32,17 +32,17 @@ public enum QueryReasonType {
 		}
 	}
 
-	private QueryReasonType(String code, String name) {
+	private QueryReasonType(String code, String remark) {
 		this.code = code;
-		this.name = name;
+		this.remark = remark;
 	}
 
 	public String getCode() {
 		return this.code;
 	}
 
-	public String getName() {
-		return this.name;
+	public String getRemark() {
+		return this.remark;
 	}
 
 	public static boolean contains(String code) {

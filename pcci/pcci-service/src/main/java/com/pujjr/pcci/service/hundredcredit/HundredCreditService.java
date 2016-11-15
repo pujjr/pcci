@@ -94,6 +94,7 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 			String portrait_result = ms.getApiData(merchantBean);
 			// 保存请求结果
 			// hundredCreditRequestDAO.save(hundredCreditRequest);
+			System.out.println("百融" + hundredCreditRequest.getMeal() + "查询结果:" + JSON.parse(portrait_result));
 			resultInfo.success(portrait_result);
 		} catch (Exception e) {
 			e.printStackTrace();

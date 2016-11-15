@@ -468,7 +468,7 @@ public class QianHaiResult implements Serializable {
 	/**
 	 * 业务发生时间
 	 */
-	@Column(length = 24)
+	@Column(length = 255)
 	private String busiDate;
 
 	/**

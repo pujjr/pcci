@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.credit.QueryProductType;
@@ -70,14 +71,20 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 
 		if (resultList.isSuccess() && resultList.getData() != null && StringUtils.equalsIgnoreCase(resultList.getResultCode(), DEFAULT_SUCCESS_CODE)) {
 			QianHaiResult qianHaiResult = resultList.getData().get(0);
-			// 不为一鉴通查询
-			if (!productType.equals(QueryProductType.MSC8107)) {
-				resultInfo.setResultCode(resultList.getResultCode());
-				resultInfo.setMsg(resultList.getMsg());
-			} else {
+			if (productType.equals(QueryProductType.MSC8107)) {// 一鉴通
 				String errorInfo = qianHaiResult.getErrorInfo();
 				JSONObject errorJson = JSON.parseObject(errorInfo);
-				resultInfo.setResultCode(errorJson.getString("erCode"));
+				JSONObject subproductincJson = errorJson.getJSONObject(DEFAULT_SUBPRODUCTINC);
+				resultInfo.setResultCode(subproductincJson.getString("erCode"));
+				resultInfo.setMsg(subproductincJson.getString("errMsg"));
+			} else if (productType.equals(QueryProductType.MSC8037)) {// 常贷客
+				List<String> busiDatelist = new ArrayList<>();
+				for (QianHaiResult qianHaiResultData : resultList.getData()) {
+					busiDatelist.add(qianHaiResultData.getBusiDate());
+				}
+				qianHaiResult.setBusiDate(JSON.toJSONString(busiDatelist));
+			} else {
+				resultInfo.setResultCode(resultList.getResultCode());
 				resultInfo.setMsg(resultList.getMsg());
 			}
 			resultInfo.success(qianHaiResult);
@@ -152,6 +159,8 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			}
 			resultInfo.setResultCode(msgJSON.getJSONObject("header").getString("rtCode"));
 			resultInfo.success(resultDataList);
+		} catch (JSONException e) {
+			logger.error("请求前海征信报文错误" + productType);
 		} catch (Exception e) {
 			logger.error("请求前海征信报文错误" + productType, e);
 			resultInfo.fail("请求前海征信调用错误");

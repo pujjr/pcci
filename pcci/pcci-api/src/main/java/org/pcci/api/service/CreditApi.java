@@ -20,4 +20,12 @@ public interface CreditApi {
 	 */
 	public ResultInfo<CreditQueryResultVO> creditQuery(CreditRequestData creditRequestData);
 
+	/**
+	 * 征信查询,把结果转化为PDF并存到存储服务(阿里云)上
+	 * 
+	 * @param creditRequestData
+	 * @return
+	 */
+	public ResultInfo<String> creditQueryAndStore(CreditRequestData creditRequestData);
+
 }

@@ -5,14 +5,14 @@ import java.util.Map;
 
 /**
  * @author wen
- * @date 创建时间�?2016�?10�?13�? 15:07:11 申请渠道类型
+ * @date 创建时间2016年11月7日 09:57:08
  */
 public enum MealType {
-	/** 借款反欺诈规则�?�特殊名�? */
+	/** 借款反欺诈规则 特殊名 */
 	RuleSpecialList,
-	/** 借款反欺诈规则�?�多次申�? */
+	/** 借款反欺诈规则 多次申 */
 	RuleApplyLoan,
-	/** 借款反欺诈规则�?�法院执行人 */
+	/** 借款反欺诈规则 法院执行人 */
 	RuleExecution,
 	/** 特殊名单核查 */
 	SpecialList_c,

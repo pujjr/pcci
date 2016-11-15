@@ -11,10 +11,18 @@ public class CreditExecutionVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	public static final String EXECUTION_TYPE_BAD = "BAD";
+
+	public static final String EXECUTION_TYPE_EXECUT = "EXECUT";
 	/**
 	 * ID
 	 */
 	private Long id;
+
+	/**
+	 * 被执行类型
+	 */
+	private String executionType;
 
 	/* 失信被执行记录 */
 
@@ -125,6 +133,21 @@ public class CreditExecutionVO implements Serializable {
 	 */
 	public void setId(Long id) {
 		this.id = id;
+	}
+
+	/**
+	 * @return 被执行类型
+	 */
+	public String getExecutionType() {
+		return executionType;
+	}
+
+	/**
+	 * @param 被执行类型
+	 *            要设置的 executionType
+	 */
+	public void setExecutionType(String executionType) {
+		this.executionType = executionType;
 	}
 
 	/**

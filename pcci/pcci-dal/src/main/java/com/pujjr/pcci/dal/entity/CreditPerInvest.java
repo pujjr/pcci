@@ -31,7 +31,7 @@ public class CreditPerInvest implements Serializable {
 	private Long id;
 
 	/**
-	 * 企业(机构)名称
+	 * 投资类型
 	 */
 	@Column(length = 24)
 	private String perinvestType;

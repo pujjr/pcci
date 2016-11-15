@@ -12,5 +12,16 @@
 	<!-- 扫描包 -->
 	<context:component-scan base-package="com.pujjr.pcci.service" />
 	<task:annotation-driven />
+	
+	<bean id="storeSetting" class="com.pujjr.common.store.AliyunStoreSetting">
+		<property name="endpoint" value="${store.ali.endpoint}" />
+		<property name="accessKeyId" value="${store.ali.accessKeyId}" />
+		<property name="accessKeySecret" value="${store.ali.accessKeySecret}" />
+		<property name="bucketName" value="${store.ali.bucketName}" />
+	</bean>
+	
+	<bean id="aliyunService" class="com.pujjr.common.store.AliyunStore">
+		<property name="storeSetting" ref="storeSetting" />
+	</bean>
 
 </beans>

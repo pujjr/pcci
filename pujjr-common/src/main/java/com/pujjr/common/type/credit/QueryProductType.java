@@ -5,26 +5,26 @@ import java.util.Map;
 
 /**
  * @author wen
- * @date 创建时间�?2016�?10�?10�? 上午11:33:09
+ * @date 创建时间2016年11月7日 09:57:08
  *
  */
 public enum QueryProductType {
 
-	/** 风险度提示查�? */
+	/** 风险度提示查 */
 	MSC8036("query", "rskdoo", "MSC8036"),
-	/** 风险度提示报�? */
+	/** 风险度提示报 */
 	MSC9004("submit", "rskdoo", "MSC9004"),
-	/** 常贷客数�? */
+	/** 常贷客数 */
 	MSC8037("query", "loanee", "MSC8037"),
-	/** 好信欺诈�? */
+	/** 好信欺诈 */
 	MSC8075("verify", "antiFraudDoo", "MSC8075"),
-	/** 驾驶证比对任务提�? */
+	/** 驾驶证比对任务提 */
 	MSC8078("submit", "drvCert2Cmp", "MSC8078"),
-	/** 驾驶证比对任务查�? */
+	/** 驾驶证比对任务查 */
 	MSC8079("query", "drvCert2CmpInc", "MSC8079"),
-	/** 驾驶证状态比对查�? */
+	/** 驾驶证状态比对查 */
 	MSC8081("submit", "drvCertSta2Cmp", "MSC8081"),
-	/** 好信�?鉴�?? */
+	/** 好信鉴 一鉴通 */
 	MSC8107("verify", "eChkPkgs", "MSC8107");
 
 	/**

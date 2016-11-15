@@ -1,21 +1,48 @@
-package org.pcci.api.bean.request;
+package com.pujjr.pcci.dal.entity;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
 
 import com.pujjr.common.type.IdentityType;
 import com.pujjr.common.type.credit.QueryReasonType;
 
 /**
  * @author wen
- * @date 创建时间：2016年10月10日 上午10:43:35 征信查询请求
+ * @date 创建时间：2016年10月10日 上午10:43:35 个人不良信息
  */
-public class CreditRequestData implements Serializable {
+@Entity
+public class CreditRequest implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+
+	/** 无数据 */
+	public static final int RISK_LEVEL_NONE = 0;
+	/** 低风险 */
+	public static final int RISK_LEVEL_LOW = 1;
+	/** 高风险 */
+	public static final int RISK_LEVEL_HIGH = 2;
+	/** 无数据 */
+	public static final int INVEST_NO = 0;
+	/** 有 */
+	public static final int INVEST_YES = 1;
+	/** 无数据 */
+	public static final int CRIMINAL_NO = 0;
+	/** 有(需其他渠道查询) */
+	public static final int CRIMINAL_YES = 1;
 
 	/**
-	 * 
+	 * ID
 	 */
-	private static final long serialVersionUID = 1L;
+	@Id
+	@Column(length = 64, nullable = true)
+	@GeneratedValue(strategy = GenerationType.AUTO)
+	private Long id;
 
 	/**
 	 * 唯一流水号ID
@@ -25,61 +52,101 @@ public class CreditRequestData implements Serializable {
 	/**
 	 * 查询请求用户/员工编号
 	 */
+	@Column(nullable = false, length = 24)
 	private String requestUserId;
 
 	/**
 	 * 查询请求时间
 	 */
+	@Column(nullable = false)
 	private Date requestDate;
-
-	/**
-	 * 百融登陆唯一标识
-	 */
-	private String tokenid;
 
 	/**
 	 * 姓名
 	 */
+	@Column(nullable = false)
 	private String name;
 
 	/**
 	 * 手机号
 	 */
+	@Column(nullable = false, length = 24)
 	private String mobileNo;
 
 	/**
 	 * 证件号
 	 */
+	@Column(nullable = false, length = 24)
 	private String idNo;
 
 	/**
 	 * 证件类型 {@link IdentityType}
 	 */
+	@Column(nullable = false, length = 8)
 	private String idType;
 
 	/**
 	 * 查询原因 {@link QueryReasonType}
 	 */
+	@Column(nullable = false, length = 8)
 	private String reasonCode;
 
 	/**
 	 * 信息主体授权码 若不涉及授权则填唯一的随机序列
 	 */
+	@Column(nullable = false, length = 32)
 	private String entityAuthCode;
 	/**
 	 * 信息主体授权时间 yyyy-MM-dd
 	 */
+	@Column(nullable = false, length = 32)
 	private String entityAuthDate;
+	/**
+	 * 风险级别
+	 */
+	@Column
+	private Integer riskLevel;
+	/**
+	 * 对外投资信息
+	 */
+	@Column
+	private Integer investInfo;
+	/**
+	 * 犯罪记录
+	 */
+	@Column
+	private Integer criminalRecord;
+
+	/**
+	 * 错误消息记录
+	 */
+	@Column
+	private String errMsg;
 
 	/**
 	 * @return ID
+	 */
+	public Long getId() {
+		return id;
+	}
+
+	/**
+	 * @param ID
+	 *            要设置的 id
+	 */
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return 唯一流水号ID
 	 */
 	public String getCreditId() {
 		return creditId;
 	}
 
 	/**
-	 * @param ID
+	 * @param 唯一流水号ID
 	 *            要设置的 creditId
 	 */
 	public void setCreditId(String creditId) {
@@ -114,21 +181,6 @@ public class CreditRequestData implements Serializable {
 	 */
 	public void setRequestDate(Date requestDate) {
 		this.requestDate = requestDate;
-	}
-
-	/**
-	 * @return 百融登陆唯一标识
-	 */
-	public String getTokenid() {
-		return tokenid;
-	}
-
-	/**
-	 * @param 百融登陆唯一标识
-	 *            要设置的 tokenid
-	 */
-	public void setTokenid(String tokenid) {
-		this.tokenid = tokenid;
 	}
 
 	/**
@@ -234,6 +286,66 @@ public class CreditRequestData implements Serializable {
 	 */
 	public void setEntityAuthDate(String entityAuthDate) {
 		this.entityAuthDate = entityAuthDate;
+	}
+
+	/**
+	 * @return 风险级别
+	 */
+	public Integer getRiskLevel() {
+		return riskLevel;
+	}
+
+	/**
+	 * @param 风险级别
+	 *            要设置的 riskLevel
+	 */
+	public void setRiskLevel(Integer riskLevel) {
+		this.riskLevel = riskLevel;
+	}
+
+	/**
+	 * @return 对外投资信息
+	 */
+	public Integer getInvestInfo() {
+		return investInfo;
+	}
+
+	/**
+	 * @param 对外投资信息
+	 *            要设置的 investInfo
+	 */
+	public void setInvestInfo(Integer investInfo) {
+		this.investInfo = investInfo;
+	}
+
+	/**
+	 * @return 犯罪记录
+	 */
+	public Integer getCriminalRecord() {
+		return criminalRecord;
+	}
+
+	/**
+	 * @param 犯罪记录
+	 *            要设置的 criminalRecord
+	 */
+	public void setCriminalRecord(Integer criminalRecord) {
+		this.criminalRecord = criminalRecord;
+	}
+
+	/**
+	 * @return 错误消息记录
+	 */
+	public String getErrMsg() {
+		return errMsg;
+	}
+
+	/**
+	 * @param 错误消息记录
+	 *            要设置的 errMsg
+	 */
+	public void setErrMsg(String errMsg) {
+		this.errMsg = errMsg;
 	}
 
 }
