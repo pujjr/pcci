@@ -20,6 +20,7 @@ import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.credit.QueryProductType;
+import com.pujjr.common.utils.BaseStringUtils;
 import com.pujjr.pcci.common.qhcs.bean.HeaderBean;
 import com.pujjr.pcci.common.qhcs.bean.SecurityInfo;
 import com.pujjr.pcci.common.qhcs.utils.DataSecurityUtil;
@@ -48,6 +49,8 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 	public final static String DEFAULT_SEQNO = "1";
 
 	public final static String DEFAULT_SUCCESS_CODE = "E000000";
+
+	public final static String DEFAULT_NO_DATA = "E000996";
 
 	public final static String DEFAULT_SUBPRODUCTINC = "0000000000001000";
 
@@ -87,7 +90,10 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 				resultInfo.setResultCode(resultList.getResultCode());
 				resultInfo.setMsg(resultList.getMsg());
 			}
-			resultInfo.success(qianHaiResult);
+			if (BaseStringUtils.equalsAny(resultList.getResultCode(), DEFAULT_SUCCESS_CODE, DEFAULT_NO_DATA)) {
+				return resultInfo.success(qianHaiResult);
+			}
+			resultInfo.fail(resultList.getResultCode() + ":" + resultList.getMsg());
 		} else {
 			resultInfo.fail();
 		}
@@ -143,8 +149,6 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			DataSecurityUtil.verifyData(msgJSON.getString("busiData"), msgJSON.getJSONObject("securityInfo").getString("signatureValue"));
 			// 转为明文
 			String responseBusiDataStr = DataSecurityUtil.decrypt(msgJSON.getString("busiData"), setting.getCheckCode());
-			System.out.println("响应BusiData明文：" + responseBusiDataStr);
-
 			JSONObject responseBusiDataJSON = JSON.parseObject(responseBusiDataStr);
 			JSONArray recordsJSON = responseBusiDataJSON.getJSONArray("records");
 			// 填装完整数据,并保存返回结果

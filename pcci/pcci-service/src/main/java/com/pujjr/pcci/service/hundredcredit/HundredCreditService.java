@@ -20,6 +20,7 @@ import com.pujjr.common.pager.Paged;
 import com.pujjr.common.pager.PagedResult;
 import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.credit.MealType;
+import com.pujjr.common.utils.BaseStringUtils;
 import com.pujjr.pcci.dal.dao.HundredCreditRequestDAO;
 import com.pujjr.pcci.dal.entity.HundredCreditRequest;
 import com.pujjr.pcci.service.ParameterizedBaseService;
@@ -94,12 +95,14 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 			String portrait_result = ms.getApiData(merchantBean);
 			// 保存请求结果
 			// hundredCreditRequestDAO.save(hundredCreditRequest);
-			System.out.println("百融" + hundredCreditRequest.getMeal() + "查询结果:" + JSON.parse(portrait_result));
-			resultInfo.success(portrait_result);
+			JSONObject crimeInfoJSON = JSON.parseObject(portrait_result);
+			if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600000", "00", "100002")) {
+				return resultInfo.success(portrait_result);
+			}
+			resultInfo.fail(crimeInfoJSON.getString("code"));
 		} catch (Exception e) {
-			e.printStackTrace();
 			logger.error(e.getMessage());
-			resultInfo.fail("调用 百融接口查询出现错误");
+			resultInfo.fail(e.getMessage());
 		}
 		return resultInfo;
 	}

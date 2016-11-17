@@ -96,6 +96,16 @@ public class CreditRequestVO implements Serializable {
 	private Integer criminalRecord;
 
 	/**
+	 * 错误消息记录
+	 */
+	private String errMsg;
+
+	/**
+	 * 云存储标识
+	 */
+	private String ossKey;
+
+	/**
 	 * @return ID
 	 */
 	public Long getId() {
@@ -303,6 +313,36 @@ public class CreditRequestVO implements Serializable {
 	 */
 	public void setCriminalRecord(Integer criminalRecord) {
 		this.criminalRecord = criminalRecord;
+	}
+
+	/**
+	 * @return 错误消息记录
+	 */
+	public String getErrMsg() {
+		return errMsg;
+	}
+
+	/**
+	 * @param 错误消息记录
+	 *            要设置的 errMsg
+	 */
+	public void setErrMsg(String errMsg) {
+		this.errMsg = errMsg;
+	}
+
+	/**
+	 * @return 云存储标识
+	 */
+	public String getOssKey() {
+		return ossKey;
+	}
+
+	/**
+	 * @param 云存储标识
+	 *            要设置的 ossKey
+	 */
+	public void setOssKey(String ossKey) {
+		this.ossKey = ossKey;
 	}
 
 }

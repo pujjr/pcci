@@ -1,7 +1,6 @@
 package com.pujjr.pcci.common.qhcs.utils;
 
 import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -35,7 +34,6 @@ public class DataSecurityUtil {
 			// System.out.println("验签OK");
 			// System.out.println(decrypt("Kn7F+lvQqP/59bltknRDBA==",
 			// "123456781234567812345678"));
-			System.out.println("k62@dfqlRE" + "_" + digest("k62@dfqlRE".getBytes()));
 			// System.out.println(getPublicKey());
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -89,12 +87,11 @@ public class DataSecurityUtil {
 		InputStream is = null;
 		try {
 			// is = new FileInputStream("D:\\KeyScript\\test\\bistest_2.cer");
-			is = new FileInputStream("D:\\Key\\credoo_stg.cer");
+
+			is = DataSecurityUtil.class.getClassLoader().getResourceAsStream("/credoo_stg.cer");
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 			X509Certificate cert = (X509Certificate) cf.generateCertificate(is);
 			return cert.getPublicKey();
-		} catch (FileNotFoundException e) {
-			throw new Exception("E000029");
 		} catch (CertificateException e) {
 			throw new Exception("E000030");
 		} finally {
@@ -114,10 +111,9 @@ public class DataSecurityUtil {
 		BufferedInputStream bis = null;
 		try {
 			KeyStore ks = KeyStore.getInstance("JKS");
-			FileInputStream fis = new FileInputStream("D:\\Key\\credoo_stg.jks");
 			// FileInputStream fis = new
 			// FileInputStream("D:\\KeyScript\\test\\EXV_BIS_FRONT_JK_RONGZI_001_STG.jks");
-			bis = new BufferedInputStream(fis);
+			bis = new BufferedInputStream(DataSecurityUtil.class.getClassLoader().getResourceAsStream("/credoo_stg.jks"));
 			String storePassword = "qhzx_stg";
 			String storeAlias = "signKey";
 			storePwdArr = new char[storePassword.length()];// store password

@@ -26,6 +26,6 @@ public interface CreditApi {
 	 * @param creditRequestData
 	 * @return
 	 */
-	public ResultInfo<String> creditQueryAndStore(CreditRequestData creditRequestData);
+	public ResultInfo<CreditQueryResultVO> creditQueryAndStore(CreditRequestData creditRequestData);
 
 }

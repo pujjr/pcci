@@ -68,11 +68,7 @@
 			<artifactId>mysql-connector-java</artifactId>
 			<version>5.1.35</version>
 		</dependency>
-		<dependency>
-			<groupId>100credit</groupId>
-			<artifactId>100credit</artifactId>
-			<version>2.5.0.test</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>com.alibaba</groupId>
 			<artifactId>druid</artifactId>
@@ -110,6 +106,11 @@
 		<dependency>
 			<groupId>org.hibernate</groupId>
 			<artifactId>hibernate-validator</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>100credit</groupId>
+			<artifactId>100credit</artifactId>
+			<version>2.5.0</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>

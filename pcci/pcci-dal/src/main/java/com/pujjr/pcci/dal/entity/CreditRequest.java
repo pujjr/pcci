@@ -47,6 +47,7 @@ public class CreditRequest implements Serializable {
 	/**
 	 * 唯一流水号ID
 	 */
+	@Column(length = 24)
 	private String creditId;
 
 	/**
@@ -116,6 +117,12 @@ public class CreditRequest implements Serializable {
 	 */
 	@Column
 	private Integer criminalRecord;
+
+	/**
+	 * 云存储标识
+	 */
+	@Column
+	private String ossKey;
 
 	/**
 	 * 错误消息记录
@@ -331,6 +338,21 @@ public class CreditRequest implements Serializable {
 	 */
 	public void setCriminalRecord(Integer criminalRecord) {
 		this.criminalRecord = criminalRecord;
+	}
+
+	/**
+	 * @return 云存储标识
+	 */
+	public String getOssKey() {
+		return ossKey;
+	}
+
+	/**
+	 * @param 云存储标识
+	 *            要设置的 ossKey
+	 */
+	public void setOssKey(String ossKey) {
+		this.ossKey = ossKey;
 	}
 
 	/**

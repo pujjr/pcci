@@ -32,8 +32,8 @@ public class CreditQueryResult implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long recordId;
 
-	@Column
-	private Long creditId;
+	@Column(length = 24)
+	private String creditId;
 
 	/* 个人不良信息 */
 	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -630,7 +630,7 @@ public class CreditQueryResult implements Serializable {
 	/**
 	 * @return creditId
 	 */
-	public Long getCreditId() {
+	public String getCreditId() {
 		return creditId;
 	}
 
@@ -638,7 +638,7 @@ public class CreditQueryResult implements Serializable {
 	 * @param creditId
 	 *            要设置的 creditId
 	 */
-	public void setCreditId(Long creditId) {
+	public void setCreditId(String creditId) {
 		this.creditId = creditId;
 	}
 }

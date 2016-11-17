@@ -2,7 +2,6 @@ package com.pujjr.pcci.service.credit;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -26,6 +25,7 @@ import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.utils.BaseFileUtils;
 import com.pujjr.common.utils.BaseIterableUtils;
 import com.pujjr.common.utils.bean.BeanPropertyUtils;
+import com.pujjr.pcci.dal.dao.CreditRequestDAO;
 import com.pujjr.pcci.dal.entity.CreditCrimeInfo;
 import com.pujjr.pcci.dal.entity.CreditExecution;
 import com.pujjr.pcci.dal.entity.CreditPerInvest;
@@ -90,6 +90,9 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 
 	@Autowired
 	private StoreService storeService;
+
+	@Autowired
+	private CreditRequestDAO creditRequestDAO;
 
 	/**
 	 * 获得默认的pdf字体
@@ -281,6 +284,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	 * @param cells
 	 * @param document
 	 */
+	@SuppressWarnings("unused")
 	private void quickTabeByList(PdfPTable table, List<String> cells, Document document) {
 		try {
 			for (String cellValue : cells) {
@@ -307,12 +311,33 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 		}
 	}
 
-	public ResultInfo<String> creditQueryResultToPDF(CreditQueryResult credit) {
-		ResultInfo<String> resultInfo = new ResultInfo<>();
-		if (credit == null) {
+	/**
+	 * 下载PDF文件
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public ResultInfo<byte[]> downloadPDF(Long id) {
+		ResultInfo<byte[]> resultInfo = new ResultInfo<>();
+		ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+		try {
+			CreditRequest creditRequest = creditRequestDAO.get(id);
+			InputStream downStream = storeService.download(creditRequest.getOssKey());
+			BaseFileUtils.inputToOutput(downStream, bStream);
+			return resultInfo.success(bStream.toByteArray());
+		} catch (Exception e) {
+			resultInfo.fail("下载PDF失败");
+		}
+		return resultInfo;
+	}
+
+	public ResultInfo<CreditQueryResult> creditQueryResultToPDF(CreditQueryResult creditQueryResult) {
+		long beginTime = System.currentTimeMillis();
+		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
+		if (creditQueryResult == null) {
 			return resultInfo.fail("查询征信错误,征信信息为空");
 		}
-
+		CreditRequest creditRequest = creditQueryResult.getCreditRequest();
 		ByteArrayOutputStream bos = null;// 创建输出流
 		Document document = new Document(PageSize.A4);
 		try {
@@ -322,25 +347,25 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			/* 开始填装数据 */
 
 			// 标题
-			titleTable(credit, document);
+			titleTable(creditQueryResult, document);
 			// 不良信息
-			crimeinfoTable(credit.getCreditCrimeInfoList(), document);
+			crimeinfoTable(creditQueryResult.getCreditCrimeInfoList(), document);
 			// 法院被执行信息
-			executionTable(credit.getCreditExecutionList(), document);
+			executionTable(creditQueryResult.getCreditExecutionList(), document);
 			// 前海信贷申请记录
-			loaneeTable(credit, document);
+			loaneeTable(creditQueryResult, document);
 			// 百融信贷申请记录
-			applyloanTable(credit, document);
+			applyloanTable(creditQueryResult, document);
 			// 前海反欺诈
-			antifrauddooTable(credit, document);
+			antifrauddooTable(creditQueryResult, document);
 			// 前海风险度
-			rskdooTable(credit, document);
+			rskdooTable(creditQueryResult, document);
 			// 前海一鉴通
-			eChkPkgs(credit, document);
+			eChkPkgs(creditQueryResult, document);
 			// 前海驾驶证
-			drvcert2cmpincTable(credit, document);
+			drvcert2cmpincTable(creditQueryResult, document);
 			// 对外投资
-			perinvestTable(credit.getCreditPerInvestList(), document);
+			perinvestTable(creditQueryResult.getCreditPerInvestList(), document);
 
 			/* 填装数据结束 */
 			document.close();
@@ -349,12 +374,13 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			String ossKey = BaseFileUtils.buildOnlyFileName(DEFAULT_SUFFIX);
 			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
 			storeService.upload(ossKey, bis);
-			InputStream downStream = storeService.download(ossKey);
-			BaseFileUtils.inputToOutput(downStream, new FileOutputStream("D://temp/" + ossKey));
-			// 打开文件
-			// BaseFileUtils.openFile("C:/Program Files (x86)/Adobe/Acrobat DC/Acrobat/Acrobat.exe", "D://temp/" + ossKey);
-			return resultInfo.success(ossKey);
-		} catch (DocumentException | IOException e) {
+			creditRequest.setOssKey(ossKey);
+			creditQueryResult.setCreditRequest(creditRequest);
+			// TODO
+			System.out.println("PDF耗时:" + (System.currentTimeMillis() - beginTime));
+			beginTime = System.currentTimeMillis();
+			return resultInfo.success(creditQueryResult);
+		} catch (DocumentException e) {
 			logger.error("根据征信查询结果生成PDF文件失败", e);
 			return resultInfo.fail(e.getMessage());
 		} finally {
@@ -366,7 +392,6 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 					resultInfo.fail(e.getMessage());
 				}
 			}
-
 		}
 	}
 

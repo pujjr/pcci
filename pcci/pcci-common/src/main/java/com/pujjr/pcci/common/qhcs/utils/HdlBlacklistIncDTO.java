@@ -161,12 +161,10 @@ public class HdlBlacklistIncDTO {
 
 	@Override
 	public boolean equals(Object obj) {
-		System.out.println("equals..");
 		if (obj == null) {
 			return super.equals(obj);
 		}
 		HdlBlacklistIncDTO tmp = (HdlBlacklistIncDTO) obj;
-		System.out.println(tmp.getUserName());
 		boolean result = tmp.getUserName().equals(this.userName);
 		if (result) {// 成功返回数据对象
 			this.clientSeqNo = tmp.getClientSeqNo();
@@ -176,7 +174,6 @@ public class HdlBlacklistIncDTO {
 
 	@Override
 	public int hashCode() {
-		System.out.println("hashCode..");
 		return 888;
 	}
 }

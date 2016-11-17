@@ -16,11 +16,12 @@ import com.pujjr.pcci.service.ParameterizedBaseService;
 
 /**
  * @author wen
- * @date 创建时间：2016年10月19日 上午10:42:27 序列化为pdf文件服务
+ * @date 创建时间：2016年10月19日 上午10:42:27
  *
  */
 @Service
 public class ExcelService extends ParameterizedBaseService<ExcelService> {
+
 	public final static String DEFAULT_ERROR_REMARK = "数据错误";
 
 	/**
@@ -35,7 +36,7 @@ public class ExcelService extends ParameterizedBaseService<ExcelService> {
 		if (creditQueryResultList == null) {
 			return resultInfo.fail("征信查询操作无结果");
 		}
-		String[] title = { "流水号", "查询时间", "姓名", "手机号", "证件号", "证件类型", "查询原因", "授权码", "授权时间", "风险级别", "对外投资", "犯罪记录", "备注" };
+		String[] title = { "流水号", "查询时间", "姓名", "手机号", "证件号", "证件类型", "查询原因", "授权码", "授权时间", "风险级别", "对外投资", "犯罪记录", "错误信息" };
 		String[][] excelData = new String[creditQueryResultList.size()][title.length];
 		for (int i = 0; i < creditQueryResultList.size(); i++) {
 			CreditQueryResult creditQueryResult = creditQueryResultList.get(i);
@@ -48,14 +49,23 @@ public class ExcelService extends ParameterizedBaseService<ExcelService> {
 			}
 			String[] rowValue = new String[title.length];
 			int index = 0;
+			// 流水号
 			rowValue[index++] = creditRequest.getCreditId();
-			rowValue[index++] = DateFormatUtils.format(creditRequest.getRequestDate(), "yyyy-MM-dd");
+			// 查询时间
+			rowValue[index++] = DateFormatUtils.format(creditRequest.getRequestDate(), "yyyy-MM-dd HH:mm:ss");
+			// 姓名
 			rowValue[index++] = creditRequest.getName();
+			// 手机号
 			rowValue[index++] = creditRequest.getMobileNo();
+			// 证件号
 			rowValue[index++] = creditRequest.getIdNo();
+			// 证件类型
 			rowValue[index++] = IdentityType.contains(creditRequest.getIdType()) ? IdentityType.fromCode(creditRequest.getIdType()).getRemark() : DEFAULT_ERROR_REMARK;
+			// 查询原因
 			rowValue[index++] = QueryReasonType.contains(creditRequest.getReasonCode()) ? QueryReasonType.fromCode(creditRequest.getReasonCode()).getRemark() : DEFAULT_ERROR_REMARK;
+			// 授权码
 			rowValue[index++] = creditRequest.getEntityAuthCode();
+			// 授权时间
 			rowValue[index++] = creditRequest.getEntityAuthDate();
 			// 风险级别
 			String riskLevelRemark = DEFAULT_ERROR_REMARK;
@@ -71,10 +81,23 @@ public class ExcelService extends ParameterizedBaseService<ExcelService> {
 			rowValue[index++] = CreditRequest.INVEST_YES == creditRequest.getInvestInfo() ? "有" : "无";
 			// 犯罪记录
 			rowValue[index++] = CreditRequest.CRIMINAL_YES == creditRequest.getCriminalRecord() ? "有" : "无";
+			// 错误信息
 			rowValue[index++] = StringUtils.defaultString(creditRequest.getErrMsg());
 			excelData[i] = rowValue;
 		}
 		byte[] byteArray = ExcelUtils.writeExcelFile(title, excelData);
+		return resultInfo.success(byteArray);
+	}
+
+	/**
+	 * 获得上传文件模板
+	 * 
+	 * @return
+	 */
+	public ResultInfo<byte[]> getUploadTemplate() {
+		ResultInfo<byte[]> resultInfo = new ResultInfo<>();
+		String[] title = { "姓名", "手机号", "证件号", "授权码", "授权时间", };
+		byte[] byteArray = ExcelUtils.writeExcelFile(title, new String[0][0]);
 		return resultInfo.success(byteArray);
 	}
 

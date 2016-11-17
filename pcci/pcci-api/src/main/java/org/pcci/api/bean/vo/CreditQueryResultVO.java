@@ -17,7 +17,7 @@ public class CreditQueryResultVO implements Serializable {
 	 */
 	private Long recordId;
 
-	private Long creditId;
+	private String creditId;
 
 	/* 个人不良信息 */
 	private List<CreditCrimeInfoVO> creditCrimeInfoList;
@@ -525,7 +525,7 @@ public class CreditQueryResultVO implements Serializable {
 	/**
 	 * @return creditId
 	 */
-	public Long getCreditId() {
+	public String getCreditId() {
 		return creditId;
 	}
 
@@ -533,7 +533,7 @@ public class CreditQueryResultVO implements Serializable {
 	 * @param creditId
 	 *            要设置的 creditId
 	 */
-	public void setCreditId(Long creditId) {
+	public void setCreditId(String creditId) {
 		this.creditId = creditId;
 	}
 

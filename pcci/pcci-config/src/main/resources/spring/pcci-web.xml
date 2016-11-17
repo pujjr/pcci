@@ -53,25 +53,59 @@
 			</util:list>
 		</property>
 	</bean>
-	
+
 	<bean id="multipartResolver"
-          class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
-        <!-- 设置上传文件的最大尺寸为1MB -->
-        <!-- <property name="maxUploadSize">
-            <value>1048576</value>
-        </property> -->
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<!-- 设置上传文件的最大尺寸为1MB -->
+		<!-- <property name="maxUploadSize"> <value>1048576</value> </property> -->
 		<property name="defaultEncoding" value="UTF-8"></property>
-    </bean>
+	</bean>
 
 	<mvc:view-controller path="/" view-name="index" />
+	<!-- 
 	<bean
 		class="org.springframework.web.servlet.view.InternalResourceViewResolver">
 		<property name="prefix" value="/template/" />
 		<property name="suffix" value=".html"></property>
 	</bean>
+	
+	 -->
+	
+	 <bean id="freemarkerResolver" class="org.springframework.web.servlet.view.freemarker.FreeMarkerViewResolver">
+        <property name="order" value="1" />
+        <property name="suffix" value=".html" />
+        <property name="contentType" value="text/html;charset=utf-8" />
+        <property name="viewClass">
+            <value>org.springframework.web.servlet.view.freemarker.FreeMarkerView</value>
+        </property>
+    </bean>
+
+	<bean id="freemarkerConfig"
+		class="org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer">
+		<property name="templateLoaderPath">
+			<value>/template/view/</value>
+		</property>
+		<property name="freemarkerVariables">  
+            <map>  
+                <entry key="webRoot" value="${webRoot}"></entry>  
+            </map>  
+        </property>  
+		<property name="freemarkerSettings"><!-- 设置FreeMarker环境属性 -->
+			<props>
+				<prop key="template_update_delay">5</prop><!--刷新模板的周期，单位为秒 -->
+				<prop key="default_encoding">UTF-8</prop><!--模板的编码格式 -->
+				<prop key="locale">UTF-8</prop><!-- 本地化设置 -->
+				<prop key="datetime_format">yyyy-MM-dd HH:mm:ss</prop>
+				<prop key="time_format">HH:mm:ss</prop>
+				<prop key="number_format">0.####</prop>
+				<prop key="boolean_format">true,false</prop>
+				<prop key="whitespace_stripping">true</prop>
+				<prop key="tag_syntax">auto_detect</prop>
+				<prop key="url_escaping_charset">UTF-8</prop>
+			</props>
+		</property>
+	</bean>
 
 	<!-- 静态资源过滤 -->
-	<mvc:resources mapping="/template/**" location="/template/" />
-	<mvc:resources mapping="/css/**" location="/css/" />
-	<mvc:resources mapping="/font/**" location="/font/" />
+	<mvc:resources mapping="/static/**" location="/static/" />
 </beans>

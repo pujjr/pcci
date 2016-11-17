@@ -33,11 +33,6 @@
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>100credit</groupId>
-			<artifactId>100credit</artifactId>
-			<version>2.5.0.test</version>
-		</dependency>
-		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-dal</artifactId>
 			<version>0.0.1</version>
@@ -56,7 +51,11 @@
 			<groupId>com.whalin</groupId>
 			<artifactId>Memcached-Java-Client</artifactId>
 		</dependency>
-
+		<dependency>
+			<groupId>100credit</groupId>
+			<artifactId>100credit</artifactId>
+			<version>2.5.0</version>
+	</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-api</artifactId>
@@ -67,5 +66,6 @@
 			<artifactId>pujjr-common</artifactId>
 			<version>1.0</version>
 		</dependency>
+		
 	</dependencies>
 </project>
