@@ -1,5 +1,7 @@
 package com.pujjr.pcci.dal.dao;
 
+import java.util.Date;
+
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.criterion.DetachedCriteria;
 import org.hibernate.criterion.Disjunction;
@@ -28,15 +30,25 @@ public class CreditRequestDAO extends ParameterizedBaseDAO<CreditRequest, Long> 
 	 * @param searchText
 	 * @return
 	 */
-	public PagedResult<CreditRequest> searchCreditRequest(Paged paged, Long beginCreditId, Long endCreditId, String searchText) {
+	public PagedResult<CreditRequest> searchCreditRequest(Paged paged, Long beginCreditId, Long endCreditId, String searchText, Date stateTime, Date endTime) {
 		DetachedCriteria detachedCriteria = DetachedCriteria.forClass(CreditRequest.class);
+		// detachedCriteria.addOrder(Order.desc("riskLevel"));
 		detachedCriteria.addOrder(Order.desc("id"));
+		// 流水号
 		if (beginCreditId != null) {
 			detachedCriteria.add(Restrictions.ge("id", beginCreditId));
 		}
 		if (endCreditId != null) {
 			detachedCriteria.add(Restrictions.le("id", endCreditId));
 		}
+		// 时间格式
+		if (stateTime != null) {
+			detachedCriteria.add(Restrictions.ge("requestDate", stateTime));
+		}
+		if (endTime != null) {
+			detachedCriteria.add(Restrictions.le("requestDate", endTime));
+		}
+		// 搜索关键字 三要素 姓名 手机号 证件号
 		if (StringUtils.isNotBlank(searchText)) {
 			Disjunction disjunction = Restrictions.disjunction();
 			disjunction.add(Restrictions.like("mobileNo", searchText, MatchMode.ANYWHERE).ignoreCase());
@@ -45,5 +57,18 @@ public class CreditRequestDAO extends ParameterizedBaseDAO<CreditRequest, Long> 
 			detachedCriteria.add(disjunction);
 		}
 		return findByPaged(paged, detachedCriteria);
+	}
+
+	/**
+	 * 根据三要素查询征信
+	 * 
+	 * @param name
+	 * @param mobileNo
+	 * @param idNo
+	 * @return
+	 */
+	public CreditRequest findCreditByThreeElement(String name, String mobileNo, String idNo) {
+		String hql = "from CreditRequest where name = ? and mobileNo = ? and idNo = ?";
+		return findUnique(hql, name, mobileNo, idNo);
 	}
 }

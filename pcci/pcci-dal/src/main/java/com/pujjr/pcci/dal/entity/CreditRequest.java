@@ -8,6 +8,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
 
 import com.pujjr.common.type.IdentityType;
 import com.pujjr.common.type.credit.QueryReasonType;
@@ -17,6 +19,7 @@ import com.pujjr.common.type.credit.QueryReasonType;
  * @date 创建时间：2016年10月10日 上午10:43:35 个人不良信息
  */
 @Entity
+@Table(uniqueConstraints = { @UniqueConstraint(columnNames = { "name", "mobile_no", "id_no" }) })
 public class CreditRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -47,7 +50,7 @@ public class CreditRequest implements Serializable {
 	/**
 	 * 唯一流水号ID
 	 */
-	@Column(length = 24)
+	@Column(length = 64, unique = true)
 	private String creditId;
 
 	/**

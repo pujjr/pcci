@@ -59,8 +59,8 @@
 
 		<!-- log4j -->
 		<dependency>
-			<groupId>log4j</groupId>
-			<artifactId>log4j</artifactId>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
 		</dependency>
 		<!-- mysql连接 -->
 		<dependency>
@@ -108,11 +108,6 @@
 			<artifactId>hibernate-validator</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>100credit</groupId>
-			<artifactId>100credit</artifactId>
-			<version>2.5.0</version>
-		</dependency>
-		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-config</artifactId>
 			<version>0.0.1</version>
@@ -121,6 +116,10 @@
 			<groupId>pujjr-common</groupId>
 			<artifactId>pujjr-common</artifactId>
 			<version>1.0</version>
+		</dependency>
+		<dependency>
+			<groupId>brApi</groupId>
+			<artifactId>brApi</artifactId>
 		</dependency>
 	</dependencies>
 </project>

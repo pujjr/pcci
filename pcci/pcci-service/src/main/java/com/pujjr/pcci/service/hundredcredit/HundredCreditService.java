@@ -42,6 +42,8 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 	@Value("#{settings['account.100credit.password']}")
 	private String password;
 
+	private final static int RETRIES = 3;
+
 	/**
 	 * 调用百融批量打包查询
 	 * 
@@ -85,25 +87,36 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 	private ResultInfo<String> createRequest(HundredCreditRequest hundredCreditRequest, MerchantBean merchantBean) {
 		ResultInfo<String> resultInfo = new ResultInfo<>();
 		MerchantServer ms = new MerchantServer();
+		// 填装基本数据
+		hundredCreditRequest.setRequestDate(new Date());
+		// 复制bean数据
+		BeanUtils.copyProperties(hundredCreditRequest, merchantBean);
 
-		try {
-			// 填装基本数据
-			hundredCreditRequest.setRequestDate(new Date());
-			// 复制bean数据
-			BeanUtils.copyProperties(hundredCreditRequest, merchantBean);
-			// 调用百融借口
-			String portrait_result = ms.getApiData(merchantBean);
-			// 保存请求结果
-			// hundredCreditRequestDAO.save(hundredCreditRequest);
-			JSONObject crimeInfoJSON = JSON.parseObject(portrait_result);
-			if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600000", "00", "100002")) {
-				return resultInfo.success(portrait_result);
+		int count = 0;
+		while (count < RETRIES && !resultInfo.isSuccess()) {
+			try {
+				// 调用百融借口
+				String portrait_result = ms.getApiData(merchantBean);
+				// 保存请求结果
+				// hundredCreditRequestDAO.save(hundredCreditRequest);
+				JSONObject crimeInfoJSON = JSON.parseObject(portrait_result);
+				System.out.println("---100--->" + portrait_result);
+				if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600000", "00", "100002")) {
+					return resultInfo.success(portrait_result);
+				}
+				if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600002", "100007")) {
+					hundredCreditRequest.setTokenid(login());
+					count++;
+					continue;
+				}
+				return resultInfo.fail(crimeInfoJSON.getString("code"));
+			} catch (Exception e) {
+				logger.error(e.getMessage());
+				resultInfo.fail(e.getMessage());
 			}
-			resultInfo.fail(crimeInfoJSON.getString("code"));
-		} catch (Exception e) {
-			logger.error(e.getMessage());
-			resultInfo.fail(e.getMessage());
+			count++;
 		}
+
 		return resultInfo;
 	}
 

@@ -26,11 +26,12 @@ import sun.misc.BASE64Encoder;
 
 @SuppressWarnings("restriction")
 public class DataSecurityUtil {
+
 	public static void main(String[] args) {
 		try {
 			// String s = signData("abc");
 			String s = "HhegzMMlIYKAth5hZS+SMBM2Vz7iuAeypLNuQRzrQaisCKVbR0RgyWBt4LfFcaVJAUekXXfWVZPX\ngODeFw3GpRdg+zZSSNLI4HLaECt5bg6ykwEfGhpk4LktjfzmtTrPlvvtGyzhfiuNQl4Vjo+EQB8W\nNnNJvzODHGVDkLxQjqZFgAbCW2008PjRptAwqxtYGKdg6r7lp2YNLjB1+NjnD09QdZ49on9B5LRw\nLs4RJXYYDsS1luX7ezvCjWlHRVxcKhQ1+56y0I+T1R0bzvzNDsyaAe8Ic/m1iiMB0hrCR9211rgr\nMh80eEoUbn4nmI/qh1ToYURdPHXMmgHvCHP5tYrpH8kBM03ytda4KzIfNHhKFG5+J5iP6n/nqCvm\nidXHzJoB7whz+bW7akfWSxHfpwBKkUi7Yez6j6snDa8/ebiQCX1hGzHFKzB1mqr00euHMpZBU08o\nh9FpnAWOBf+FJJiLaqhKse33";
-			verifyData(s, "BuOIaou42Wov81X6KwvMK3C3HiYb2gfptMWo7RbsE0t2/t1FQWQ5n44awN34WHim1kSROetpqBWh\natb5RcF2NHA81A9HTDXXaymQWjFn4z9hfqyhz33dEMEv0XRRUNvI2TqBEzc/IPL65svImD2zbevU\nLOpqrh8gvOEB2+lGlxw=\n");
+			verifyData(s, "BuOIaou42Wov81X6KwvMK3C3HiYb2gfptMWo7RbsE0t2/t1FQWQ5n44awN34WHim1kSROetpqBWh\natb5RcF2NHA81A9HTDXXaymQWjFn4z9hfqyhz33dEMEv0XRRUNvI2TqBEzc/IPL65svImD2zbevU\nLOpqrh8gvOEB2+lGlxw=\n", "/dev/credoo_stg.cer/");
 			// System.out.println("验签OK");
 			// System.out.println(decrypt("Kn7F+lvQqP/59bltknRDBA==",
 			// "123456781234567812345678"));
@@ -53,9 +54,9 @@ public class DataSecurityUtil {
 		return strDes;
 	}
 
-	public static String signData(String data) throws Exception {
+	public static String signData(String data, String privateKeyPath, String storeAlias, String storePassword) throws Exception {
 		try {
-			PrivateKey key = getPrivateKey();
+			PrivateKey key = getPrivateKey(privateKeyPath, storeAlias, storePassword);
 			Signature sig = Signature.getInstance("SHA1WithRSA");
 			sig.initSign(key);
 			sig.update(data.getBytes("utf-8"));
@@ -67,9 +68,9 @@ public class DataSecurityUtil {
 		}
 	}
 
-	public static void verifyData(String data, String signValue) throws Exception {
+	public static void verifyData(String data, String signValue, String publicKeyPath) throws Exception {
 		try {
-			PublicKey key = getPublicKey();
+			PublicKey key = getPublicKey(publicKeyPath);
 			Signature sig = Signature.getInstance("SHA1WithRSA");
 			sig.initVerify(key);
 			sig.update(data.getBytes("utf-8"));
@@ -83,12 +84,11 @@ public class DataSecurityUtil {
 		}
 	}
 
-	private static PublicKey getPublicKey() throws Exception {
+	private static PublicKey getPublicKey(String publicKeyPath) throws Exception {
 		InputStream is = null;
 		try {
 			// is = new FileInputStream("D:\\KeyScript\\test\\bistest_2.cer");
-
-			is = DataSecurityUtil.class.getClassLoader().getResourceAsStream("/credoo_stg.cer");
+			is = DataSecurityUtil.class.getClassLoader().getResourceAsStream(publicKeyPath);
 			CertificateFactory cf = CertificateFactory.getInstance("X.509");
 			X509Certificate cert = (X509Certificate) cf.generateCertificate(is);
 			return cert.getPublicKey();
@@ -105,7 +105,7 @@ public class DataSecurityUtil {
 		}
 	}
 
-	private static PrivateKey getPrivateKey() throws Exception {
+	private static PrivateKey getPrivateKey(String privateKeyPath, String storeAlias, String storePassword) throws Exception {
 		char[] storePwdArr;
 		int i;
 		BufferedInputStream bis = null;
@@ -113,9 +113,7 @@ public class DataSecurityUtil {
 			KeyStore ks = KeyStore.getInstance("JKS");
 			// FileInputStream fis = new
 			// FileInputStream("D:\\KeyScript\\test\\EXV_BIS_FRONT_JK_RONGZI_001_STG.jks");
-			bis = new BufferedInputStream(DataSecurityUtil.class.getClassLoader().getResourceAsStream("/credoo_stg.jks"));
-			String storePassword = "qhzx_stg";
-			String storeAlias = "signKey";
+			bis = new BufferedInputStream(DataSecurityUtil.class.getClassLoader().getResourceAsStream(privateKeyPath));
 			storePwdArr = new char[storePassword.length()];// store password
 			for (i = 0; i < storePassword.length(); i++) {
 				storePwdArr[i] = storePassword.charAt(i);

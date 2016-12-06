@@ -7,7 +7,8 @@
 
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>dev</param-value>
+		<param-value>production</param-value>
+		<!-- dev production -->
 	</context-param>
 	<!-- spring MVC的核心就是DispatcherServlet，使用springMVC的第一步就是将下面的servlet放入web.xml 
 		servlet-name属性非常重要，默认情况下，DispatchServlet会加载这个名字-servlet.xml的文件，如下，就会加载 dispather-servlet.xml，也是在WEN-INF目录下。 -->

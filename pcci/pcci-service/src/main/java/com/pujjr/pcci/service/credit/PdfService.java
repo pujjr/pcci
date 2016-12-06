@@ -5,8 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +26,11 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.pujjr.common.result.ResultInfo;
+import com.pujjr.common.type.DrivingLicenceStatusType;
 import com.pujjr.common.utils.BaseFileUtils;
 import com.pujjr.common.utils.BaseIterableUtils;
 import com.pujjr.common.utils.bean.BeanPropertyUtils;
+import com.pujjr.pcci.dal.dao.CreditQueryResultDAO;
 import com.pujjr.pcci.dal.dao.CreditRequestDAO;
 import com.pujjr.pcci.dal.entity.CreditCrimeInfo;
 import com.pujjr.pcci.dal.entity.CreditExecution;
@@ -93,6 +99,9 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 
 	@Autowired
 	private CreditRequestDAO creditRequestDAO;
+
+	@Autowired
+	private CreditQueryResultDAO creditQueryResultDAO;
 
 	/**
 	 * 获得默认的pdf字体
@@ -322,6 +331,9 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 		ByteArrayOutputStream bStream = new ByteArrayOutputStream();
 		try {
 			CreditRequest creditRequest = creditRequestDAO.get(id);
+			if (StringUtils.isBlank(creditRequest.getOssKey())) {
+				creditQueryResultToPDF(creditQueryResultDAO.findCreditQueryResultByCreditId(creditRequest.getCreditId()));
+			}
 			InputStream downStream = storeService.download(creditRequest.getOssKey());
 			BaseFileUtils.inputToOutput(downStream, bStream);
 			return resultInfo.success(bStream.toByteArray());
@@ -398,13 +410,17 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	private void titleTable(CreditQueryResult creditQueryResult, Document document) {
 
 		PdfPTable table = defaultTable(4);
-		table.addCell(newTitleCell(table, "征信报告"));
 		try {
 			CreditRequest creditRequest = creditQueryResult.getCreditRequest();
+			table.addCell(newTitleCell(table, "征信报告"));
+			if (StringUtils.isNotBlank(creditRequest.getErrMsg())) {
+				table.addCell(newTitleCell(table, creditRequest.getErrMsg()));
+			}
 			table.addCell(newCell("姓名"));
 			table.addCell(newCell(creditRequest.getName()));
 			table.addCell(newCell("身份证号"));
 			table.addCell(newCell(creditRequest.getIdNo()));
+
 			document.add(table);
 		} catch (DocumentException e) {
 			logger.error("生成征信标题表格错误", e);
@@ -424,11 +440,11 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			CreditCrimeInfo creditCrimeInfo = creditCrimeInfoList.get(i);
 			List<String> cells = new ArrayList<>();
 			cells.add("案件来源");
-			cells.add(creditCrimeInfo.getCaseSource());
+			cells.add(excNullValue(creditCrimeInfo.getCaseSource()));
 			cells.add("案件类别");
-			cells.add(creditCrimeInfo.getCaseType());
+			cells.add(excNullValue(creditCrimeInfo.getCaseType()));
 			cells.add("案件时间");
-			cells.add(creditCrimeInfo.getCaseTime());
+			cells.add(excNullValue(creditCrimeInfo.getCaseTime()));
 			quickTabeByList(i == 0 ? "个人不良信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
 		}
 	}
@@ -446,25 +462,25 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			CreditExecution creditExecution = creditExecutionList.get(i);
 			List<String> badCells = new ArrayList<>();
 			badCells.add("数据类型");
-			badCells.add(creditExecution.getEx_bad_datatype());
+			badCells.add(excNullValue(creditExecution.getEx_bad_datatype()));
 			badCells.add("执行法院");
-			badCells.add(creditExecution.getEx_bad_court());
+			badCells.add(excNullValue(creditExecution.getEx_bad_court()));
 			badCells.add("立案时间");
-			badCells.add(creditExecution.getEx_bad_time());
+			badCells.add(excNullValue(creditExecution.getEx_bad_time()));
 			badCells.add("执行案号");
-			badCells.add(creditExecution.getEx_bad_casenum());
+			badCells.add(excNullValue(creditExecution.getEx_bad_casenum()));
 			badCells.add("执行标的");
-			badCells.add(creditExecution.getEx_bad_money());
+			badCells.add(excNullValue(creditExecution.getEx_bad_money()));
 			badCells.add("依据文号");
-			badCells.add(creditExecution.getEx_bad_base());
+			badCells.add(excNullValue(creditExecution.getEx_bad_base()));
 			badCells.add("做出依据的单位");
-			badCells.add(creditExecution.getEx_bad_basecompany());
+			badCells.add(excNullValue(creditExecution.getEx_bad_basecompany()));
 			badCells.add("履行情况");
-			badCells.add(creditExecution.getEx_bad_performance());
+			badCells.add(excNullValue(creditExecution.getEx_bad_performance()));
 			badCells.add("具体情形");
-			badCells.add(creditExecution.getEx_bad_concretesituation());
+			badCells.add(excNullValue(creditExecution.getEx_bad_concretesituation()));
 			badCells.add("失信时间");
-			badCells.add(creditExecution.getEx_bad_breaktime());
+			badCells.add(excNullValue(creditExecution.getEx_bad_breaktime()));
 			quickTabeByList(i == 0 ? "法院被执行信息——失信被执行记录" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, badCells, document);
 		}
 		// 法院被执行信息 被执行记录
@@ -472,21 +488,21 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			CreditExecution creditExecution = creditExecutionList.get(i);
 			List<String> executCells = new ArrayList<>();
 			executCells.add("数据类型");
-			executCells.add(creditExecution.getEx_execut_datatype());
+			executCells.add(excNullValue(creditExecution.getEx_execut_datatype()));
 			executCells.add("执行法院");
-			executCells.add(creditExecution.getEx_execut_court());
+			executCells.add(excNullValue(creditExecution.getEx_execut_court()));
 			executCells.add("立案时间");
-			executCells.add(creditExecution.getEx_execut_time());
+			executCells.add(excNullValue(creditExecution.getEx_execut_time()));
 			executCells.add("执行案号");
-			executCells.add(creditExecution.getEx_execut_casenum());
+			executCells.add(excNullValue(creditExecution.getEx_execut_casenum()));
 			executCells.add("执行标的");
-			executCells.add(creditExecution.getEx_execut_money());
+			executCells.add(excNullValue(creditExecution.getEx_execut_money()));
 			executCells.add("案件状态");
-			executCells.add(creditExecution.getEx_execut_statute());
+			executCells.add(excNullValue(creditExecution.getEx_execut_statute()));
 			executCells.add("执行依据");
-			executCells.add(creditExecution.getEx_execut_basic());
+			executCells.add(excNullValue(creditExecution.getEx_execut_basic()));
 			executCells.add("做出依据的机构");
-			executCells.add(creditExecution.getEx_execut_basiccourt());
+			executCells.add(excNullValue(creditExecution.getEx_execut_basiccourt()));
 			quickTabeByList(i == 0 ? "法院被执行信息——被执行记录" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, executCells, document);
 		}
 	}
@@ -537,11 +553,14 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 
 	// 反欺诈
 	private void antifrauddooTable(CreditQueryResult creditQueryResult, Document document) {
+		Map<String, String> map = new HashMap<>();
+		map.put("1", "命中");
+		map.put("0", "未命中");
 		List<String> cells = new ArrayList<>();
 		cells.add("命中第三方标注黑名单");
-		cells.add(creditQueryResult.getIsMachdBlMakt());
+		cells.add(getTargetValue(map, creditQueryResult.getIsMachdBlMakt()));
 		cells.add("命中欺诈号码");
-		cells.add(creditQueryResult.getIsMachFraud());
+		cells.add(getTargetValue(map, creditQueryResult.getIsMachFraud()));
 		quickTabeByList("前海反欺诈", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
 	}
 
@@ -549,13 +568,25 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	private void rskdooTable(CreditQueryResult creditQueryResult, Document document) {
 		List<String> cells = new ArrayList<>();
 		cells.add("来源代码");
-		cells.add(creditQueryResult.getSourceId());
+		Map<String, String> sourceIdMap = new HashMap<>();
+		sourceIdMap.put("A", "信贷逾期风险");
+		sourceIdMap.put("B", "行政负面风险");
+		sourceIdMap.put("C", "欺诈风险");
+		cells.add(getTargetValue(sourceIdMap, creditQueryResult.getSourceId()));
 		cells.add("风险的分");
-		cells.add(creditQueryResult.getRskScore());
+		cells.add(excNullValue(creditQueryResult.getRskScore()));
 		cells.add("风险标记");
-		cells.add(creditQueryResult.getRskMark());
+		Map<String, String> rskMarkMap = new HashMap<>();
+		rskMarkMap.put("B1", "失信被执行人");
+		rskMarkMap.put("B2", "被执行人");
+		rskMarkMap.put("B3", "交通严重违章");
+		rskMarkMap.put("C1", "手机号存在欺诈风险");
+		rskMarkMap.put("C2", "卡号存在欺诈风险");
+		rskMarkMap.put("C3", "身份证号存在欺诈风险");
+		rskMarkMap.put("C4", " IP存在欺诈风险");
+		cells.add(getTargetValue(rskMarkMap, creditQueryResult.getRskMark()));
 		cells.add("业务发生时间");
-		cells.add(creditQueryResult.getDataBuildTime());
+		cells.add(excNullValue(creditQueryResult.getDataBuildTime()));
 		quickTabeByList("前海风险度", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
 	}
 
@@ -563,23 +594,48 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	private void eChkPkgs(CreditQueryResult creditQueryResult, Document document) {
 		List<String> cells = new ArrayList<>();
 		cells.add("手机验证结果");
-		cells.add(creditQueryResult.getIsOwnerMobile());
+		Map<String, String> isOwnerMobileMap = new HashMap<>();
+		isOwnerMobileMap.put("0", "手机号、证件号、姓名均一致");
+		isOwnerMobileMap.put("1", "手机号和证件号一致，姓名不一致");
+		isOwnerMobileMap.put("2", "手机号和证件号一致，姓名不做比对");
+		isOwnerMobileMap.put("3", "手机号一致，证件号不一致，姓名不做比对");
+		cells.add(getTargetValue(isOwnerMobileMap, creditQueryResult.getIsOwnerMobile()));
 		cells.add("手机状态");
-		cells.add(creditQueryResult.getOwnerMobileStatus());
+		Map<String, String> ownerMobileStatusMap = new HashMap<>();
+		ownerMobileStatusMap.put("1", "正常");
+		ownerMobileStatusMap.put("2", "停机");
+		ownerMobileStatusMap.put("3", "不可用");
+		ownerMobileStatusMap.put("4", "已销号");
+		cells.add(getTargetValue(ownerMobileStatusMap, creditQueryResult.getOwnerMobileStatus()));
 		cells.add("使用时间分数");
-		cells.add(creditQueryResult.getDataBuildTime());
+		Map<String, String> dataBuildTimeMap = new HashMap<>();
+		dataBuildTimeMap.put("-1", "不可用");
+		dataBuildTimeMap.put("1", "(0-1]");
+		dataBuildTimeMap.put("2", "(1-2]");
+		dataBuildTimeMap.put("3", "(2-6]");
+		dataBuildTimeMap.put("4", "(6-12]");
+		dataBuildTimeMap.put("5", "(12-24]");
+		dataBuildTimeMap.put("6", "(24-36]");
+		dataBuildTimeMap.put("7", "(36,+]");
+		dataBuildTimeMap.put("30", "(0,6]");
+		dataBuildTimeMap.put("60", "(24,+]");
+		cells.add(getTargetValue(dataBuildTimeMap, creditQueryResult.getDataBuildTime()));
 		quickTabeByList("前海一鉴通", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
 	}
 
 	// 驾驶证
 	private void drvcert2cmpincTable(CreditQueryResult creditQueryResult, Document document) {
+		Map<String, String> map = new HashMap<>();
+		map.put("1", "匹配正确");
+		map.put("0", "匹配不正确");
 		List<String> cells = new ArrayList<>();
 		cells.add("驾驶证号");
-		cells.add(creditQueryResult.getChkDriverNo());
+		cells.add(getTargetValue(map, creditQueryResult.getChkDriverNo()));
 		cells.add("姓名");
-		cells.add(creditQueryResult.getChkName());
+		cells.add(getTargetValue(map, creditQueryResult.getChkName()));
 		cells.add("驾驶证状态的查询结果");
-		cells.add(creditQueryResult.getChkStatus());
+		String chkStatus = DrivingLicenceStatusType.contains(creditQueryResult.getChkStatus()) ? DrivingLicenceStatusType.fromCode(creditQueryResult.getChkStatus()).getRemark() : "无数据";
+		cells.add(chkStatus);
 		quickTabeByList("前海驾驶证状态", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
 
 	}
@@ -602,12 +658,12 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			if (CreditPerInvest.PERINVEST_TYPE_RYPOSFR.equals(creditPerInvest.getPerinvestType())) {
 				List<String> legalPersonCells = new ArrayList<>();
 				legalPersonCells.add("企业(机构)名称");
-				legalPersonCells.add(creditPerInvest.getEntname());
+				legalPersonCells.add(excNullValue(creditPerInvest.getEntname()));
 				legalPersonCells.add("企业(机构)类型");
-				legalPersonCells.add(creditPerInvest.getEnttype());
+				legalPersonCells.add(excNullValue(creditPerInvest.getEnttype()));
 				legalPersonCells.add("注册资本(万元)");
-				legalPersonCells.add(creditPerInvest.getEntstatus());
-				quickTabeByList(i == 0 ? "对外投资——企业法人信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
+				legalPersonCells.add(excNullValue(creditPerInvest.getEntstatus()));
+				quickTabeByList("对外投资——企业法人信息", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
 			}
 		}
 
@@ -616,15 +672,42 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			if (CreditPerInvest.PERINVEST_TYPE_RYPOSSHA.equals(creditPerInvest.getPerinvestType())) {
 				List<String> shareholderCells = new ArrayList<>();
 				shareholderCells.add("企业(机构)名称");
-				shareholderCells.add(creditPerInvest.getEntname());
+				shareholderCells.add(excNullValue(creditPerInvest.getEntname()));
 				shareholderCells.add("企业(机构)类型");
-				shareholderCells.add(creditPerInvest.getEnttype());
+				shareholderCells.add(excNullValue(creditPerInvest.getEnttype()));
 				shareholderCells.add("注册资本(万元)");
-				shareholderCells.add(creditPerInvest.getRegcap());
+				shareholderCells.add(excNullValue(creditPerInvest.getRegcap()));
 				shareholderCells.add("企业状态");
-				shareholderCells.add(creditPerInvest.getEntstatus());
-				quickTabeByList(i == 0 ? "对外投资——企业股东信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
+				shareholderCells.add(excNullValue(creditPerInvest.getEntstatus()));
+				quickTabeByList("对外投资——企业股东信息", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
 			}
 		}
+	}
+
+	/**
+	 * 是否命中
+	 * 
+	 * @param value
+	 * @return
+	 */
+	private String getTargetValue(Map<String, String> conditions, String value) {
+		Iterator<String> keys = conditions.keySet().iterator();
+		while (keys.hasNext()) {
+			String key = keys.next();
+			if (StringUtils.equals(key, value)) {
+				return conditions.get(key);
+			}
+		}
+		return excNullValue(value);
+	}
+
+	/**
+	 * 排除掉空值
+	 * 
+	 * @param value
+	 * @return
+	 */
+	private String excNullValue(String value) {
+		return StringUtils.isBlank(value) ? "无数据" : value;
 	}
 }

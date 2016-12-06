@@ -32,7 +32,7 @@ public class CreditQueryResult implements Serializable {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long recordId;
 
-	@Column(length = 24)
+	@Column(length = 64, unique = true)
 	private String creditId;
 
 	/* 个人不良信息 */

@@ -52,10 +52,9 @@
 			<artifactId>Memcached-Java-Client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>100credit</groupId>
-			<artifactId>100credit</artifactId>
-			<version>2.5.0</version>
-	</dependency>
+			<groupId>brApi</groupId>
+			<artifactId>brApi</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-api</artifactId>

@@ -44,4 +44,5 @@ public class HundredCreditRequestDAO extends ParameterizedBaseDAO<HundredCreditR
 		}
 		return findByPaged(paged, detachedCriteria);
 	}
+
 }

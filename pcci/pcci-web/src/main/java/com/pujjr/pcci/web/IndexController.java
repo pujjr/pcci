@@ -1,5 +1,6 @@
 package com.pujjr.pcci.web;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -21,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.alibaba.fastjson.JSON;
 import com.pujjr.common.pager.Paged;
 import com.pujjr.common.pager.PagedResult;
 import com.pujjr.common.result.ResultInfo;
@@ -62,76 +62,6 @@ public class IndexController extends BaseController {
 	public Object credit() {
 		return creditService.creditQuery(new CreditRequestData());
 
-	}
-
-	@RequestMapping(value = "/creditQuery")
-	public void downloadCreditQueryByExcel(@RequestParam MultipartFile[] files, HttpServletRequest request, HttpServletResponse response) {
-		List<CreditQueryResult> creditQueryResultList = new ArrayList<>();
-		if (files != null && files.length > 0) {
-			// 循环获取files数组中得文件
-			for (int i = 0; i < files.length; i++) {
-				MultipartFile multipartFile = files[i];
-				try {
-					// 获取征信批量查询的Excel文件
-					// 1.取Excel文件中叫Sheet的工作表或者第一个工作表
-					// 2.表的第一排为标题,不需要读取
-					// 3.文件中的字段顺序如下:
-					// [姓名,手机号,证件号,授权码,授权时间]
-					// 4.由于该批量处理为临时使用,以上字段外的征信查询需要的查询条件如证件类型,查询原因之类的固定写死,简化操作
-					List<String[]> excelData = ExcelUtils.loadExcelFile(multipartFile.getInputStream(), multipartFile.getOriginalFilename(), 1, 5);
-					CreditRequestData creditRequestData = new CreditRequestData();
-
-					for (String[] excelStrArray : excelData) {
-						// 从Excel里获取的必填
-						creditRequestData.setName(excelStrArray[0]);// 姓名
-						creditRequestData.setMobileNo(excelStrArray[1]);// 手机号
-						creditRequestData.setIdNo(excelStrArray[2]);// 证件号
-						creditRequestData.setEntityAuthCode(excelStrArray[3]);// 授权码
-						creditRequestData.setEntityAuthDate(excelStrArray[4]);// 授权时间yyyy-MM-dd
-						// 没从Excel里获取的 自动填写的值
-						// creditRequestData.setCreditId(BaseUtils.newUUID());// 请求唯一标识流水
-						creditRequestData.setIdType(IdentityType.ID_CARD.getCode());// 证件类型
-						creditRequestData.setReasonCode(QueryReasonType.LOAN_APPROVAL.getCode());// 查询原因
-						creditRequestData.setRequestUserId("admin");// 征信查询发起人
-						System.out.println("------查询--" + excelStrArray[0] + "-----");
-						ResultInfo<CreditQueryResult> resultInfo = creditService.creditQuery(creditRequestData);
-						if (resultInfo.isSuccess()) {
-							creditQueryResultList.add(resultInfo.getData());
-						}
-					}
-					System.out.println("------查询--结束-----");
-					System.out.println(JSON.toJSONString(excelData));
-					ResultInfo<byte[]> excelResult = excelService.writeCreditExcelFile(creditQueryResultList);
-					if (excelResult.isSuccess()) {
-						byte[] byteArray = excelResult.getData();
-						response.setContentType("application/x-download");
-						response.setCharacterEncoding("utf-8");
-						String fileName = "征信查询返回记录" + DateFormatUtils.format(new Date(), "yyyy-MM-dd") + "." + ExcelUtils.XLSX;
-						/**
-						 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
-						 * 
-						 */
-						// IE使用URLEncoder
-						String userAgent = request.getHeader("User-Agent").toLowerCase();
-						if (userAgent.contains("windows")) {
-							fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
-							// 其它使用转iso
-						} else {
-							fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
-						}
-						response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
-						OutputStream os = response.getOutputStream();
-						os.write(byteArray);
-						os.flush();
-						os.close();
-					}
-
-				} catch (Exception e) {
-					// TODO
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	@RequestMapping(value = "/getUploadTemplate")
@@ -176,6 +106,7 @@ public class IndexController extends BaseController {
 			for (int i = 0; i < files.length; i++) {
 				MultipartFile multipartFile = files[i];
 				try {
+					List<CreditRequestData> creditRequestDataList = new ArrayList<>();
 					// 获取征信批量查询的Excel文件
 					// 1.取Excel文件中叫Sheet的工作表或者第一个工作表
 					// 2.表的第一排为标题,不需要读取
@@ -183,33 +114,37 @@ public class IndexController extends BaseController {
 					// [姓名,手机号,证件号,授权码,授权时间]
 					// 4.由于该批量处理为临时使用,以上字段外的征信查询需要的查询条件如证件类型,查询原因之类的固定写死,简化操作
 					List<String[]> excelData = ExcelUtils.loadExcelFile(multipartFile.getInputStream(), multipartFile.getOriginalFilename(), 1, 5);
-					CreditRequestData creditRequestData = new CreditRequestData();
-					Long maxCreditId = 0l;
-					Long minCreditId = 0l;
+					int index = 1;
 					for (String[] excelStrArray : excelData) {
+						CreditRequestData creditRequestData = new CreditRequestData();
 						// 从Excel里获取的必填
 						creditRequestData.setName(excelStrArray[0]);// 姓名
 						creditRequestData.setMobileNo(excelStrArray[1]);// 手机号
 						creditRequestData.setIdNo(excelStrArray[2]);// 证件号
 						creditRequestData.setEntityAuthCode(excelStrArray[3]);// 授权码
-						;// 授权时间yyyy-MM-dd
-							// 没从Excel里获取的 自动填写的值
-							// creditRequestData.setCreditId(BaseUtils.newUUID());// 请求唯一标识流水
+						// 授权时间yyyy-MM-dd
+						// 没从Excel里获取的 自动填写的值
+						// creditRequestData.setCreditId(BaseUtils.newUUID());// 请求唯一标识流水
 						creditRequestData.setIdType(IdentityType.ID_CARD.getCode());// 证件类型
 						creditRequestData.setReasonCode(QueryReasonType.LOAN_APPROVAL.getCode());// 查询原因
 						creditRequestData.setRequestUserId("admin");// 征信查询发起人
-						String EntityAuthDate = StringUtils.isBlank(excelStrArray[4]) ? DateFormatUtils.format(new Date(), "yyyy-MM-dd") : excelStrArray[4];// 授权时间yyyy-MM-dd
+						String EntityAuthDate = StringUtils.isBlank(excelStrArray[4]) ? DateFormatUtils.format(new Date(), "yyyy-MM-dd") : excelStrArray[4].trim();// 授权时间yyyy-MM-dd
 						creditRequestData.setEntityAuthDate(EntityAuthDate);
-						System.out.println("------查询--" + excelStrArray[0] + "-----");
-						ResultInfo<CreditQueryResult> creditQueryResult = creditService.creditQueryAndStore(creditRequestData);
-						if (creditQueryResult.isSuccess() && creditQueryResult.getData() != null) {
-							CreditRequest creditRequest = creditQueryResult.getData().getCreditRequest();
-							maxCreditId = Long.max(maxCreditId, creditRequest.getId());
-							minCreditId = minCreditId == 0l ? creditRequest.getId() : Long.min(minCreditId, creditRequest.getId());
+						ResultInfo<String> validateResult = creditService.creditRequestValidate(creditRequestData);
+						if (validateResult.isSuccess()) {
+							CreditRequest repetitionCreditRequest = creditService.findCreditByThreeElement(creditRequestData.getName(), creditRequestData.getMobileNo(), creditRequestData.getIdNo());
+							if (repetitionCreditRequest == null) {
+								creditRequestDataList.add(creditRequestData);
+							} else {
+								return resultInfo.fail(index + "行数据重复:");
+							}
+							index++;
+						} else {
+							return resultInfo.fail(index + "行数据出错:" + validateResult.getMsg());
 						}
+
 					}
-					resultInfo.success("searchCredit?beginCreditId=" + minCreditId + "&endCreditId=" + maxCreditId);
-					System.out.println("------查询--结束-----");
+					resultInfo = creditService.concurrenceCreditQuery(creditRequestDataList);
 				} catch (Exception e) {
 					e.printStackTrace();
 					resultInfo.fail(e);
@@ -220,49 +155,82 @@ public class IndexController extends BaseController {
 
 	}
 
-	@RequestMapping(value = "/downloadCredit/{creditId}")
-	public void downloadCredit(@PathVariable String creditId, HttpServletRequest request, HttpServletResponse response) {
+	@RequestMapping(value = "/downloadCredit/{id}")
+	public void downloadCredit(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
+		OutputStream os = null;
 		try {
-			ResultInfo<byte[]> downloadResult = creditService.downloadCreditFile(creditId);
-			if (downloadResult.isSuccess()) {
-				byte[] byteArray = downloadResult.getData();
-				response.setContentType("application/x-download");
-				response.setCharacterEncoding("utf-8");
-				String fileName = "征信查询文件" + creditId + ".PDF";
-				/**
-				 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
-				 * 
-				 */
-				// IE使用URLEncoder
-				String userAgent = request.getHeader("User-Agent").toLowerCase();
-				if (userAgent.contains("windows")) {
-					fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
-					// 其它使用转iso
-				} else {
-					fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
+			if (id != null && id != 0) {
+				ResultInfo<byte[]> downloadResult = creditService.downloadCreditFile(id);
+				if (downloadResult.isSuccess()) {
+					byte[] byteArray = downloadResult.getData();
+					response.setContentType("application/pdf");
+					response.setCharacterEncoding("utf-8");
+					String fileName = "征信查询文件" + StringUtils.leftPad(String.valueOf(id), 10, "0") + ".PDF";
+					/**
+					 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
+					 * 
+					 */
+					// IE使用URLEncoder
+					String userAgent = request.getHeader("User-Agent").toLowerCase();
+					if (userAgent.contains("windows")) {
+						fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
+						// 其它使用转iso
+					} else {
+						fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
+					}
+					response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+					os = response.getOutputStream();
+					os.write(byteArray);
 				}
-				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
-				OutputStream os = response.getOutputStream();
-				os.write(byteArray);
-				os.flush();
-				os.close();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			logger.error("下载文件异常:" + e.getLocalizedMessage());
+		} finally {
+			if (os != null) {
+				try {
+					os.flush();
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 
 	@RequestMapping(value = "/searchCredit")
-	public String searchCreditRequest(Integer page, Long beginCreditId, Long endCreditId, String searchText) {
+	public String searchCreditRequest(Integer page, Long beginCreditId, Long endCreditId, String searchText, String stateTime, String endTime) {
+
 		Paged paged = new Paged();
 		paged.setPage(page);
-		PagedResult<CreditRequest> pagedResult = creditService.searchCreditRequest(paged, beginCreditId, endCreditId, searchText);
-		setAttribute("beginCreditId", beginCreditId == null ? "" : beginCreditId);
-		setAttribute("endCreditId", endCreditId == null ? "" : endCreditId);
-		setAttribute("searchText", StringUtils.defaultString(searchText));
-		setAttribute("paged", pagedResult.getPaged());
-		setAttribute("creditRequestList", pagedResult.getResults());
+		if (beginCreditId != null || endCreditId != null || StringUtils.isNotBlank(searchText) || (StringUtils.isNotBlank(stateTime) && StringUtils.isNotBlank(endTime))) {
+			PagedResult<CreditRequest> pagedResult = creditService.searchCreditRequest(paged, beginCreditId, endCreditId, searchText, stateTime, endTime);
+			paged = pagedResult.getPaged();
+			setAttribute("creditRequestList", pagedResult.getResults());
+			setAttribute("paged", paged);
+			setAttribute("beginCreditId", beginCreditId);
+			setAttribute("endCreditId", endCreditId);
+			setAttribute("stateTime", stateTime);
+			setAttribute("endTime", endTime);
+			setAttribute("searchText", searchText);
+			if (StringUtils.isNotBlank(stateTime) && StringUtils.isNotBlank(endTime)) {
+				setAttribute("stateEndTime", stateTime + " - " + endTime);
+			}
+		}
 		return "search";
+	}
+
+	@RequestMapping(value = "/refreshCredit/{creditId}")
+	@ResponseBody
+	public ResultInfo<CreditQueryResult> refreshCredit(@PathVariable String creditId) {
+		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
+		try {
+			if (StringUtils.isNotBlank(creditId)) {
+				resultInfo = creditService.creditQueryAgain(creditId);
+			}
+		} catch (Exception e) {
+			resultInfo.fail(e);
+		}
+		return resultInfo;
 	}
 
 }

@@ -58,13 +58,13 @@ public class QianHaiResult implements Serializable {
 	/**
 	 * 错误代码
 	 */
-	@Column(nullable = false, length = 8)
+	@Column(length = 8)
 	private String erCode;
 
 	/**
 	 * 错误信息
 	 */
-	@Column(nullable = false)
+	@Column
 	private String erMsg;
 
 	/**

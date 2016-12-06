@@ -16,11 +16,9 @@ import org.springframework.stereotype.Service;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
-import com.alibaba.fastjson.JSONException;
 import com.alibaba.fastjson.JSONObject;
 import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.credit.QueryProductType;
-import com.pujjr.common.utils.BaseStringUtils;
 import com.pujjr.pcci.common.qhcs.bean.HeaderBean;
 import com.pujjr.pcci.common.qhcs.bean.SecurityInfo;
 import com.pujjr.pcci.common.qhcs.utils.DataSecurityUtil;
@@ -52,7 +50,7 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 
 	public final static String DEFAULT_NO_DATA = "E000996";
 
-	public final static String DEFAULT_SUBPRODUCTINC = "0000000000001000";
+	public final static String DEFAULT_SUBPRODUCTINC = "0000001000000000";
 
 	/**
 	 * 发送前海查询请求
@@ -69,9 +67,8 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 		requestData.setTransNo(transNo);
 		requestData.setBatchNo(transNo);
 		requestList.add(requestData);
-
-		ResultInfo<List<QianHaiResult>> resultList = sandQianHaiRequest(transNo, requestList, productType);
-
+		System.out.println("------>" + JSON.toJSONString(requestData));
+		ResultInfo<List<QianHaiResult>> resultList = sand(transNo, requestList, productType);
 		if (resultList.isSuccess() && resultList.getData() != null && StringUtils.equalsIgnoreCase(resultList.getResultCode(), DEFAULT_SUCCESS_CODE)) {
 			QianHaiResult qianHaiResult = resultList.getData().get(0);
 			if (productType.equals(QueryProductType.MSC8107)) {// 一鉴通
@@ -90,16 +87,11 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 				resultInfo.setResultCode(resultList.getResultCode());
 				resultInfo.setMsg(resultList.getMsg());
 			}
-			if (BaseStringUtils.equalsAny(resultList.getResultCode(), DEFAULT_SUCCESS_CODE, DEFAULT_NO_DATA)) {
-				return resultInfo.success(qianHaiResult);
-			}
-			resultInfo.fail(resultList.getResultCode() + ":" + resultList.getMsg());
-		} else {
-			resultInfo.fail();
+			return resultInfo.success(qianHaiResult);
 		}
 		resultInfo.setResultCode(resultList.getResultCode());
 		resultInfo.setMsg(resultList.getMsg());
-		return resultInfo;
+		return resultInfo.fail();
 	}
 
 	/**
@@ -111,16 +103,51 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 	 * @return
 	 */
 	public ResultInfo<List<QianHaiResult>> sandQianHaiRequest(String transNo, List<QianHaiRequestData> requestList, QueryProductType productType) {
-
 		ResultInfo<List<QianHaiResult>> resultInfo = new ResultInfo<>();
-		try {
-			// 数据库存记录请求,获得批次号/流水号,并写入请求
-			for (int i = 0; i < requestList.size(); i++) {
-				if (requestList.get(i) != null) {
-					requestList.get(i).setTransNo(transNo);
-					requestList.get(i).setBatchNo(transNo);
+		ResultInfo<List<QianHaiResult>> resultList = sand(transNo, requestList, productType);
+
+		if (resultList.isSuccess() && resultList.getData() != null && StringUtils.equalsIgnoreCase(resultList.getResultCode(), DEFAULT_SUCCESS_CODE)) {
+			List<QianHaiResult> qianHaiResultList = resultList.getData();
+			for (int i = 0; qianHaiResultList != null && i < qianHaiResultList.size(); i++) {
+				QianHaiResult qianHaiResult = qianHaiResultList.get(i);
+				if (productType.equals(QueryProductType.MSC8107)) {// 一鉴通
+					String errorInfo = qianHaiResult.getErrorInfo();
+					JSONObject errorJson = JSON.parseObject(errorInfo);
+					JSONObject subproductincJson = errorJson.getJSONObject(DEFAULT_SUBPRODUCTINC);
+					resultInfo.setResultCode(subproductincJson.getString("erCode"));
+					resultInfo.setMsg(subproductincJson.getString("errMsg"));
+				} else if (productType.equals(QueryProductType.MSC8037)) {// 常贷客
+					List<String> busiDatelist = new ArrayList<>();
+					for (QianHaiResult qianHaiResultData : resultList.getData()) {
+						busiDatelist.add(qianHaiResultData.getBusiDate());
+					}
+					qianHaiResult.setBusiDate(JSON.toJSONString(busiDatelist));
+				} else {
+					resultInfo.setResultCode(resultList.getResultCode());
+					resultInfo.setMsg(resultList.getMsg());
 				}
+				// qianHaiResultList.add(qianHaiResult);
 			}
+			return resultInfo.success(qianHaiResultList);
+		} else {
+			resultInfo.setResultCode(resultList.getResultCode());
+			resultInfo.fail(resultList.getMsg());
+		}
+		return resultInfo;
+	}
+
+	/**
+	 * 发送前海查询请求
+	 * 
+	 * @param transNo
+	 * @param requestList
+	 * @param productType
+	 * @return
+	 */
+	private ResultInfo<List<QianHaiResult>> sand(String transNo, List<QianHaiRequestData> requestList, QueryProductType productType) {
+		ResultInfo<List<QianHaiResult>> resultInfo = new ResultInfo<>();
+		String rtCode = "";
+		try {
 			// 获得环境变量
 			QianHaiSetting setting = getFullSettingByMessageCode(productType);
 			// 获得标头数据
@@ -130,11 +157,10 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			busiData.put("batchNo", transNo);
 			busiData.put("records", requestList);
 			busiData.put("subProductInc", DEFAULT_SUBPRODUCTINC);
-
 			String busiDataString = JSON.toJSONString(busiData);
 			// 获得安全节点数据 加密基础数据
 			String encBusiData = DataSecurityUtil.encrypt(busiDataString.getBytes(StandardCharsets.UTF_8.displayName()), setting.getCheckCode());
-			String sigValue = DataSecurityUtil.signData(encBusiData);
+			String sigValue = DataSecurityUtil.signData(encBusiData, setting.getPrivateKeyPath(), setting.getStoreAlias(), setting.getStorePassword());
 			SecurityInfo securityInfo = getSecurityInfo(sigValue);
 			// 获得请求完整字符串
 			Map<String, Object> requestMap = new HashMap<String, Object>();
@@ -144,11 +170,14 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			String message = JSON.toJSONString(requestMap);
 			// 发送查询请求
 			String res = HttpRequestUtil.sendJsonWithHttps(setting.getServiceURL(), message);
+
 			// 验签
 			JSONObject msgJSON = JSON.parseObject(res);
-			DataSecurityUtil.verifyData(msgJSON.getString("busiData"), msgJSON.getJSONObject("securityInfo").getString("signatureValue"));
+			rtCode = msgJSON.getJSONObject("header").getString("rtCode");
+			DataSecurityUtil.verifyData(msgJSON.getString("busiData"), msgJSON.getJSONObject("securityInfo").getString("signatureValue"), setting.getPublicKeyPath());
 			// 转为明文
 			String responseBusiDataStr = DataSecurityUtil.decrypt(msgJSON.getString("busiData"), setting.getCheckCode());
+			System.out.println(responseBusiDataStr);
 			JSONObject responseBusiDataJSON = JSON.parseObject(responseBusiDataStr);
 			JSONArray recordsJSON = responseBusiDataJSON.getJSONArray("records");
 			// 填装完整数据,并保存返回结果
@@ -163,11 +192,9 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			}
 			resultInfo.setResultCode(msgJSON.getJSONObject("header").getString("rtCode"));
 			resultInfo.success(resultDataList);
-		} catch (JSONException e) {
-			logger.error("请求前海征信报文错误" + productType);
 		} catch (Exception e) {
 			logger.error("请求前海征信报文错误" + productType, e);
-			resultInfo.fail("请求前海征信调用错误");
+			resultInfo.fail(productType + ":" + rtCode);
 		}
 		return resultInfo;
 	}
@@ -239,5 +266,4 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 		securityInfo.setUserPassword(DataSecurityUtil.digest(settingBean.getUserPassword().getBytes()));
 		return securityInfo;
 	}
-
 }

@@ -1,17 +1,22 @@
 package com.pujjr.pcci.service.credit;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.pcci.api.bean.request.CreditRequestData;
 import org.pcci.api.bean.request.QianHaiRequestData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
@@ -28,6 +33,7 @@ import com.pujjr.common.type.credit.QueryProductType;
 import com.pujjr.common.type.credit.QueryReasonType;
 import com.pujjr.common.utils.BaseIterableUtils;
 import com.pujjr.common.utils.BaseStringUtils;
+import com.pujjr.common.utils.BaseUtils;
 import com.pujjr.pcci.dal.dao.CreditQueryResultDAO;
 import com.pujjr.pcci.dal.dao.CreditRequestDAO;
 import com.pujjr.pcci.dal.entity.CreditCrimeInfo;
@@ -40,6 +46,7 @@ import com.pujjr.pcci.dal.entity.QianHaiResult;
 import com.pujjr.pcci.service.ParameterizedBaseService;
 import com.pujjr.pcci.service.hundredcredit.HundredCreditService;
 import com.pujjr.pcci.service.qhcs.QianHaiService;
+import com.pujjr.pcci.service.store.StoreService;
 
 /**
  * @author wen
@@ -52,29 +59,27 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	/**
 	 * 1个月前
 	 */
-	public final static Integer ONE_MONTH_AGO = -1;
+	public final static Integer ONE_MONTH_AGO = 1;
 	/**
 	 * 3个月前
 	 */
-	public final static Integer THREE_MONTHS_AGO = -3;
+	public final static Integer THREE_MONTHS_AGO = 3;
 	/**
 	 * 6个月前
 	 */
-	public final static Integer SIX_MONTHS_AGO = -6;
+	public final static Integer SIX_MONTHS_AGO = 6;
 	/**
 	 * 12个月前
 	 */
-	public final static Integer TWELVE_MONTHS_AGO = -12;
+	public final static Integer TWELVE_MONTHS_AGO = 12;
 
 	/**
 	 * 默认时间格式
 	 */
 	private final static String DEFAULT_DATE_FORMAT = "yyyy-MM-dd";
 
-	/**
-	 * 默认交易流水号头标识
-	 */
-	private final static String DEFAULT_SEQ_HEAD = "C";
+	@Value("#{settings['pcci.concurrent.number']}")
+	private int concurrentNumber;
 
 	@Autowired
 	private HundredCreditService hundredCreditService;
@@ -91,6 +96,9 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	@Autowired
 	private CreditRequestDAO creditRequestDAO;
 
+	@Autowired
+	private StoreService storeService;
+
 	/**
 	 * 根据条件查询征信请求记录
 	 * 
@@ -100,8 +108,22 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param searchText
 	 * @return
 	 */
-	public PagedResult<CreditRequest> searchCreditRequest(Paged paged, Long beginCreditId, Long endCreditId, String searchText) {
-		return creditRequestDAO.searchCreditRequest(paged, beginCreditId, endCreditId, searchText);
+	public PagedResult<CreditRequest> searchCreditRequest(Paged paged, Long beginCreditId, Long endCreditId, String searchText, String stateTimeStr, String endTimeStr) {
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm");
+		Date stateTime = null;
+		Date endTime = null;
+		try {
+			if (StringUtils.isNotBlank(stateTimeStr)) {
+				stateTime = dateFormat.parse(stateTimeStr);
+			}
+			if (StringUtils.isNotBlank(endTimeStr)) {
+				endTime = dateFormat.parse(endTimeStr);
+			}
+		} catch (ParseException e) {
+			logger.error("时间格式转化错误");
+		}
+
+		return creditRequestDAO.searchCreditRequest(paged, beginCreditId, endCreditId, searchText, stateTime, endTime);
 	}
 
 	/**
@@ -110,16 +132,10 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param creditId
 	 * @return
 	 */
-	public ResultInfo<byte[]> downloadCreditFile(String creditId) {
+	public ResultInfo<byte[]> downloadCreditFile(Long id) {
 		ResultInfo<byte[]> resultInfo = new ResultInfo<>();
-		if (StringUtils.isNotBlank(creditId)) {
-			creditId = StringUtils.remove(creditId, DEFAULT_SEQ_HEAD);
-			if (NumberUtils.isDigits(creditId)) {
-				Long id = NumberUtils.toLong(creditId);
-				return pdfService.downloadPDF(id);
-			} else {
-				resultInfo.fail("征信流水号格式错误");
-			}
+		if (id != null) {
+			return pdfService.downloadPDF(id);
 		} else {
 			resultInfo.fail("征信流水号不能为空");
 		}
@@ -132,7 +148,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param creditRequestData
 	 * @return
 	 */
-	private ResultInfo<String> CreditRequestValidate(CreditRequestData creditRequestData) {
+	public ResultInfo<String> creditRequestValidate(CreditRequestData creditRequestData) {
 		ResultInfo<String> resultInfo = new ResultInfo<>();
 		try {
 			Assert.notNull(creditRequestData, "征信请求数据不能为空");
@@ -146,10 +162,11 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			Assert.notNull(creditRequestData.getIdType(), "被查询用户证件类型不能为空");
 			Assert.isTrue(StringUtils.isNotBlank(creditRequestData.getEntityAuthCode()), "信息主体授权码不能为空");
 			Assert.isTrue(StringUtils.isNotBlank(creditRequestData.getEntityAuthDate()), "信息主体授权码授权时间不能为空");
+			resultInfo.success();
 		} catch (IllegalArgumentException e) {
 			resultInfo.fail(e);
 		}
-		return resultInfo.success();
+		return resultInfo;
 	}
 
 	/**
@@ -168,7 +185,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 */
 	public CreditRequestData getCreditRequestData(String creditId, String requestUserId, String idNo, String mobileNo, String name, QueryReasonType reasonType, IdentityType identityType, String entityAuthCode, String entityAuthDate) {
 		CreditRequestData creditRequestData = new CreditRequestData();
-		creditRequestData.setCreditId(DEFAULT_SEQ_HEAD + StringUtils.leftPad(creditId, 9, "0"));
+		creditRequestData.setCreditId(StringUtils.leftPad(creditId, 10, "0"));
 		creditRequestData.setRequestUserId(requestUserId);
 		creditRequestData.setIdNo(idNo);
 		creditRequestData.setMobileNo(mobileNo);
@@ -210,6 +227,48 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		return creditQueryResult;
 	}
 
+	public ResultInfo<String> concurrenceCreditQuery(List<CreditRequestData> creditRequestDataList) {
+		ResultInfo<String> resultInfo = new ResultInfo<>();
+		// 线程池，超过数量则堵塞线程
+		ExecutorService executor = Executors.newFixedThreadPool(concurrentNumber);
+		List<CompletableFuture<ResultInfo<CreditQueryResult>>> futureList = new ArrayList<>();
+		List<CreditQueryResult> creditQueryResultList = new ArrayList<>();
+		try {
+			// 循环生并发
+			for (CreditRequestData CreditRequestData : creditRequestDataList) {
+				CompletableFuture<ResultInfo<CreditQueryResult>> future = CompletableFuture.supplyAsync(new Supplier<ResultInfo<CreditQueryResult>>() {
+					@Override
+					public ResultInfo<CreditQueryResult> get() {
+						ResultInfo<CreditQueryResult> result = creditQuery(CreditRequestData);
+						if (result.isSuccess() && result.getData() != null) {
+							CreditQueryResult creditQueryResult = result.getData();
+							creditQueryResultList.add(creditQueryResult);
+						}
+						return result;
+					}
+				}, executor);
+				futureList.add(future);
+			}
+			CompletableFuture<Void> allDoneFuture = CompletableFuture.allOf(futureList.toArray(new CompletableFuture[futureList.size()]));
+
+			allDoneFuture.join();
+			Long maxCreditId = 0l;
+			Long minCreditId = 0l;
+			for (CreditQueryResult creditQueryResult : creditQueryResultList) {
+				CreditRequest creditRequest = creditQueryResult.getCreditRequest();
+				maxCreditId = Long.max(maxCreditId, creditRequest.getId());
+				minCreditId = minCreditId == 0l ? creditRequest.getId() : Long.min(minCreditId, creditRequest.getId());
+			}
+			resultInfo.success("searchCredit?beginCreditId=" + minCreditId + "&endCreditId=" + maxCreditId);
+		} catch (Exception e) {
+			e.printStackTrace();
+			resultInfo.fail(e);
+		} finally {
+			executor.shutdown();
+		}
+		return resultInfo;
+	}
+
 	/**
 	 * 调用征信查询
 	 * 
@@ -221,53 +280,76 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		// 开始调用
 		CreditQueryResult creditQueryResult = new CreditQueryResult();
 		CreditRequest creditRequest = new CreditRequest();
+		// TODO 验证结果
+		ResultInfo<String> validateResult = creditRequestValidate(creditRequestData);
+		if (validateResult.isSuccess()) {
+			BeanUtils.copyProperties(creditRequestData, creditRequest);
+			creditQueryResult.setCreditRequest(creditRequest);
+			sandCreditQuery(creditQueryResult);
+		}
+		creditQueryResultDAO.save(creditQueryResult);
+		resultInfo.success(creditQueryResult);
+		return resultInfo;
+	}
+
+	public ResultInfo<CreditQueryResult> creditQueryAgain(String creditId) {
+		CreditQueryResult creditQueryResult = creditQueryResultDAO.findCreditQueryResultByCreditId(creditId);
+
+		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
+		// 开始调用
+		CreditRequest creditRequest = creditQueryResult.getCreditRequest();
+		if (StringUtils.isNotBlank(creditRequest.getOssKey())) {
+			storeService.delete(creditRequest.getOssKey());
+			creditRequest.setOssKey(null);
+		}
+		// TODO 验证结果
+		sandCreditQuery(creditQueryResult);
+		creditQueryResultDAO.update(creditQueryResult);
+		resultInfo.success(creditQueryResult);
+		return resultInfo;
+	}
+
+	public ResultInfo<CreditQueryResult> sandCreditQuery(CreditQueryResult creditQueryResult) {
+		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
+		// 开始调用
+		CreditRequest creditRequest = creditQueryResult.getCreditRequest();
 		List<String> errMsg = new ArrayList<>();
 		long beginTime = System.currentTimeMillis();
 		try {
-			// TODO 验证结果
-			CreditRequestValidate(creditRequestData);
-
-			creditRequestData.setRequestDate(new Date());// 征信查询发起时间
-			creditRequestData.setName(StringUtils.remove(creditRequestData.getName(), "·"));
-			creditRequestData.setEntityAuthDate(StringUtils.replace(creditRequestData.getEntityAuthDate(), "/", "-"));
-			BeanUtils.copyProperties(creditRequestData, creditRequest);
-			// TODO 如果没有唯一交易流失号传入 则自动生成一个
-			if (StringUtils.isBlank(creditRequestData.getCreditId())) {
-				creditRequestDAO.save(creditRequest);
-				String creditId = DEFAULT_SEQ_HEAD + StringUtils.leftPad(creditRequest.getId().toString(), 9, "0");
-				creditRequest.setCreditId(creditId);
-			}
-			String creditId = creditRequest.getCreditId();
+			String creditId = getNewCreditId(creditRequest.getIdNo());
 			creditQueryResult.setCreditId(creditId);
-			creditQueryResult.setCreditRequest(creditRequest);
+
+			creditRequest.setCreditId(creditId);
+			creditRequest.setRequestDate(new Date());// 征信查询发起时间
+			creditRequest.setName(StringUtils.remove(creditRequest.getName(), "·"));
+			creditRequest.setEntityAuthDate(StringUtils.replace(creditRequest.getEntityAuthDate(), "/", "-"));
 
 			System.out.println("百融登录前:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
 			// 百融登录获取
 			String tokenid = hundredCreditService.login();
-			creditRequestData.setTokenid(tokenid);
 			System.out.println("百融登录耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
 			// 百融接口调用请求数据
 			HundredCreditRequest hcRequestData = new HundredCreditRequest();
-			hcRequestData.setTokenid(creditRequestData.getTokenid());// no
-			hcRequestData.setRequestUserId(creditRequestData.getRequestUserId());
-			hcRequestData.setId(creditRequestData.getIdNo());
-			hcRequestData.setCell(creditRequestData.getMobileNo());
-			hcRequestData.setName(creditRequestData.getName());
+			hcRequestData.setTokenid(tokenid);// no
+			hcRequestData.setRequestUserId(creditRequest.getRequestUserId());
+			hcRequestData.setId(creditRequest.getIdNo());
+			hcRequestData.setCell(creditRequest.getMobileNo());
+			hcRequestData.setName(creditRequest.getName());
 
 			// 前海接口调用请求数据
 			QianHaiRequestData qhRequestData = new QianHaiRequestData();
-			qhRequestData.setQueryId(creditId);
 			qhRequestData.setSubmitTransNo(creditId);
-			qhRequestData.setIdNo(creditRequestData.getIdNo());
-			qhRequestData.setReasonCode(creditRequestData.getReasonCode());
-			qhRequestData.setReasonNo(creditRequestData.getReasonCode());
-			qhRequestData.setIdType(creditRequestData.getIdType());
-			qhRequestData.setName(creditRequestData.getName());
-			qhRequestData.setMobileNo(creditRequestData.getMobileNo());
-			qhRequestData.setEntityAuthCode(creditRequestData.getEntityAuthCode());
-			qhRequestData.setEntityAuthDate(creditRequestData.getEntityAuthDate());
+			qhRequestData.setIdNo(creditRequest.getIdNo());
+			qhRequestData.setDriverNo(creditRequest.getIdNo());
+			qhRequestData.setReasonCode(creditRequest.getReasonCode());
+			qhRequestData.setReasonNo(creditRequest.getReasonCode());
+			qhRequestData.setIdType(creditRequest.getIdType());
+			qhRequestData.setName(creditRequest.getName());
+			qhRequestData.setMobileNo(creditRequest.getMobileNo());
+			qhRequestData.setEntityAuthCode(creditRequest.getEntityAuthCode());
+			qhRequestData.setEntityAuthDate(creditRequest.getEntityAuthDate());
 
 			System.out.println("接口配置耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
@@ -336,25 +418,36 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			System.out.println("驾驶证耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
 			// TODO 对外投资 太贵了 查不起 暂时注释掉
-			// try {
-			// perinvestQuery(creditQueryResult, hcRequestData);
-			// } catch (Exception e) {
-			// errMsg = errMsg + ",百融对外投资-" + e.getMessage();
-			// }
-
+			try {
+				// perinvestQuery(creditQueryResult, hcRequestData);
+			} catch (Exception e) {
+				errMsg.add("百融对外投资-" + e.getMessage());
+			}
 			// 根据结果计算风险
 			calculatedRisk(creditQueryResult);
 			System.out.println("风险计算耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
 			// 保存数据
 		} catch (Exception e) {
 			logger.error("查询征信报告出现错误", e);
 			errMsg.add("查询征信报告出现错误:" + e.getMessage());
 		}
 		creditRequest.setErrMsg(StringUtils.join(errMsg, ","));
-		creditQueryResultDAO.save(creditQueryResult);
+		System.out.println(creditRequest.getName() + "---" + creditRequest.getCreditId() + "--------总耗时：" + (System.currentTimeMillis() - creditRequest.getRequestDate().getTime()));
 		resultInfo.success(creditQueryResult);
 		return resultInfo;
+	}
+
+	/**
+	 * 获得一个新的唯一征信流水号
+	 * 
+	 * @param IdNo
+	 * @return
+	 */
+	private String getNewCreditId(String IdNo) {
+		String prefix = StringUtils.substring(StringUtils.leftPad(IdNo, 8, "0"), -8);
+		return (prefix + BaseUtils.get16UUID());
 	}
 
 	/**
@@ -478,6 +571,10 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			if (BaseStringUtils.equalsAny(creditQueryResult.getUseTimeScore(), "1", "2", "3", "30")) {
 				riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_LOW);
 			}
+			// 出现任意“不一致”的情况
+			if (BaseStringUtils.equalsAny(creditQueryResult.getIsOwnerMobile(), "1", "3")) {
+				riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_LOW);
+			}
 		} else if (StringUtils.isNotBlank(creditQueryResult.getOwnerMobileStatus())) {
 			// 手机状态不为1则低风险
 			riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_LOW);
@@ -531,7 +628,17 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			JSONArray priskChecks = crimeInfoJSON.getJSONObject("product").getJSONArray("priskChecks");
 			List<CreditCrimeInfo> creditCrimeInfoList = new ArrayList<>();
 			for (int i = 0; priskChecks != null && i < priskChecks.size(); i++) {
-				JSONArray caseDetails = priskChecks.getJSONObject(i).getJSONArray("caseDetail");
+				JSONObject priskCheck = priskChecks.getJSONObject(i);
+				JSONArray caseDetails = new JSONArray();
+				if (priskCheck.get("caseDetail") != null) {
+					if (priskCheck.get("caseDetail") instanceof JSONObject) {
+						caseDetails.add(priskCheck.getJSONObject("caseDetail"));
+					} else if (priskCheck.get("caseDetail") instanceof JSONArray) {
+						caseDetails = priskCheck.getJSONArray("caseDetail");
+					} else {
+						throw new CheckFailException("数据格式获取错误");
+					}
+				}
 				for (int j = 0; caseDetails != null && j < caseDetails.size(); j++) {
 					CreditCrimeInfo creditCrimeInfo = new CreditCrimeInfo();
 					JSONObject caseDetailJSON = caseDetails.getJSONObject(j);
@@ -540,10 +647,10 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 							creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseSource").getString("#text"));
 						}
 						if (caseDetailJSON.getJSONObject("caseTime") != null) {
-							creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseTime").getString("#text"));
+							creditCrimeInfo.setCaseTime(caseDetailJSON.getJSONObject("caseTime").getString("#text"));
 						}
 						if (caseDetailJSON.getJSONObject("caseType") != null) {
-							creditCrimeInfo.setCaseSource(caseDetailJSON.getJSONObject("caseType").getString("#text"));
+							creditCrimeInfo.setCaseType(caseDetailJSON.getJSONObject("caseType").getString("#text"));
 						}
 						creditCrimeInfoList.add(creditCrimeInfo);
 					}
@@ -625,22 +732,31 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 					if (StringUtils.isNotBlank(busiDateString)) {
 						Date busiDate = DateUtils.parseDate(busiDateString, "yyyy-MM-dd");
 						Date nowDate = new Date();
-						// 是否一月以内
-						qh_m1_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, ONE_MONTH_AGO)) ? qh_m1_id_loan_num + 1 : qh_m1_id_loan_num;
-						// 是否三月以内
-						qh_m3_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, THREE_MONTHS_AGO)) ? qh_m3_id_loan_num + 1 : qh_m3_id_loan_num;
-						// 是否六月以内
-						qh_m6_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, SIX_MONTHS_AGO)) ? qh_m6_id_loan_num + 1 : qh_m6_id_loan_num;
 						// 是否十二月以内
-						qh_m12_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, TWELVE_MONTHS_AGO)) ? qh_m12_id_loan_num + 1 : qh_m12_id_loan_num;
+						if (busiDate != null && nowDate.before(DateUtils.addMonths(busiDate, TWELVE_MONTHS_AGO))) {
+							qh_m12_id_loan_num++;
+							// 是否六月以内
+							if (nowDate.before(DateUtils.addMonths(busiDate, SIX_MONTHS_AGO))) {
+								qh_m6_id_loan_num++;
+								// 是否三月以内
+								if (nowDate.before(DateUtils.addMonths(busiDate, THREE_MONTHS_AGO))) {
+									qh_m3_id_loan_num++;
+									// 是否一月以内
+									if (nowDate.before(DateUtils.addMonths(busiDate, ONE_MONTH_AGO))) {
+										qh_m1_id_loan_num++;
+									}
+								}
+							}
+						}
+						// qh_m1_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, ONE_MONTH_AGO)) ? qh_m1_id_loan_num + 1 : qh_m1_id_loan_num;
+						// qh_m3_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, THREE_MONTHS_AGO)) ? qh_m3_id_loan_num + 1 : qh_m3_id_loan_num;
+						// qh_m6_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, SIX_MONTHS_AGO)) ? qh_m6_id_loan_num + 1 : qh_m6_id_loan_num;
+						// qh_m12_id_loan_num = busiDate.before(DateUtils.addMonths(nowDate, TWELVE_MONTHS_AGO)) ? qh_m12_id_loan_num + 1 : qh_m12_id_loan_num;
 					}
 				}
 				creditQueryResult.setQh_m1_id_loan_num(qh_m1_id_loan_num);
-				// 是否三月以内
 				creditQueryResult.setQh_m3_id_loan_num(qh_m3_id_loan_num);
-				// 是否六月以内
 				creditQueryResult.setQh_m6_id_loan_num(qh_m6_id_loan_num);
-				// 是否十二月以内
 				creditQueryResult.setQh_m12_id_loan_num(qh_m12_id_loan_num);
 			}
 		} else {
@@ -660,13 +776,13 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			JSONObject applyloanJSON = JSON.parseObject(applyloanResult.getData());
 			// 身份证
 			creditQueryResult.setBr_m1_id_loan_num(applyloanJSON.getIntValue("als_m1_id_bank_allnum") + applyloanJSON.getIntValue("als_m1_id_nbank_allnum"));
-			creditQueryResult.setBr_m3_id_loan_num(applyloanJSON.getIntValue("als_m3_id_bank_allnum") + applyloanJSON.getIntValue("als_m3_id_nbank_allnum"));
-			creditQueryResult.setBr_m6_id_loan_num(applyloanJSON.getIntValue("als_m6_id_bank_allnum") + applyloanJSON.getIntValue("als_m6_id_nbank_allnum"));
+			creditQueryResult.setBr_m3_id_loan_num(applyloanJSON.getIntValue("al_m3_id_bank_allnum") + applyloanJSON.getIntValue("al_m3_id_notbank_allnum"));
+			creditQueryResult.setBr_m6_id_loan_num(applyloanJSON.getIntValue("al_m6_id_bank_allnum") + applyloanJSON.getIntValue("al_m6_id_notbank_allnum"));
 			creditQueryResult.setBr_m12_id_loan_num(applyloanJSON.getIntValue("al_m12_id_bank_allnum") + applyloanJSON.getIntValue("al_m12_id_bank_selfnum") + applyloanJSON.getIntValue("al_m12_id_notbank_allnum") + applyloanJSON.getIntValue("al_m12_id_notbank_selfnum"));
 			// 手机
 			creditQueryResult.setBr_m1_cell_loan_num(applyloanJSON.getIntValue("als_m1_cell_bank_allnum") + applyloanJSON.getIntValue("als_m1_cell_nbank_allnum"));
-			creditQueryResult.setBr_m3_cell_loan_num(applyloanJSON.getIntValue("als_m3_cell_bank_allnum") + applyloanJSON.getIntValue("als_m3_cell_nbank_allnum"));
-			creditQueryResult.setBr_m6_cell_loan_num(applyloanJSON.getIntValue("als_m6_cell_bank_allnum") + applyloanJSON.getIntValue("als_m6_cell_nbank_allnum"));
+			creditQueryResult.setBr_m3_cell_loan_num(applyloanJSON.getIntValue("al_m3_cell_bank_allnum") + applyloanJSON.getIntValue("al_m3_cell_notbank_allnum"));
+			creditQueryResult.setBr_m6_cell_loan_num(applyloanJSON.getIntValue("al_m6_cell_bank_allnum") + applyloanJSON.getIntValue("al_m6_cell_notbank_allnum"));
 			creditQueryResult.setBr_m12_cell_loan_num(applyloanJSON.getIntValue("al_m12_cell_bank_allnum") + applyloanJSON.getIntValue("al_m12_cell_bank_selfnum") + applyloanJSON.getIntValue("al_m12_cell_notbank_allnum") + applyloanJSON.getIntValue("al_m12_cell_notbank_selfnum"));
 		} else {
 			throw new CheckFailException(applyloanResult.getMsg());
@@ -722,9 +838,9 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		ResultInfo<QianHaiResult> qianHaiResult_8107 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8107);
 		if (qianHaiResult_8107.isSuccess()) {
 			QianHaiResult qianHaiResults = qianHaiResult_8107.getData();
-			creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobile());
-			creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatus());
-			creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScore());
+			creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobileII());
+			creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatusII());
+			creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScoreII());
 		} else {
 			throw new Exception(qianHaiResult_8107.getMsg());
 		}
@@ -738,14 +854,32 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param transNo
 	 */
 	private void drvcert2cmpincQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) throws Exception {
-		ResultInfo<QianHaiResult> qianHaiResult_8079 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8079);
-		if (qianHaiResult_8079.isSuccess()) {
-			QianHaiResult qianHaiResults = qianHaiResult_8079.getData();
-			creditQueryResult.setIsOwnerMobile(qianHaiResults.getIsOwnerMobile());
-			creditQueryResult.setOwnerMobileStatus(qianHaiResults.getOwnerMobileStatus());
-			creditQueryResult.setUseTimeScore(qianHaiResults.getUseTimeScore());
+		ResultInfo<QianHaiResult> qianHaiResult_8078 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8078);
+		if (qianHaiResult_8078.isSuccess()) {
+			QianHaiResult result_8078 = qianHaiResult_8078.getData();
+			qhRequestData.setQueryId(result_8078.getQueryId());
+			for (int i = 0; i <= 10; i++) {
+				ResultInfo<QianHaiResult> qianHaiResult_8079 = qianHaiService.sandQianHaiRequest(getNewCreditId(qhRequestData.getIdNo()), qhRequestData, QueryProductType.MSC8079);
+				if (qianHaiResult_8079.isSuccess()) {
+					QianHaiResult qianHaiResults = qianHaiResult_8079.getData();
+					// E000990 查询中 轮询查询
+					if (StringUtils.equals(qianHaiResults.getErCode(), "E000990")) {
+						if (i == 10) {
+							throw new Exception("驾驶证对比处理中");
+						}
+						Thread.sleep(5000);
+						continue;
+					}
+					creditQueryResult.setChkDriverNo(qianHaiResults.getChkDriverNo());
+					creditQueryResult.setChkName(qianHaiResults.getChkName());
+					creditQueryResult.setChkStatus(qianHaiResults.getChkStatus());
+					return;
+				} else {
+					throw new Exception(qianHaiResult_8079.getMsg());
+				}
+			}
 		} else {
-			throw new Exception(qianHaiResult_8079.getMsg());
+			throw new Exception(qianHaiResult_8078.getMsg());
 		}
 	}
 
@@ -755,6 +889,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param creditQueryResult
 	 * @param hcRequestData
 	 */
+	@SuppressWarnings("unused")
 	private void perinvestQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) throws Exception {
 		ResultInfo<String> perInvestResult = hundredCreditService.hundredCreditDasRequest(hcRequestData, MealType.PerInvest);
 		if (perInvestResult.isSuccess()) {
@@ -796,4 +931,17 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			throw new CheckFailException(perInvestResult.getMsg());
 		}
 	}
+
+	/**
+	 * 根据三要素查询征信
+	 * 
+	 * @param name
+	 * @param mobileNo
+	 * @param idNo
+	 * @return
+	 */
+	public CreditRequest findCreditByThreeElement(String name, String mobileNo, String idNo) {
+		return creditRequestDAO.findCreditByThreeElement(name, mobileNo, idNo);
+	}
+
 }

@@ -1,23 +1,28 @@
 <#include "layout/default_layout.html"/>
 <@page>
-<link rel="stylesheet" href="${webRoot}/static/fileinput/css/fileinput.min.css" />
+<link rel="stylesheet" href="${webRoot}/static/tool/fileinput/css/fileinput.min.css" />
 
-<script src="${webRoot}/static/fileinput/js/fileinput.min.js"></script>
-<script src="${webRoot}/static/fileinput/js/locales/zh.js"></script>
+<script src="${webRoot}/static/tool/fileinput/js/fileinput.min.js"></script>
+<script src="${webRoot}/static/tool/fileinput/js/locales/zh.js"></script>
 <script src="${webRoot}/static/pcci/index.js"></script>
 
 <div class="container" style="width: 100%;">
 	<div class="row">
-		<div class="col-md-4 col-md-offset-4" style="margin-top: 20em">
-			<h6 ><a href="${webRoot}/searchCredit" target="_blank">征信查询 </a></h6>
+		<div class="col-md-4 col-md-offset-4 center" style="margin-top: 20em;">
+			<a href="${webRoot}/searchCredit" target="_blank"><img alt="征信数据查询" src="${webRoot}/static/img/logo.png"></a>
 		</div>
 	</div>
 	<div class="row">
-		<div class="col-md-4 col-md-offset-4">
+		<div class="col-md-4 col-md-offset-4"  style="margin-top: 5em;">
 				<div class="form-group" >
-				 <input id="selectFile" type="file" name="files">
+					<input id="selectFile" type="file" name="files">
 					<p class="help-block" style="font-size: 12px">点击<a href="${webRoot}/getUploadTemplate" target="_blank" style="color: black;">这里</a>获取征信查询上传模板.</p>
 				</div>
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-4 col-md-offset-4 center"  style="margin-top: 30em;font-size: 12px;color: gray;">
+				<p>${version!}</p>
 		</div>
 	</div>
 </div>

@@ -100,14 +100,14 @@ public class BaseFileUtils {
 	 */
 	public static String buildOnlyFileName(String suffix) {
 		if (StringUtils.isBlank(suffix)) {
-			return BaseUtils.newUUID();
+			return BaseUtils.get32UUID();
 		} else {
 			suffix = suffix.trim().toUpperCase();
 			if (!StringUtils.contains(suffix, ".")) {
 				suffix = "." + suffix;
 			}
 		}
-		return BaseUtils.newUUID() + suffix;
+		return BaseUtils.get32UUID() + suffix;
 	}
 
 	/**

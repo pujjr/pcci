@@ -47,6 +47,22 @@ public class QianHaiSetting {
 	@Value("#{settings['qianhai.setting.serviceURL']}")
 	private String serviceURL;
 
+	/** 私钥地址 */
+	@Value("#{settings['qianhai.privateKey.path']}")
+	private String privateKeyPath;
+
+	/** 公钥地址 */
+	@Value("#{settings['qianhai.publicKey.path']}")
+	private String publicKeyPath;
+
+	/** 私钥别名 */
+	@Value("#{settings['qianhai.privateKey.storeAlias']}")
+	private String storeAlias;
+
+	/** 密钥密码 */
+	@Value("#{settings['qianhai.privateKey.storePassword']}")
+	private String storePassword;
+
 	/**
 	 * 交易名称
 	 */
@@ -239,6 +255,66 @@ public class QianHaiSetting {
 	 */
 	public void setMessageCode(String messageCode) {
 		this.messageCode = messageCode;
+	}
+
+	/**
+	 * @return 私钥地址
+	 */
+	public String getPrivateKeyPath() {
+		return privateKeyPath;
+	}
+
+	/**
+	 * @param 私钥地址
+	 *            要设置的 privateKeyPath
+	 */
+	public void setPrivateKeyPath(String privateKeyPath) {
+		this.privateKeyPath = privateKeyPath;
+	}
+
+	/**
+	 * @return 公钥地址
+	 */
+	public String getPublicKeyPath() {
+		return publicKeyPath;
+	}
+
+	/**
+	 * @param 公钥地址
+	 *            要设置的 publicKeyPath
+	 */
+	public void setPublicKeyPath(String publicKeyPath) {
+		this.publicKeyPath = publicKeyPath;
+	}
+
+	/**
+	 * @return 私钥别名
+	 */
+	public String getStoreAlias() {
+		return storeAlias;
+	}
+
+	/**
+	 * @param 私钥别名
+	 *            要设置的 storeAlias
+	 */
+	public void setStoreAlias(String storeAlias) {
+		this.storeAlias = storeAlias;
+	}
+
+	/**
+	 * @return 密钥密码
+	 */
+	public String getStorePassword() {
+		return storePassword;
+	}
+
+	/**
+	 * @param 密钥密码
+	 *            要设置的 storePassword
+	 */
+	public void setStorePassword(String storePassword) {
+		this.storePassword = storePassword;
 	}
 
 }

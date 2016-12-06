@@ -12,4 +12,8 @@ import com.pujjr.pcci.dal.entity.CreditQueryResult;
 @Repository
 public class CreditQueryResultDAO extends ParameterizedBaseDAO<CreditQueryResult, Long> {
 
+	public CreditQueryResult findCreditQueryResultByCreditId(String creditId) {
+		String hql = "from CreditQueryResult where creditId = ?";
+		return findUnique(hql, creditId);
+	}
 }
