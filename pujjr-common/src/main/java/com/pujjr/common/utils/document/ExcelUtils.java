@@ -139,7 +139,7 @@ public class ExcelUtils {
 				dataList.add(rowDataArray);
 			} else {
 				closeStream(inputStream);
-				throw new CheckFailException("第" + y + "列，列数少于要求");
+				throw new CheckFailException("第" + y + "行为空数据行,可能存在空格,请删除掉该行再重新尝试");
 			}
 
 		}

@@ -7,7 +7,7 @@
 
 	<context-param>
 		<param-name>spring.profiles.active</param-name>
-		<param-value>production</param-value>
+		<param-value>dev</param-value>
 		<!-- dev production -->
 	</context-param>
 	<!-- spring MVC的核心就是DispatcherServlet，使用springMVC的第一步就是将下面的servlet放入web.xml 

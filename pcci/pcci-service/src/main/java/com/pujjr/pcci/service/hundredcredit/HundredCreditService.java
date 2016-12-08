@@ -6,6 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
@@ -42,7 +43,7 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 	@Value("#{settings['account.100credit.password']}")
 	private String password;
 
-	private final static int RETRIES = 3;
+	private final static int RETRIES = 5;
 
 	/**
 	 * 调用百融批量打包查询
@@ -105,7 +106,7 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 					return resultInfo.success(portrait_result);
 				}
 				if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600002", "100007")) {
-					hundredCreditRequest.setTokenid(login());
+					hundredCreditRequest.setTokenid(refreshLogin());
 					count++;
 					continue;
 				}
@@ -122,6 +123,20 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 
 	@Cacheable(value = "100CreditLogin")
 	public String login() {
+		try {
+			MerchantServer ms = new MerchantServer();
+			// 登录并获得tokenid
+			String login_result = ms.login(username, password);
+			JSONObject json = JSON.parseObject(login_result);
+			return json.getString("tokenid");
+		} catch (Exception e) {
+			logger.error("百融登录失败");
+		}
+		return null;
+	}
+
+	@CachePut(value = "100CreditLogin")
+	public String refreshLogin() {
 		try {
 			MerchantServer ms = new MerchantServer();
 			// 登录并获得tokenid

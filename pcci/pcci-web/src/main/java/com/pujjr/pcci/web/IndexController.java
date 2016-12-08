@@ -144,7 +144,12 @@ public class IndexController extends BaseController {
 						}
 
 					}
-					resultInfo = creditService.concurrenceCreditQuery(creditRequestDataList);
+					ResultInfo<String> validateRepeatResult = creditService.isRepeatRequest(creditRequestDataList);
+					if (validateRepeatResult.isSuccess()) {
+						resultInfo = creditService.concurrenceCreditQuery(creditRequestDataList);
+					} else {
+						return resultInfo.fail(validateRepeatResult.getMsg());
+					}
 				} catch (Exception e) {
 					e.printStackTrace();
 					resultInfo.fail(e);

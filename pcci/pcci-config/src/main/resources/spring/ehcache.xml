@@ -5,6 +5,6 @@
                   timeToIdleSeconds="600" timeToLiveSeconds="600"
                   overflowToDisk="false"/>
 
-    <cache name="100CreditLogin" maxElementsInMemory="100" eternal="false" timeToIdleSeconds="3000"
+    <cache name="100CreditLogin" maxElementsInMemory="200" eternal="false" timeToIdleSeconds="3000"
            timeToLiveSeconds="3000" overflowToDisk="false" />
 </ehcache>

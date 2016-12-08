@@ -608,18 +608,18 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 		ownerMobileStatusMap.put("4", "已销号");
 		cells.add(getTargetValue(ownerMobileStatusMap, creditQueryResult.getOwnerMobileStatus()));
 		cells.add("使用时间分数");
-		Map<String, String> dataBuildTimeMap = new HashMap<>();
-		dataBuildTimeMap.put("-1", "不可用");
-		dataBuildTimeMap.put("1", "(0-1]");
-		dataBuildTimeMap.put("2", "(1-2]");
-		dataBuildTimeMap.put("3", "(2-6]");
-		dataBuildTimeMap.put("4", "(6-12]");
-		dataBuildTimeMap.put("5", "(12-24]");
-		dataBuildTimeMap.put("6", "(24-36]");
-		dataBuildTimeMap.put("7", "(36,+]");
-		dataBuildTimeMap.put("30", "(0,6]");
-		dataBuildTimeMap.put("60", "(24,+]");
-		cells.add(getTargetValue(dataBuildTimeMap, creditQueryResult.getDataBuildTime()));
+		Map<String, String> useTimeScoreMap = new HashMap<>();
+		useTimeScoreMap.put("-1", "不可用");
+		useTimeScoreMap.put("1", "(0-1]");
+		useTimeScoreMap.put("2", "(1-2]");
+		useTimeScoreMap.put("3", "(2-6]");
+		useTimeScoreMap.put("4", "(6-12]");
+		useTimeScoreMap.put("5", "(12-24]");
+		useTimeScoreMap.put("6", "(24-36]");
+		useTimeScoreMap.put("7", "(36,+]");
+		useTimeScoreMap.put("30", "(0,6]");
+		useTimeScoreMap.put("60", "(24,+]");
+		cells.add(getTargetValue(useTimeScoreMap, creditQueryResult.getUseTimeScore()));
 		quickTabeByList("前海一鉴通", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
 	}
 

@@ -170,6 +170,37 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	}
 
 	/**
+	 * 检查请求的所有数据里,是否有重复的
+	 * 
+	 * @param creditRequestDataList
+	 * @param creditRequestData
+	 * @return
+	 */
+	public ResultInfo<String> isRepeatRequest(List<CreditRequestData> creditRequestDataList) {
+		ResultInfo<String> resultInfo = new ResultInfo<>();
+		try {
+			if (creditRequestDataList == null) {
+				throw new CheckFailException("获取数据失败");
+			}
+			for (int i = 0; i < creditRequestDataList.size(); i++) {
+				CreditRequestData data1 = creditRequestDataList.get(i);
+				// 与集合后面的每一个元素比较, 最后一个元素停止比较
+				for (int j = i + 1; j < creditRequestDataList.size(); j++) {
+					CreditRequestData data2 = creditRequestDataList.get(j);
+					// 如果三要素都一致,返回失败
+					if (StringUtils.equals(data1.getIdNo(), data2.getIdNo()) && StringUtils.equals(data1.getName(), data2.getName()) && StringUtils.equals(data1.getMobileNo(), data2.getMobileNo())) {
+						throw new CheckFailException("表中第" + (i + 1) + "行数据与第" + (j + 1) + "行数据重复");
+					}
+				}
+			}
+			resultInfo.success();
+		} catch (CheckFailException e) {
+			resultInfo.fail(e);
+		}
+		return resultInfo;
+	}
+
+	/**
 	 * 获得一个征信请求数据填装bean
 	 * 
 	 * @param creditId
@@ -854,20 +885,21 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param transNo
 	 */
 	private void drvcert2cmpincQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) throws Exception {
-		ResultInfo<QianHaiResult> qianHaiResult_8078 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8078);
-		if (qianHaiResult_8078.isSuccess()) {
-			QianHaiResult result_8078 = qianHaiResult_8078.getData();
+		ResultInfo<QianHaiResult> qianHaiResult_8081 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8081);
+		if (qianHaiResult_8081.isSuccess()) {
+			QianHaiResult result_8078 = qianHaiResult_8081.getData();
 			qhRequestData.setQueryId(result_8078.getQueryId());
-			for (int i = 0; i <= 10; i++) {
+			int max = 20;
+			for (int i = 0; i <= max; i++) {
+				Thread.sleep(3000);
 				ResultInfo<QianHaiResult> qianHaiResult_8079 = qianHaiService.sandQianHaiRequest(getNewCreditId(qhRequestData.getIdNo()), qhRequestData, QueryProductType.MSC8079);
 				if (qianHaiResult_8079.isSuccess()) {
 					QianHaiResult qianHaiResults = qianHaiResult_8079.getData();
 					// E000990 查询中 轮询查询
 					if (StringUtils.equals(qianHaiResults.getErCode(), "E000990")) {
-						if (i == 10) {
+						if (i == max) {
 							throw new Exception("驾驶证对比处理中");
 						}
-						Thread.sleep(5000);
 						continue;
 					}
 					creditQueryResult.setChkDriverNo(qianHaiResults.getChkDriverNo());
@@ -879,7 +911,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 				}
 			}
 		} else {
-			throw new Exception(qianHaiResult_8078.getMsg());
+			throw new Exception(qianHaiResult_8081.getMsg());
 		}
 	}
 
