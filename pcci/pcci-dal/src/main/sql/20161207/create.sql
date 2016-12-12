@@ -1,77 +1,33 @@
 DROP TABLE IF EXISTS pujjr_credit_crime_info ;
-
-CREATE TABLE pujjr_credit_crime_info (
-  id BIGINT (20) NOT NULL AUTO_INCREMENT,
-  case_source VARCHAR (50) COLLATE utf8_bin DEFAULT NULL,
-  case_time VARCHAR (50) COLLATE utf8_bin DEFAULT NULL,
-  case_type VARCHAR (50) COLLATE utf8_bin DEFAULT NULL,
-  credit_record_Id BIGINT (20) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY FKCF28DC2F487C768A (credit_record_Id),
-  CONSTRAINT FKCF28DC2F487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
-) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
-
 DROP TABLE IF EXISTS pujjr_credit_execution ;
-
-CREATE TABLE pujjr_credit_execution (
-  id BIGINT (20) NOT NULL AUTO_INCREMENT,
-  ex_bad_base VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_basecompany VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_breaktime VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_casenum VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_concretesituation VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_court VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_datatype VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_money VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_performance VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_bad_time VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_basic VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_basiccourt VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_casenum VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_court VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_datatype VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_money VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_statute VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  ex_execut_time VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  execution_type VARCHAR (24) COLLATE utf8_bin DEFAULT NULL,
-  credit_record_Id BIGINT (20) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY FKB27E3844487C768A (credit_record_Id),
-  CONSTRAINT FKB27E3844487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
-) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
-
 DROP TABLE IF EXISTS pujjr_credit_per_invest ;
+DROP TABLE IF EXISTS pujjr_credit_rskdoo;
+DROP TABLE IF EXISTS pujjr_credit_query_result ;
+DROP TABLE IF EXISTS pujjr_credit_request ;
+DROP TABLE IF EXISTS pujjr_hundred_credit_request ;
+DROP TABLE IF EXISTS pujjr_qian_hai_result ;
 
-CREATE TABLE pujjr_credit_per_invest (
+CREATE TABLE pujjr_credit_request (
   id BIGINT (20) NOT NULL AUTO_INCREMENT,
-  entname VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  entstatus VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  enttype VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  fundedratio VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  perinvest_type VARCHAR (24) COLLATE utf8_bin DEFAULT NULL,
-  regcap VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
-  credit_record_Id BIGINT (20) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY FK7969D9AB487C768A (credit_record_Id),
-  CONSTRAINT FK7969D9AB487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
+  credit_id VARCHAR (64) COLLATE utf8_bin DEFAULT NULL,
+  criminal_record INT (11) DEFAULT NULL,
+  entity_auth_code VARCHAR (32) COLLATE utf8_bin NOT NULL,
+  entity_auth_date VARCHAR (32) COLLATE utf8_bin NOT NULL,
+  err_msg VARCHAR (255) COLLATE utf8_bin DEFAULT NULL,
+  id_no VARCHAR (24) COLLATE utf8_bin NOT NULL,
+  id_type VARCHAR (8) COLLATE utf8_bin NOT NULL,
+  invest_info INT (11) DEFAULT NULL,
+  mobile_no VARCHAR (24) COLLATE utf8_bin NOT NULL,
+  NAME VARCHAR (255) COLLATE utf8_bin NOT NULL,
+  oss_key VARCHAR (255) COLLATE utf8_bin DEFAULT NULL,
+  reason_code VARCHAR (8) COLLATE utf8_bin NOT NULL,
+  request_date DATETIME NOT NULL,
+  request_user_id VARCHAR (24) COLLATE utf8_bin NOT NULL,
+  risk_level INT (11) DEFAULT NULL,
+  PRIMARY KEY (id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
 
-DROP TABLE IF EXISTS pujjr_credit_rskdoo;
-
-CREATE TABLE pujjr_credit_rskdoo (
-  id BIGINT(20) NOT NULL AUTO_INCREMENT,
-  data_build_time VARCHAR(24) COLLATE utf8_bin DEFAULT NULL,
-  rsk_mark VARCHAR(8) COLLATE utf8_bin DEFAULT NULL,
-  rsk_score VARCHAR(8) COLLATE utf8_bin DEFAULT NULL,
-  source_id VARCHAR(2) COLLATE utf8_bin DEFAULT NULL,
-  credit_record_Id BIGINT(20) DEFAULT NULL,
-  PRIMARY KEY (id),
-  KEY FK9440F10E487C768A (credit_record_Id),
-  CONSTRAINT FK9440F10E487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
-) ENGINE=INNODB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
-
-
-DROP TABLE IF EXISTS pujjr_credit_query_result ;
+ALTER TABLE pujjr_credit_request ADD UNIQUE(id_no,mobile_no,NAME);
 
 CREATE TABLE pujjr_credit_query_result (
   record_id BIGINT (20) NOT NULL AUTO_INCREMENT,
@@ -106,31 +62,72 @@ CREATE TABLE pujjr_credit_query_result (
   CONSTRAINT FK13726EC81E368EE2 FOREIGN KEY (credit_request_Id) REFERENCES pujjr_credit_request (id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
 
-DROP TABLE IF EXISTS pujjr_credit_request ;
-
-CREATE TABLE pujjr_credit_request (
+CREATE TABLE pujjr_credit_crime_info (
   id BIGINT (20) NOT NULL AUTO_INCREMENT,
-  credit_id VARCHAR (64) COLLATE utf8_bin DEFAULT NULL,
-  criminal_record INT (11) DEFAULT NULL,
-  entity_auth_code VARCHAR (32) COLLATE utf8_bin NOT NULL,
-  entity_auth_date VARCHAR (32) COLLATE utf8_bin NOT NULL,
-  err_msg VARCHAR (255) COLLATE utf8_bin DEFAULT NULL,
-  id_no VARCHAR (24) COLLATE utf8_bin NOT NULL,
-  id_type VARCHAR (8) COLLATE utf8_bin NOT NULL,
-  invest_info INT (11) DEFAULT NULL,
-  mobile_no VARCHAR (24) COLLATE utf8_bin NOT NULL,
-  NAME VARCHAR (255) COLLATE utf8_bin NOT NULL,
-  oss_key VARCHAR (255) COLLATE utf8_bin DEFAULT NULL,
-  reason_code VARCHAR (8) COLLATE utf8_bin NOT NULL,
-  request_date DATETIME NOT NULL,
-  request_user_id VARCHAR (24) COLLATE utf8_bin NOT NULL,
-  risk_level INT (11) DEFAULT NULL,
-  PRIMARY KEY (id)
+  case_source VARCHAR (50) COLLATE utf8_bin DEFAULT NULL,
+  case_time VARCHAR (50) COLLATE utf8_bin DEFAULT NULL,
+  case_type VARCHAR (50) COLLATE utf8_bin DEFAULT NULL,
+  credit_record_Id BIGINT (20) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY FKCF28DC2F487C768A (credit_record_Id),
+  CONSTRAINT FKCF28DC2F487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
 
-ALTER TABLE pujjr_credit_request ADD UNIQUE(id_no,mobile_no,NAME);
+CREATE TABLE pujjr_credit_execution (
+  id BIGINT (20) NOT NULL AUTO_INCREMENT,
+  ex_bad_base VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_basecompany VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_breaktime VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_casenum VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_concretesituation VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_court VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_datatype VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_money VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_performance VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_bad_time VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_basic VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_basiccourt VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_casenum VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_court VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_datatype VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_money VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_statute VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  ex_execut_time VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  execution_type VARCHAR (24) COLLATE utf8_bin DEFAULT NULL,
+  credit_record_Id BIGINT (20) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY FKB27E3844487C768A (credit_record_Id),
+  CONSTRAINT FKB27E3844487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
+) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
 
-DROP TABLE IF EXISTS pujjr_hundred_credit_request ;
+
+CREATE TABLE pujjr_credit_per_invest (
+  id BIGINT (20) NOT NULL AUTO_INCREMENT,
+  entname VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  entstatus VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  enttype VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  fundedratio VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  perinvest_type VARCHAR (24) COLLATE utf8_bin DEFAULT NULL,
+  regcap VARCHAR (100) COLLATE utf8_bin DEFAULT NULL,
+  credit_record_Id BIGINT (20) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY FK7969D9AB487C768A (credit_record_Id),
+  CONSTRAINT FK7969D9AB487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
+) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
+
+
+CREATE TABLE pujjr_credit_rskdoo (
+  id BIGINT(20) NOT NULL AUTO_INCREMENT,
+  data_build_time VARCHAR(24) COLLATE utf8_bin DEFAULT NULL,
+  rsk_mark VARCHAR(8) COLLATE utf8_bin DEFAULT NULL,
+  rsk_score VARCHAR(8) COLLATE utf8_bin DEFAULT NULL,
+  source_id VARCHAR(2) COLLATE utf8_bin DEFAULT NULL,
+  credit_record_Id BIGINT(20) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY FK9440F10E487C768A (credit_record_Id),
+  CONSTRAINT FK9440F10E487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
+) ENGINE=INNODB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
 
 CREATE TABLE pujjr_hundred_credit_request (
   request_id BIGINT (20) NOT NULL AUTO_INCREMENT,
@@ -211,7 +208,6 @@ CREATE TABLE pujjr_hundred_credit_request (
   PRIMARY KEY (request_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
 
-DROP TABLE IF EXISTS pujjr_qian_hai_result ;
 
 CREATE TABLE pujjr_qian_hai_result (
   record_id BIGINT (20) NOT NULL AUTO_INCREMENT,
@@ -310,4 +306,3 @@ CREATE TABLE pujjr_qian_hai_result (
   use_time_scoreii VARCHAR (8) COLLATE utf8_bin DEFAULT NULL,
   PRIMARY KEY (record_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
-

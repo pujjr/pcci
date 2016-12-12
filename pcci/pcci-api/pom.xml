@@ -15,9 +15,18 @@
   </properties>
   <dependencies>
   	<dependency>
-  		<groupId>pujjr-common</groupId>
+  		<groupId>com.pujjr</groupId>
   		<artifactId>pujjr-common</artifactId>
   		<version>1.0</version>
   	</dependency>
   </dependencies>
+  
+  <distributionManagement>
+		<repository>
+			<id>releases</id>
+			<name>Releases</name>
+			<url>http://172.18.10.72:8081/nexus/content/repositories/releases/</url>
+		</repository>
+	</distributionManagement>
+	
 </project>

@@ -128,7 +128,7 @@
 			<version>0.5.1</version>
 		</dependency>
 		<dependency>
-			<groupId>pujjr-common</groupId>
+			<groupId>com.pujjr</groupId>
 			<artifactId>pujjr-common</artifactId>
 			<version>1.0</version>
 		</dependency>

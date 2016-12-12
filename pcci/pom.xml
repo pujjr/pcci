@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>com.pujjr</groupId>
@@ -26,7 +27,7 @@
 		<hibernate.version>4.2.0.Final</hibernate.version>
 		<!-- 其他 -->
 		<brApi.version>2.5.0</brApi.version>
-		
+
 	</properties>
 
 	<dependencyManagement>
@@ -98,10 +99,10 @@
 			</dependency>
 			<!-- springframe end -->
 			<dependency>
-                <groupId>org.hibernate</groupId>
-                <artifactId>hibernate-validator</artifactId>
-                <version>${hibernate.version}</version>
-            </dependency>
+				<groupId>org.hibernate</groupId>
+				<artifactId>hibernate-validator</artifactId>
+				<version>${hibernate.version}</version>
+			</dependency>
 
 			<!-- junit测试包 -->
 			<dependency>
@@ -250,6 +251,7 @@
 			<resource>
 				<directory>src/main/java</directory>
 				<includes>
+					<include>**/*.jar</include>
 					<include>**/*.xml</include>
 					<include>**/*.properties</include>
 					<include>**/*.groovy</include>
@@ -266,7 +268,7 @@
 		<module>pcci-common</module>
 		<module>pcci-service</module>
 		<module>pcci-dal</module>
-    <module>pcci-config</module>
-    <module>pcci-api</module>
-  </modules>
+		<module>pcci-config</module>
+		<module>pcci-api</module>
+	</modules>
 </project>

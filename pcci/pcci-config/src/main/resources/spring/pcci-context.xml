@@ -18,8 +18,7 @@
 			p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
 			<property name="locations">
 				<list>
-					<value>classpath:common/dev/dev.properties</value>
-					<value>classpath:common/dev/*_dev.properties</value>
+					<value>classpath:common/dev/*.properties</value>
 				</list>
 			</property>
 		</bean>
@@ -28,8 +27,8 @@
 			<property name="ignoreResourceNotFound" value="true" />
 			<property name="locations">
 				<list>
-					<value>classpath:common/dev/dev.properties</value>
-					<value>classpath:service/dev/*_dev.properties</value>
+					<value>classpath:common/dev/setting.properties</value>
+					<value>classpath:service/dev/*.properties</value>
 				</list>
 			</property>
 		</bean>
@@ -40,8 +39,7 @@
 			p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
 			<property name="locations">
 				<list>
-					<value>classpath:common/sandbox/sandbox.properties</value>
-					<value>classpath:common/sandbox/*_sandbox.properties</value>
+					<value>classpath:common/sandbox/*.properties</value>
 				</list>
 			</property>
 		</bean>
@@ -50,8 +48,8 @@
 			<property name="ignoreResourceNotFound" value="true" />
 			<property name="locations">
 				<list>
-					<value>classpath:common/sandbox/sandbox.properties</value>
-					<value>classpath:service/sandbox/*_sandbox.properties</value>
+					<value>classpath:common/sandbox/setting.properties</value>
+					<value>classpath:service/sandbox/*.properties</value>
 				</list>
 			</property>
 		</bean>
@@ -62,8 +60,7 @@
 			p:ignoreResourceNotFound="true" p:systemPropertiesModeName="SYSTEM_PROPERTIES_MODE_OVERRIDE">
 			<property name="locations">
 				<list>
-					<value>classpath:common/pduc/pduc.properties</value>
-					<value>classpath:common/pduc/*_pduc.properties</value>
+					<value>classpath:common/pduc/*.properties</value>
 				</list>
 			</property>
 		</bean>
@@ -72,8 +69,8 @@
 			<property name="ignoreResourceNotFound" value="true" />
 			<property name="locations">
 				<list>
-					<value>classpath:common/pduc/pduc.properties</value>
-					<value>classpath:service/pduc/*_pduc.properties</value>
+					<value>classpath:common/pduc/setting.properties</value>
+					<value>classpath:service/pduc/*.properties</value>
 				</list>
 			</property>
 		</bean>
