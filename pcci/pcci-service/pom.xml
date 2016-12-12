@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.0.1</version>
+		<version>0.5.1</version>
 	</parent>
 	<artifactId>pcci-service</artifactId>
 	<name>pcci-service</name>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-common</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -35,17 +35,12 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-dal</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-config</artifactId>
-			<version>0.0.1</version>
-		</dependency>
-		<dependency>
-			<groupId>net.sf.ehcache</groupId>
-			<artifactId>ehcache</artifactId>
-			<version>2.9.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.whalin</groupId>
@@ -58,13 +53,18 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-api</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>pujjr-common</groupId>
 			<artifactId>pujjr-common</artifactId>
 			<version>1.0</version>
 		</dependency>
-		
+
+		<dependency>
+			<groupId>net.sf.ehcache</groupId>
+			<artifactId>ehcache-core</artifactId>
+			<version>2.4.3</version>
+		</dependency>
 	</dependencies>
 </project>

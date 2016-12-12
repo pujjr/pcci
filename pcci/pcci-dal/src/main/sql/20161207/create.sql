@@ -56,6 +56,21 @@ CREATE TABLE pujjr_credit_per_invest (
   CONSTRAINT FK7969D9AB487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8 COLLATE = utf8_bin ;
 
+DROP TABLE IF EXISTS pujjr_credit_rskdoo;
+
+CREATE TABLE pujjr_credit_rskdoo (
+  id BIGINT(20) NOT NULL AUTO_INCREMENT,
+  data_build_time VARCHAR(24) COLLATE utf8_bin DEFAULT NULL,
+  rsk_mark VARCHAR(8) COLLATE utf8_bin DEFAULT NULL,
+  rsk_score VARCHAR(8) COLLATE utf8_bin DEFAULT NULL,
+  source_id VARCHAR(2) COLLATE utf8_bin DEFAULT NULL,
+  credit_record_Id BIGINT(20) DEFAULT NULL,
+  PRIMARY KEY (id),
+  KEY FK9440F10E487C768A (credit_record_Id),
+  CONSTRAINT FK9440F10E487C768A FOREIGN KEY (credit_record_Id) REFERENCES pujjr_credit_query_result (record_id)
+) ENGINE=INNODB AUTO_INCREMENT=34 DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+
+
 DROP TABLE IF EXISTS pujjr_credit_query_result ;
 
 CREATE TABLE pujjr_credit_query_result (

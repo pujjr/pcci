@@ -5,7 +5,7 @@
   <parent>
     <groupId>com.pujjr</groupId>
     <artifactId>pcci</artifactId>
-    <version>0.0.1</version>
+    <version>0.5.1</version>
   </parent>
   <artifactId>pcci-config</artifactId>
   <name>pcci-config</name>

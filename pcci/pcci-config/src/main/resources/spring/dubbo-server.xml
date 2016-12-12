@@ -7,6 +7,7 @@
 
 	<dubbo:application name="${dubbo.service.application.name}"/>
 	<dubbo:registry address="${dubbo.service.registry.address}" />
-	<dubbo:service interface="org.pcci.api.service.CreditApi" ref="creditApiImpl" timeout="${dubbo.service.timeout}" retries="${dubbo.service.retries}" group="${dubbo.service.group}"/>
+	<dubbo:protocol name="${dubbo.service.protocol.name}" port="${dubbo.service.protocol.port}" />
+	<dubbo:service interface="com.pujjr.pcci.api.service.CreditApi" ref="creditApiImpl" timeout="${dubbo.service.timeout}" retries="${dubbo.service.retries}" group="${dubbo.service.group}"/>
 
 </beans>

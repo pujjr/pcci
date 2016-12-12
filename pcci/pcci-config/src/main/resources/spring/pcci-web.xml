@@ -87,8 +87,8 @@
 		</property>
 		<property name="freemarkerVariables">  
             <map>  
-                <entry key="webRoot" value="${pcci.webRoot}"></entry>  
-                <entry key="version" value="${pcci.version}"></entry>  
+                <entry key="webRoot" value="${project.webRoot}"></entry>  
+                <entry key="version" value="${project.version}"></entry>  
             </map>  
         </property>  
 		<property name="freemarkerSettings"><!-- 设置FreeMarker环境属性 -->

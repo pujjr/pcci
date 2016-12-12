@@ -1,4 +1,4 @@
-package org.pcci.api.bean.request;
+package com.pujjr.pcci.api.bean.request;
 
 import java.io.Serializable;
 

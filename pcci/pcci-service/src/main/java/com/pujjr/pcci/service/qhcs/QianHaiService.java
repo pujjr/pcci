@@ -9,7 +9,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.pcci.api.bean.request.QianHaiRequestData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,6 +18,7 @@ import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.credit.QueryProductType;
+import com.pujjr.pcci.api.bean.request.QianHaiRequestData;
 import com.pujjr.pcci.common.qhcs.bean.HeaderBean;
 import com.pujjr.pcci.common.qhcs.bean.SecurityInfo;
 import com.pujjr.pcci.common.qhcs.utils.DataSecurityUtil;
@@ -147,7 +147,9 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 	private ResultInfo<List<QianHaiResult>> sand(String transNo, List<QianHaiRequestData> requestList, QueryProductType productType) {
 		ResultInfo<List<QianHaiResult>> resultInfo = new ResultInfo<>();
 		String rtCode = "";
+		String sss = "";
 		try {
+
 			// 获得环境变量
 			QianHaiSetting setting = getFullSettingByMessageCode(productType);
 			// 获得标头数据
@@ -170,7 +172,7 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			String message = JSON.toJSONString(requestMap);
 			// 发送查询请求
 			String res = HttpRequestUtil.sendJsonWithHttps(setting.getServiceURL(), message);
-
+			sss = res;
 			// 验签
 			JSONObject msgJSON = JSON.parseObject(res);
 			rtCode = msgJSON.getJSONObject("header").getString("rtCode");
@@ -193,6 +195,9 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			resultInfo.setResultCode(msgJSON.getJSONObject("header").getString("rtCode"));
 			resultInfo.success(resultDataList);
 		} catch (Exception e) {
+			if (productType.equals(QueryProductType.MSC8037)) {
+				System.out.println(sss);
+			}
 			logger.error("请求前海征信报文错误" + productType, e);
 			resultInfo.fail(productType + ":" + rtCode);
 		}

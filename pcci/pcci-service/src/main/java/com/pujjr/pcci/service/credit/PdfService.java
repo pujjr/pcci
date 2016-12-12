@@ -37,6 +37,7 @@ import com.pujjr.pcci.dal.entity.CreditExecution;
 import com.pujjr.pcci.dal.entity.CreditPerInvest;
 import com.pujjr.pcci.dal.entity.CreditQueryResult;
 import com.pujjr.pcci.dal.entity.CreditRequest;
+import com.pujjr.pcci.dal.entity.CreditRskdoo;
 import com.pujjr.pcci.service.ParameterizedBaseService;
 import com.pujjr.pcci.service.store.StoreService;
 
@@ -371,7 +372,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			// 前海反欺诈
 			antifrauddooTable(creditQueryResult, document);
 			// 前海风险度
-			rskdooTable(creditQueryResult, document);
+			rskdooTable(creditQueryResult.getCreditRskdooList(), document);
 			// 前海一鉴通
 			eChkPkgs(creditQueryResult, document);
 			// 前海驾驶证
@@ -503,7 +504,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			executCells.add(excNullValue(creditExecution.getEx_execut_basic()));
 			executCells.add("做出依据的机构");
 			executCells.add(excNullValue(creditExecution.getEx_execut_basiccourt()));
-			quickTabeByList(i == 0 ? "法院被执行信息——被执行记录" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, executCells, document);
+			quickTabeByList(i == 0 ? "法院被执行信息——被执行记录" + i : "", DEFAULT_VERTICAL_COLUMN_NUMBER, executCells, document);
 		}
 	}
 
@@ -565,29 +566,38 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	}
 
 	// 风险度
-	private void rskdooTable(CreditQueryResult creditQueryResult, Document document) {
-		List<String> cells = new ArrayList<>();
-		cells.add("来源代码");
-		Map<String, String> sourceIdMap = new HashMap<>();
-		sourceIdMap.put("A", "信贷逾期风险");
-		sourceIdMap.put("B", "行政负面风险");
-		sourceIdMap.put("C", "欺诈风险");
-		cells.add(getTargetValue(sourceIdMap, creditQueryResult.getSourceId()));
-		cells.add("风险的分");
-		cells.add(excNullValue(creditQueryResult.getRskScore()));
-		cells.add("风险标记");
-		Map<String, String> rskMarkMap = new HashMap<>();
-		rskMarkMap.put("B1", "失信被执行人");
-		rskMarkMap.put("B2", "被执行人");
-		rskMarkMap.put("B3", "交通严重违章");
-		rskMarkMap.put("C1", "手机号存在欺诈风险");
-		rskMarkMap.put("C2", "卡号存在欺诈风险");
-		rskMarkMap.put("C3", "身份证号存在欺诈风险");
-		rskMarkMap.put("C4", " IP存在欺诈风险");
-		cells.add(getTargetValue(rskMarkMap, creditQueryResult.getRskMark()));
-		cells.add("业务发生时间");
-		cells.add(excNullValue(creditQueryResult.getDataBuildTime()));
-		quickTabeByList("前海风险度", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
+	private void rskdooTable(List<CreditRskdoo> creditRskdooList, Document document) {
+		if (BaseIterableUtils.isEmpty(creditRskdooList)) {
+			creditRskdooList = new ArrayList<>();
+			CreditRskdoo creditRskdoo = new CreditRskdoo();
+			BeanPropertyUtils.autoSetDefaultValue(creditRskdoo);
+			creditRskdooList.add(creditRskdoo);
+		}
+		for (int i = 0; creditRskdooList != null && i < creditRskdooList.size(); i++) {
+			CreditRskdoo creditRskdoo = creditRskdooList.get(i);
+			List<String> cells = new ArrayList<>();
+			cells.add("来源代码");
+			Map<String, String> sourceIdMap = new HashMap<>();
+			sourceIdMap.put("A", "信贷逾期风险");
+			sourceIdMap.put("B", "行政负面风险");
+			sourceIdMap.put("C", "欺诈风险");
+			cells.add(getTargetValue(sourceIdMap, creditRskdoo.getSourceId()));
+			cells.add("风险的分");
+			cells.add(excNullValue(creditRskdoo.getRskScore()));
+			cells.add("风险标记");
+			Map<String, String> rskMarkMap = new HashMap<>();
+			rskMarkMap.put("B1", "失信被执行人");
+			rskMarkMap.put("B2", "被执行人");
+			rskMarkMap.put("B3", "交通严重违章");
+			rskMarkMap.put("C1", "手机号存在欺诈风险");
+			rskMarkMap.put("C2", "卡号存在欺诈风险");
+			rskMarkMap.put("C3", "身份证号存在欺诈风险");
+			rskMarkMap.put("C4", " IP存在欺诈风险");
+			cells.add(getTargetValue(rskMarkMap, creditRskdoo.getRskMark()));
+			cells.add("业务发生时间");
+			cells.add(excNullValue(creditRskdoo.getDataBuildTime()));
+			quickTabeByList(i == 0 ? "前海风险度" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, cells, document);
+		}
 	}
 
 	// 一鉴通
@@ -597,8 +607,8 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 		Map<String, String> isOwnerMobileMap = new HashMap<>();
 		isOwnerMobileMap.put("0", "手机号、证件号、姓名均一致");
 		isOwnerMobileMap.put("1", "手机号和证件号一致，姓名不一致");
-		isOwnerMobileMap.put("2", "手机号和证件号一致，姓名不做比对");
-		isOwnerMobileMap.put("3", "手机号一致，证件号不一致，姓名不做比对");
+		isOwnerMobileMap.put("2", "手机号和证件号一致，姓名不明确");
+		isOwnerMobileMap.put("3", "手机号一致，证件号和姓名不一致");
 		cells.add(getTargetValue(isOwnerMobileMap, creditQueryResult.getIsOwnerMobile()));
 		cells.add("手机状态");
 		Map<String, String> ownerMobileStatusMap = new HashMap<>();
@@ -663,7 +673,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				legalPersonCells.add(excNullValue(creditPerInvest.getEnttype()));
 				legalPersonCells.add("注册资本(万元)");
 				legalPersonCells.add(excNullValue(creditPerInvest.getEntstatus()));
-				quickTabeByList("对外投资——企业法人信息", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
+				quickTabeByList(i == 0 ? "对外投资——企业法人信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
 			}
 		}
 
@@ -679,7 +689,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				shareholderCells.add(excNullValue(creditPerInvest.getRegcap()));
 				shareholderCells.add("企业状态");
 				shareholderCells.add(excNullValue(creditPerInvest.getEntstatus()));
-				quickTabeByList("对外投资——企业股东信息", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
+				quickTabeByList(i == 0 ? "对外投资——企业股东信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
 			}
 		}
 	}

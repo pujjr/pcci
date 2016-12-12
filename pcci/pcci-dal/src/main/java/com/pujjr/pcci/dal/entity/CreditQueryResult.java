@@ -50,6 +50,11 @@ public class CreditQueryResult implements Serializable {
 	@JoinColumn(name = "credit_record_Id")
 	private List<CreditPerInvest> creditPerInvestList;
 
+	/* 风险度 */
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "credit_record_Id")
+	private List<CreditRskdoo> creditRskdooList;
+
 	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
 	@JoinColumn(name = "credit_request_Id")
 	private CreditRequest creditRequest;
@@ -131,30 +136,6 @@ public class CreditQueryResult implements Serializable {
 	 */
 	@Column(length = 8)
 	private String isMachFraud;
-
-	/* 前海风险度 */
-
-	/**
-	 * 来源代码
-	 */
-	@Column(length = 2)
-	private String sourceId;
-	/**
-	 * 风险得分
-	 */
-	@Column(length = 8)
-	private String rskScore;
-
-	/**
-	 * 风险标记
-	 */
-	@Column(length = 8)
-	private String rskMark;
-	/**
-	 * 业务发生时间
-	 */
-	@Column(length = 24)
-	private String dataBuildTime;
 
 	/* 浅海一鉴通(手机号验证) */
 
@@ -250,6 +231,21 @@ public class CreditQueryResult implements Serializable {
 	 */
 	public void setCreditPerInvestList(List<CreditPerInvest> creditPerInvestList) {
 		this.creditPerInvestList = creditPerInvestList;
+	}
+
+	/**
+	 * @return creditRskdooList
+	 */
+	public List<CreditRskdoo> getCreditRskdooList() {
+		return creditRskdooList;
+	}
+
+	/**
+	 * @param creditRskdooList
+	 *            要设置的 creditRskdooList
+	 */
+	public void setCreditRskdooList(List<CreditRskdoo> creditRskdooList) {
+		this.creditRskdooList = creditRskdooList;
 	}
 
 	/**
@@ -475,66 +471,6 @@ public class CreditQueryResult implements Serializable {
 	 */
 	public void setIsMachFraud(String isMachFraud) {
 		this.isMachFraud = isMachFraud;
-	}
-
-	/**
-	 * @return 前海风险度
-	 */
-	public String getSourceId() {
-		return sourceId;
-	}
-
-	/**
-	 * @param 前海风险度
-	 *            要设置的 sourceId
-	 */
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
-	/**
-	 * @return 风险得分
-	 */
-	public String getRskScore() {
-		return rskScore;
-	}
-
-	/**
-	 * @param 风险得分
-	 *            要设置的 rskScore
-	 */
-	public void setRskScore(String rskScore) {
-		this.rskScore = rskScore;
-	}
-
-	/**
-	 * @return 风险标记
-	 */
-	public String getRskMark() {
-		return rskMark;
-	}
-
-	/**
-	 * @param 风险标记
-	 *            要设置的 rskMark
-	 */
-	public void setRskMark(String rskMark) {
-		this.rskMark = rskMark;
-	}
-
-	/**
-	 * @return 业务发生时间
-	 */
-	public String getDataBuildTime() {
-		return dataBuildTime;
-	}
-
-	/**
-	 * @param 业务发生时间
-	 *            要设置的 dataBuildTime
-	 */
-	public void setDataBuildTime(String dataBuildTime) {
-		this.dataBuildTime = dataBuildTime;
 	}
 
 	/**

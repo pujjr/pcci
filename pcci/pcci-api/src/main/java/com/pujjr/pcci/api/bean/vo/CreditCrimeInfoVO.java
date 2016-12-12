@@ -1,4 +1,4 @@
-package org.pcci.api.bean.vo;
+package com.pujjr.pcci.api.bean.vo;
 
 import java.io.Serializable;
 

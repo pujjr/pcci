@@ -12,8 +12,6 @@ import java.util.function.Supplier;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.pcci.api.bean.request.CreditRequestData;
-import org.pcci.api.bean.request.QianHaiRequestData;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,6 +32,8 @@ import com.pujjr.common.type.credit.QueryReasonType;
 import com.pujjr.common.utils.BaseIterableUtils;
 import com.pujjr.common.utils.BaseStringUtils;
 import com.pujjr.common.utils.BaseUtils;
+import com.pujjr.pcci.api.bean.request.CreditRequestData;
+import com.pujjr.pcci.api.bean.request.QianHaiRequestData;
 import com.pujjr.pcci.dal.dao.CreditQueryResultDAO;
 import com.pujjr.pcci.dal.dao.CreditRequestDAO;
 import com.pujjr.pcci.dal.entity.CreditCrimeInfo;
@@ -41,6 +41,7 @@ import com.pujjr.pcci.dal.entity.CreditExecution;
 import com.pujjr.pcci.dal.entity.CreditPerInvest;
 import com.pujjr.pcci.dal.entity.CreditQueryResult;
 import com.pujjr.pcci.dal.entity.CreditRequest;
+import com.pujjr.pcci.dal.entity.CreditRskdoo;
 import com.pujjr.pcci.dal.entity.HundredCreditRequest;
 import com.pujjr.pcci.dal.entity.QianHaiResult;
 import com.pujjr.pcci.service.ParameterizedBaseService;
@@ -258,6 +259,12 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		return creditQueryResult;
 	}
 
+	/**
+	 * 并发执行征信查询
+	 * 
+	 * @param creditRequestDataList
+	 * @return
+	 */
 	public ResultInfo<String> concurrenceCreditQuery(List<CreditRequestData> creditRequestDataList) {
 		ResultInfo<String> resultInfo = new ResultInfo<>();
 		// 线程池，超过数量则堵塞线程
@@ -265,12 +272,14 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		List<CompletableFuture<ResultInfo<CreditQueryResult>>> futureList = new ArrayList<>();
 		List<CreditQueryResult> creditQueryResultList = new ArrayList<>();
 		try {
+			// 并发执行前进行登录
+			String tokenid = hundredCreditService.login();
 			// 循环生并发
 			for (CreditRequestData CreditRequestData : creditRequestDataList) {
 				CompletableFuture<ResultInfo<CreditQueryResult>> future = CompletableFuture.supplyAsync(new Supplier<ResultInfo<CreditQueryResult>>() {
 					@Override
 					public ResultInfo<CreditQueryResult> get() {
-						ResultInfo<CreditQueryResult> result = creditQuery(CreditRequestData);
+						ResultInfo<CreditQueryResult> result = creditQuery(CreditRequestData, tokenid);
 						if (result.isSuccess() && result.getData() != null) {
 							CreditQueryResult creditQueryResult = result.getData();
 							creditQueryResultList.add(creditQueryResult);
@@ -307,6 +316,16 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @return
 	 */
 	public ResultInfo<CreditQueryResult> creditQuery(CreditRequestData creditRequestData) {
+		return creditQuery(creditRequestData, null);
+	}
+
+	/**
+	 * 调用征信查询
+	 * 
+	 * @param creditRequestData
+	 * @return
+	 */
+	public ResultInfo<CreditQueryResult> creditQuery(CreditRequestData creditRequestData, String tokenid) {
 		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
 		// 开始调用
 		CreditQueryResult creditQueryResult = new CreditQueryResult();
@@ -316,7 +335,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		if (validateResult.isSuccess()) {
 			BeanUtils.copyProperties(creditRequestData, creditRequest);
 			creditQueryResult.setCreditRequest(creditRequest);
-			sandCreditQuery(creditQueryResult);
+			sandCreditQuery(creditQueryResult, tokenid);
 		}
 		creditQueryResultDAO.save(creditQueryResult);
 		resultInfo.success(creditQueryResult);
@@ -333,14 +352,20 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			storeService.delete(creditRequest.getOssKey());
 			creditRequest.setOssKey(null);
 		}
-		// TODO 验证结果
-		sandCreditQuery(creditQueryResult);
+		sandCreditQuery(creditQueryResult, null);
 		creditQueryResultDAO.update(creditQueryResult);
 		resultInfo.success(creditQueryResult);
 		return resultInfo;
 	}
 
-	public ResultInfo<CreditQueryResult> sandCreditQuery(CreditQueryResult creditQueryResult) {
+	/**
+	 * 执行征信查询
+	 * 
+	 * @param creditQueryResult
+	 * @param tokenid
+	 * @return
+	 */
+	public ResultInfo<CreditQueryResult> sandCreditQuery(CreditQueryResult creditQueryResult, String tokenid) {
 		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
 		// 开始调用
 		CreditRequest creditRequest = creditQueryResult.getCreditRequest();
@@ -358,7 +383,9 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			System.out.println("百融登录前:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
 			// 百融登录获取
-			String tokenid = hundredCreditService.login();
+			if (StringUtils.isBlank(tokenid)) {
+				tokenid = hundredCreditService.login();
+			}
 			System.out.println("百融登录耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
 			// 百融接口调用请求数据
@@ -384,6 +411,8 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 
 			System.out.println("接口配置耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
+			/*************** 百融相关 ****************/
 			// 个人不良信息
 			try {
 				crimeinfoQuery(creditQueryResult, hcRequestData);
@@ -392,6 +421,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("不良信息耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
 			// 被执行人
 			try {
 				executionQuery(creditQueryResult, hcRequestData);
@@ -400,6 +430,24 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("被执行耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
+			// 百融多次申请
+			try {
+				applyloanQuery(creditQueryResult, hcRequestData);
+			} catch (Exception e) {
+				errMsg.add("百融多次贷款申请-" + e.getMessage());
+			}
+			System.out.println("百融多次贷款申请耗时:" + (System.currentTimeMillis() - beginTime));
+			beginTime = System.currentTimeMillis();
+
+			// TODO 对外投资 太贵了 查不起 暂时注释掉
+			try {
+				// perinvestQuery(creditQueryResult, hcRequestData);
+			} catch (Exception e) {
+				errMsg.add("百融对外投资-" + e.getMessage());
+			}
+
+			/*************** 前海相关 ****************/
 			// 常贷客值装入
 			try {
 				loaneeQuery(creditQueryResult, qhRequestData, creditId);
@@ -408,14 +456,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("常贷客耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
-			// 百融
-			try {
-				applyloanQuery(creditQueryResult, hcRequestData);
-			} catch (Exception e) {
-				errMsg.add("百融多次贷款申请-" + e.getMessage());
-			}
-			System.out.println("百融多次贷款申请耗时:" + (System.currentTimeMillis() - beginTime));
-			beginTime = System.currentTimeMillis();
+
 			// 反欺诈
 			try {
 				antifrauddooQuery(creditQueryResult, qhRequestData, creditId);
@@ -424,6 +465,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("反欺诈耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
 			// 风险度
 			try {
 				rskdooQuery(creditQueryResult, qhRequestData, creditId);
@@ -432,6 +474,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("风险度耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
 			// 一鉴通
 			try {
 				eChkPkgs(creditQueryResult, qhRequestData, creditId);
@@ -440,6 +483,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("一鉴通耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
+
 			// 驾驶证
 			try {
 				drvcert2cmpincQuery(creditQueryResult, qhRequestData, creditId);
@@ -448,12 +492,8 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 			}
 			System.out.println("驾驶证耗时:" + (System.currentTimeMillis() - beginTime));
 			beginTime = System.currentTimeMillis();
-			// TODO 对外投资 太贵了 查不起 暂时注释掉
-			try {
-				// perinvestQuery(creditQueryResult, hcRequestData);
-			} catch (Exception e) {
-				errMsg.add("百融对外投资-" + e.getMessage());
-			}
+
+			/*************** 接口调用完成 ****************/
 			// 根据结果计算风险
 			calculatedRisk(creditQueryResult);
 			System.out.println("风险计算耗时:" + (System.currentTimeMillis() - beginTime));
@@ -577,21 +617,35 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 
 		/************** 前海风险度 *****************/
 		// 风险的分不为空或99权限不足 低风险
-		if (StringUtils.isNotBlank(creditQueryResult.getDataBuildTime()) && StringUtils.equals("99", creditQueryResult.getDataBuildTime())) {
-			riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_LOW);
-			Date requestDate = creditRequest.getRequestDate();
-			try {
-				Date buildTime = DateUtils.parseDate(creditQueryResult.getDataBuildTime(), DEFAULT_DATE_FORMAT);
-				// 九十天内风险得分20以上的为 高风险
-				if (requestDate.before(DateUtils.addDays(buildTime, 90)) && Integer.parseInt(creditQueryResult.getRskScore()) > 20) {
-					riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_HIGH);
+		List<CreditRskdoo> creditRskdooList = creditQueryResult.getCreditRskdooList();
+		int rskdooCount = 0;
+		for (CreditRskdoo creditRskdoo : creditRskdooList) {
+			if (StringUtils.isNotBlank(creditRskdoo.getDataBuildTime()) && StringUtils.equals("99", creditRskdoo.getDataBuildTime())) {
+				riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_LOW);
+				Date requestDate = creditRequest.getRequestDate();
+				try {
+					Date buildTime = DateUtils.parseDate(creditRskdoo.getDataBuildTime(), DEFAULT_DATE_FORMAT);
+					// 九十天内风险得分20以上的为 高风险
+					if (requestDate.before(DateUtils.addDays(buildTime, 90)) && Integer.parseInt(creditRskdoo.getRskScore()) > 20) {
+						riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_HIGH);
+					}
+					// 365天内风险得分30分以上的为高风险
+					if (requestDate.before(DateUtils.addDays(buildTime, 365))) {
+						if (Integer.parseInt(creditRskdoo.getRskScore()) > 30) {
+							riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_HIGH);
+						}
+						// 365天内20以上记一次
+						if (Integer.parseInt(creditRskdoo.getRskScore()) > 20) {
+							rskdooCount = rskdooCount + 1;
+						}
+					}
+					// 365天内<2次20分>
+					if (rskdooCount >= 2) {
+						riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_HIGH);
+					}
+				} catch (ParseException e) {
+					logger.debug("时间格式转化错误", e);
 				}
-				// TODO <2次20分> 365天内风险得分30分以上的为高风险
-				if (requestDate.before(DateUtils.addDays(buildTime, 365)) && Integer.parseInt(creditQueryResult.getRskScore()) > 30) {
-					riskLevel = Integer.max(riskLevel, CreditRequest.RISK_LEVEL_HIGH);
-				}
-			} catch (ParseException e) {
-				logger.debug("时间格式转化错误", e);
 			}
 		}
 
@@ -846,13 +900,24 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param transNo
 	 */
 	private void rskdooQuery(CreditQueryResult creditQueryResult, QianHaiRequestData qhRequestData, String transNo) throws Exception {
-		ResultInfo<QianHaiResult> qianHaiResult_8036 = qianHaiService.sandQianHaiRequest(transNo, qhRequestData, QueryProductType.MSC8036);
+		List<QianHaiRequestData> requestList = new ArrayList<>();
+		requestList.add(qhRequestData);
+		ResultInfo<List<QianHaiResult>> qianHaiResult_8036 = qianHaiService.sandQianHaiRequest(transNo, requestList, QueryProductType.MSC8036);
 		if (qianHaiResult_8036.isSuccess()) {
-			QianHaiResult qianHaiResults = qianHaiResult_8036.getData();
-			creditQueryResult.setSourceId(qianHaiResults.getSourceId());
-			creditQueryResult.setRskScore(qianHaiResults.getRskScore());
-			creditQueryResult.setRskMark(qianHaiResults.getRskMark());
-			creditQueryResult.setDataBuildTime(qianHaiResults.getDataBuildTime());
+			List<QianHaiResult> qianHaiResults = qianHaiResult_8036.getData();
+			List<CreditRskdoo> rskdooList = new ArrayList<>();
+			for (QianHaiResult qianHaiResult : qianHaiResults) {
+				// 如果成功E000000
+				if (StringUtils.equals("E000000", qianHaiResult.getErCode())) {
+					CreditRskdoo creditRskdoo = new CreditRskdoo();
+					creditRskdoo.setSourceId(qianHaiResult.getSourceId());
+					creditRskdoo.setRskScore(qianHaiResult.getRskScore());
+					creditRskdoo.setRskMark(qianHaiResult.getRskMark());
+					creditRskdoo.setDataBuildTime(qianHaiResult.getDataBuildTime());
+					rskdooList.add(creditRskdoo);
+				}
+			}
+			creditQueryResult.setCreditRskdooList(rskdooList);
 		} else {
 			throw new Exception(qianHaiResult_8036.getMsg());
 		}

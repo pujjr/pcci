@@ -1,9 +1,8 @@
-package org.pcci.api.service;
-
-import org.pcci.api.bean.request.CreditRequestData;
-import org.pcci.api.bean.vo.CreditQueryResultVO;
+package com.pujjr.pcci.api.service;
 
 import com.pujjr.common.result.ResultInfo;
+import com.pujjr.pcci.api.bean.request.CreditRequestData;
+import com.pujjr.pcci.api.bean.vo.CreditQueryResultVO;
 
 /**
  * @author wen

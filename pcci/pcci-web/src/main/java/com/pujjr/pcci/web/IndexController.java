@@ -13,7 +13,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
-import org.pcci.api.bean.request.CreditRequestData;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -28,6 +27,7 @@ import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.IdentityType;
 import com.pujjr.common.type.credit.QueryReasonType;
 import com.pujjr.common.utils.document.ExcelUtils;
+import com.pujjr.pcci.api.bean.request.CreditRequestData;
 import com.pujjr.pcci.dal.entity.CreditQueryResult;
 import com.pujjr.pcci.dal.entity.CreditRequest;
 import com.pujjr.pcci.service.credit.CreditService;
@@ -186,6 +186,7 @@ public class IndexController extends BaseController {
 					response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 					os = response.getOutputStream();
 					os.write(byteArray);
+					os.flush();
 				}
 			}
 		} catch (Exception e) {
@@ -193,7 +194,6 @@ public class IndexController extends BaseController {
 		} finally {
 			if (os != null) {
 				try {
-					os.flush();
 					os.close();
 				} catch (IOException e) {
 					e.printStackTrace();

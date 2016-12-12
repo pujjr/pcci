@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.0.1</version>
+		<version>0.5.1</version>
 	</parent>
 	<artifactId>pcci-web</artifactId>
 	<packaging>war</packaging>
@@ -91,17 +91,17 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-service</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-common</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-config</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -125,7 +125,7 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-api</artifactId>
-			<version>0.0.1</version>
+			<version>0.5.1</version>
 		</dependency>
 		<dependency>
 			<groupId>pujjr-common</groupId>

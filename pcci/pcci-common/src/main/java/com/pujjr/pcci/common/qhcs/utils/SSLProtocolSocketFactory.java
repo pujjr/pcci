@@ -11,6 +11,7 @@ import java.net.SocketAddress;
 import java.net.UnknownHostException;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
 
 import org.apache.commons.httpclient.ConnectTimeoutException;
 import org.apache.commons.httpclient.params.HttpConnectionParams;
@@ -29,13 +30,14 @@ public class SSLProtocolSocketFactory implements ProtocolSocketFactory {
 		this.isChkCert = chkCert;
 	}
 
-	public Socket createSocket(String host, int port, InetAddress localAddress, int localPort,
-			HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
+	@Override
+	public Socket createSocket(String host, int port, InetAddress localAddress, int localPort, HttpConnectionParams params) throws IOException, UnknownHostException, ConnectTimeoutException {
 		if (params == null) {
 			throw new IllegalArgumentException("Parameters may not be null!");
 		}
 		int timeout = params.getConnectionTimeout();
-		SocketFactory socketFactory = SSLContextFactory.getInstance(this.isChkCert).getSocketFactory();
+		SSLContext sslContext = SSLContextFactory.getInstance(this.isChkCert);
+		SocketFactory socketFactory = sslContext.getSocketFactory();
 		if (timeout == 0) {
 			return createSocket(host, port, localAddress, localPort);
 		}
@@ -47,12 +49,12 @@ public class SSLProtocolSocketFactory implements ProtocolSocketFactory {
 		return socket;
 	}
 
-	public Socket createSocket(String host, int port, InetAddress localAddress, int localPort)
-			throws IOException, UnknownHostException {
-		return SSLContextFactory.getInstance(this.isChkCert).getSocketFactory().createSocket(host, port, localAddress,
-				localPort);
+	@Override
+	public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException, UnknownHostException {
+		return SSLContextFactory.getInstance(this.isChkCert).getSocketFactory().createSocket(host, port, localAddress, localPort);
 	}
 
+	@Override
 	public Socket createSocket(String host, int port) throws IOException, UnknownHostException {
 		return SSLContextFactory.getInstance(this.isChkCert).getSocketFactory().createSocket(host, port);
 	}
