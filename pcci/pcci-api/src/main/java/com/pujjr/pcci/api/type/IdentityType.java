@@ -1,4 +1,4 @@
-package com.pujjr.common.type;
+package com.pujjr.pcci.api.type;
 
 import java.util.HashMap;
 import java.util.Map;
