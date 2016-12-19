@@ -2,14 +2,13 @@ package com.pujjr.pcci.service.credit;
 
 import java.util.List;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.springframework.stereotype.Service;
 
 import com.pujjr.common.result.ResultInfo;
-import com.pujjr.common.type.IdentityType;
-import com.pujjr.common.type.credit.QueryReasonType;
 import com.pujjr.common.utils.document.ExcelUtils;
+import com.pujjr.pcci.api.type.IdentityType;
+import com.pujjr.pcci.api.type.QueryReasonType;
 import com.pujjr.pcci.dal.entity.CreditQueryResult;
 import com.pujjr.pcci.dal.entity.CreditRequest;
 import com.pujjr.pcci.service.ParameterizedBaseService;
@@ -82,7 +81,41 @@ public class ExcelService extends ParameterizedBaseService<ExcelService> {
 			// 犯罪记录
 			rowValue[index++] = CreditRequest.CRIMINAL_YES == creditRequest.getCriminalRecord() ? "有" : "无";
 			// 错误信息
-			rowValue[index++] = StringUtils.defaultString(creditRequest.getErrMsg());
+			rowValue[index++] = creditRequest.getErrStatus() == CreditRequest.ERROR_STATUS_SUCCESS ? "成功" : "失败";
+			excelData[i] = rowValue;
+		}
+		byte[] byteArray = ExcelUtils.writeExcelFile(title, excelData);
+		return resultInfo.success(byteArray);
+	}
+
+	/**
+	 * 获得被删除的征信查询列表
+	 * 
+	 * @param creditRequestList
+	 * @return
+	 */
+	public ResultInfo<byte[]> getDeleteCreditList(List<CreditRequest> creditRequestList) {
+		ResultInfo<byte[]> resultInfo = new ResultInfo<>();
+		if (creditRequestList == null) {
+			return resultInfo.fail("操作无结果");
+		}
+		String[] title = { "姓名", "手机号", "证件号", "授权码", "授权时间", };
+		String[][] excelData = new String[creditRequestList.size()][title.length];
+		for (int i = 0; i < creditRequestList.size(); i++) {
+			CreditRequest creditRequest = creditRequestList.get(i);
+
+			String[] rowValue = new String[title.length];
+			int index = 0;
+			// 姓名
+			rowValue[index++] = creditRequest.getName();
+			// 手机号
+			rowValue[index++] = creditRequest.getMobileNo();
+			// 证件号
+			rowValue[index++] = creditRequest.getIdNo();
+			// 授权码
+			rowValue[index++] = creditRequest.getEntityAuthCode();
+			// 授权时间
+			rowValue[index++] = creditRequest.getEntityAuthDate();
 			excelData[i] = rowValue;
 		}
 		byte[] byteArray = ExcelUtils.writeExcelFile(title, excelData);

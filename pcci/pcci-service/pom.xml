@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.5.1</version>
+		<version>0.6.1</version>
 	</parent>
 	<artifactId>pcci-service</artifactId>
 	<name>pcci-service</name>
@@ -18,7 +18,7 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-common</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -35,12 +35,12 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-dal</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-config</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.whalin</groupId>
@@ -53,12 +53,12 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-api</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pujjr-common</artifactId>
-			<version>1.0</version>
+			<version>1.1</version>
 		</dependency>
 
 		<dependency>
@@ -70,6 +70,10 @@
 			<groupId>com.itextpdf</groupId>
 			<artifactId>itextpdf</artifactId>
 			<version>5.5.6</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
 		</dependency>
 	</dependencies>
 </project>

@@ -1,1 +1,0 @@
-ALTER TABLE pujjr_credit_request AUTO_INCREMENT=1000;

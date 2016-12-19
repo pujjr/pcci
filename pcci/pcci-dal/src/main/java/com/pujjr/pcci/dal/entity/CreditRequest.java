@@ -3,16 +3,20 @@ package com.pujjr.pcci.dal.entity;
 import java.io.Serializable;
 import java.util.Date;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 import javax.persistence.UniqueConstraint;
 
-import com.pujjr.common.type.IdentityType;
-import com.pujjr.common.type.credit.QueryReasonType;
+import com.pujjr.pcci.api.type.IdentityType;
+import com.pujjr.pcci.api.type.QueryReasonType;
 
 /**
  * @author wen
@@ -23,6 +27,12 @@ import com.pujjr.common.type.credit.QueryReasonType;
 public class CreditRequest implements Serializable {
 
 	private static final long serialVersionUID = 1L;
+
+	/** 失败代码 成功 */
+	public static final int ERROR_STATUS_SUCCESS = 1;
+
+	/** 失败代码 成功 */
+	public static final int ERROR_STATUS_FAIL = 0;
 
 	/** 无数据 */
 	public static final int RISK_LEVEL_NONE = 0;
@@ -128,10 +138,17 @@ public class CreditRequest implements Serializable {
 	private String ossKey;
 
 	/**
-	 * 错误消息记录
+	 * 错误状态
 	 */
 	@Column
-	private String errMsg;
+	private Integer errStatus = 0;
+
+	/**
+	 * 征信查询结果
+	 */
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "fk_record_id")
+	private CreditQueryResult creditQueryResult;
 
 	/**
 	 * @return ID
@@ -359,18 +376,33 @@ public class CreditRequest implements Serializable {
 	}
 
 	/**
-	 * @return 错误消息记录
+	 * @return 错误状态
 	 */
-	public String getErrMsg() {
-		return errMsg;
+	public Integer getErrStatus() {
+		return errStatus;
 	}
 
 	/**
-	 * @param 错误消息记录
-	 *            要设置的 errMsg
+	 * @param 错误状态
+	 *            要设置的 errStatus
 	 */
-	public void setErrMsg(String errMsg) {
-		this.errMsg = errMsg;
+	public void setErrStatus(Integer errStatus) {
+		this.errStatus = errStatus;
+	}
+
+	/**
+	 * @return 征信查询结果
+	 */
+	public CreditQueryResult getCreditQueryResult() {
+		return creditQueryResult;
+	}
+
+	/**
+	 * @param 征信查询结果
+	 *            要设置的 creditQueryResult
+	 */
+	public void setCreditQueryResult(CreditQueryResult creditQueryResult) {
+		this.creditQueryResult = creditQueryResult;
 	}
 
 }

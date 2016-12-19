@@ -3,17 +3,21 @@ package com.pujjr.pcci.service.credit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.compress.archivers.ArchiveOutputStream;
+import org.apache.commons.compress.archivers.ArchiveStreamFactory;
+import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
+import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.itextpdf.text.BaseColor;
 import com.itextpdf.text.Document;
 import com.itextpdf.text.DocumentException;
 import com.itextpdf.text.Element;
@@ -25,6 +29,7 @@ import com.itextpdf.text.pdf.BaseFont;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
+import com.pujjr.common.exception.CheckFailException;
 import com.pujjr.common.result.ResultInfo;
 import com.pujjr.common.type.DrivingLicenceStatusType;
 import com.pujjr.common.utils.BaseFileUtils;
@@ -283,7 +288,6 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				nullTable(table, document);
 			}
 		}
-
 	}
 
 	/**
@@ -294,7 +298,6 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	 * @param cells
 	 * @param document
 	 */
-	@SuppressWarnings("unused")
 	private void quickTabeByList(PdfPTable table, List<String> cells, Document document) {
 		try {
 			for (String cellValue : cells) {
@@ -327,30 +330,122 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	 * @param id
 	 * @return
 	 */
-	public ResultInfo<byte[]> downloadPDF(Long id) {
+	public ResultInfo<byte[]> downloadZip(List<CreditRequest> creditRequestList) {
 		ResultInfo<byte[]> resultInfo = new ResultInfo<>();
-		ByteArrayOutputStream bStream = new ByteArrayOutputStream();
+		ByteArrayOutputStream targetZipStream = new ByteArrayOutputStream();
 		try {
-			CreditRequest creditRequest = creditRequestDAO.get(id);
-			if (StringUtils.isBlank(creditRequest.getOssKey())) {
-				creditQueryResultToPDF(creditQueryResultDAO.findCreditQueryResultByCreditId(creditRequest.getCreditId()));
+			ArchiveOutputStream out = new ArchiveStreamFactory().createArchiveOutputStream(ArchiveStreamFactory.ZIP, targetZipStream);
+			for (CreditRequest creditRequest : creditRequestList) {
+				byte[] byteArray = creditQueryResultToPDF(creditRequest.getCreditQueryResult());
+				// 创建文件
+				ZipArchiveEntry zipArchiveEntry = new ZipArchiveEntry(creditRequest.getId() + "_" + creditRequest.getName() + DEFAULT_SUFFIX);
+				out.putArchiveEntry(zipArchiveEntry);
+				ByteArrayInputStream bis = new ByteArrayInputStream(byteArray);
+				IOUtils.copy(bis, out);
+				out.closeArchiveEntry();
+				bis.close();
 			}
-			InputStream downStream = storeService.download(creditRequest.getOssKey());
-			BaseFileUtils.inputToOutput(downStream, bStream);
-			return resultInfo.success(bStream.toByteArray());
+			out.finish();
+			out.close();
+			return resultInfo.success(targetZipStream.toByteArray());
 		} catch (Exception e) {
 			resultInfo.fail("下载PDF失败");
 		}
 		return resultInfo;
 	}
 
-	public ResultInfo<CreditQueryResult> creditQueryResultToPDF(CreditQueryResult creditQueryResult) {
-		long beginTime = System.currentTimeMillis();
-		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
-		if (creditQueryResult == null) {
-			return resultInfo.fail("查询征信错误,征信信息为空");
+	/**
+	 * 下载PDF文件
+	 * 
+	 * @param id
+	 * @return
+	 */
+	public ResultInfo<byte[]> downloadPDF(Long id) {
+		ResultInfo<byte[]> resultInfo = new ResultInfo<>();
+		ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+		ByteArrayInputStream byteInStream = null;
+		try {
+			CreditRequest creditRequest = creditRequestDAO.get(id);
+			if (StringUtils.isNotBlank(creditRequest.getOssKey())) {
+				storeService.delete(creditRequest.getOssKey());
+				creditRequest.setOssKey(null);
+			}
+			// 如果已经存在生成的PDF 则不再生成新的 而是使用原本的
+			byte[] byteArray = creditQueryResultToPDF(creditRequest.getCreditQueryResult());
+			// 存储文件到阿里云
+			String ossKey = BaseFileUtils.buildOnlyFileName(DEFAULT_SUFFIX);
+			byteInStream = new ByteArrayInputStream(byteArray);
+			storeService.upload(ossKey, byteInStream);
+			creditRequest.setOssKey(ossKey);
+			return resultInfo.success(byteArray);
+		} catch (Exception e) {
+			resultInfo.fail("下载PDF失败:" + e.getMessage());
+		} finally {
+			if (byteOutStream != null) {
+				try {
+					byteOutStream.close();
+				} catch (IOException e) {
+					logger.error("根据征信查询结果生成PDF文件失败", e);
+				}
+			}
+			if (byteInStream != null) {
+				try {
+					byteInStream.close();
+				} catch (IOException e) {
+					logger.error("根据征信查询结果生成PDF文件失败", e);
+				}
+			}
 		}
-		CreditRequest creditRequest = creditQueryResult.getCreditRequest();
+		return resultInfo;
+	}
+
+	/**
+	 * 
+	 * @param creditRequest
+	 * @return
+	 */
+	public ResultInfo<String> createPDF(CreditRequest creditRequest) {
+		ResultInfo<String> resultInfo = new ResultInfo<>();
+		ByteArrayOutputStream byteOutStream = new ByteArrayOutputStream();
+		ByteArrayInputStream byteInStream = null;
+		try {
+			if (StringUtils.isNotBlank(creditRequest.getOssKey())) {
+				storeService.delete(creditRequest.getOssKey());
+				creditRequest.setOssKey(null);
+			}
+			// 如果已经存在生成的PDF 则不再生成新的 而是使用原本的
+			byte[] byteArray = creditQueryResultToPDF(creditRequest.getCreditQueryResult());
+			// 存储文件到阿里云
+			String ossKey = BaseFileUtils.buildOnlyFileName(DEFAULT_SUFFIX);
+			byteInStream = new ByteArrayInputStream(byteArray);
+			storeService.upload(ossKey, byteInStream);
+			creditRequest.setOssKey(ossKey);
+			return resultInfo.success(creditRequest.getOssKey());
+		} catch (Exception e) {
+			resultInfo.fail("下载PDF失败:" + e.getMessage());
+		} finally {
+			if (byteOutStream != null) {
+				try {
+					byteOutStream.close();
+				} catch (IOException e) {
+					logger.error("根据征信查询结果生成PDF文件失败", e);
+				}
+			}
+			if (byteInStream != null) {
+				try {
+					byteInStream.close();
+				} catch (IOException e) {
+					logger.error("根据征信查询结果生成PDF文件失败", e);
+				}
+			}
+		}
+		return resultInfo;
+	}
+
+	public byte[] creditQueryResultToPDF(CreditQueryResult creditQueryResult) throws CheckFailException {
+		if (creditQueryResult == null) {
+			throw new CheckFailException("查询征信错误,征信信息为空");
+		}
 		ByteArrayOutputStream bos = null;// 创建输出流
 		Document document = new Document(PageSize.A4);
 		try {
@@ -382,27 +477,16 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 
 			/* 填装数据结束 */
 			document.close();
-
-			// 存储文件到阿里云
-			String ossKey = BaseFileUtils.buildOnlyFileName(DEFAULT_SUFFIX);
-			ByteArrayInputStream bis = new ByteArrayInputStream(bos.toByteArray());
-			storeService.upload(ossKey, bis);
-			creditRequest.setOssKey(ossKey);
-			creditQueryResult.setCreditRequest(creditRequest);
-			// TODO
-			System.out.println("PDF耗时:" + (System.currentTimeMillis() - beginTime));
-			beginTime = System.currentTimeMillis();
-			return resultInfo.success(creditQueryResult);
+			return bos.toByteArray();
 		} catch (DocumentException e) {
 			logger.error("根据征信查询结果生成PDF文件失败", e);
-			return resultInfo.fail(e.getMessage());
+			throw new CheckFailException("根据征信查询结果生成PDF文件失败:" + e.getMessage());
 		} finally {
 			if (bos != null) {
 				try {
 					bos.close();
 				} catch (IOException e) {
 					logger.error("根据征信查询结果生成PDF文件失败", e);
-					resultInfo.fail(e.getMessage());
 				}
 			}
 		}
@@ -414,8 +498,8 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 		try {
 			CreditRequest creditRequest = creditQueryResult.getCreditRequest();
 			table.addCell(newTitleCell(table, "征信报告"));
-			if (StringUtils.isNotBlank(creditRequest.getErrMsg())) {
-				table.addCell(newTitleCell(table, creditRequest.getErrMsg()));
+			if (creditRequest.getErrStatus() == CreditRequest.ERROR_STATUS_FAIL) {
+				table.addCell(newTitleCell(table, "查询数据有异常,请检查!"));
 			}
 			table.addCell(newCell("姓名"));
 			table.addCell(newCell(creditRequest.getName()));
@@ -662,6 +746,8 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			creditPerInvest.setPerinvestType(CreditPerInvest.PERINVEST_TYPE_RYPOSSHA);
 			creditPerInvestList.add(creditPerInvest);
 		}
+
+		boolean isShowTableName = true;
 		// 对外投资 企业法人信息
 		for (int i = 0; creditPerInvestList != null && i < creditPerInvestList.size(); i++) {
 			CreditPerInvest creditPerInvest = creditPerInvestList.get(i);
@@ -673,10 +759,18 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				legalPersonCells.add(excNullValue(creditPerInvest.getEnttype()));
 				legalPersonCells.add("注册资本(万元)");
 				legalPersonCells.add(excNullValue(creditPerInvest.getEntstatus()));
-				quickTabeByList(i == 0 ? "对外投资——企业法人信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
+				// 暂不使用该方法,标红文字
+				// quickTabeByList(isShowTableName ? "对外投资——企业股东信息(暂未使用)" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
+				PdfPTable table = defaultTable(DEFAULT_VERTICAL_COLUMN_NUMBER);
+				PdfPCell cell = newCell(isShowTableName ? "对外投资——企业法人信息(暂未使用)" : "", new Font(defaultBaseFont(), DEFAULT_FONT_SIZE, Font.BOLD, BaseColor.RED));
+				cell.setColspan(table.getNumberOfColumns());
+				cell.setBorder(Rectangle.NO_BORDER);
+				table.addCell(cell);
+				quickTabeByList(table, legalPersonCells, document);
+				isShowTableName = false;
 			}
 		}
-
+		isShowTableName = true;
 		for (int i = 0; creditPerInvestList != null && i < creditPerInvestList.size(); i++) {
 			CreditPerInvest creditPerInvest = creditPerInvestList.get(i);
 			if (CreditPerInvest.PERINVEST_TYPE_RYPOSSHA.equals(creditPerInvest.getPerinvestType())) {
@@ -689,7 +783,15 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				shareholderCells.add(excNullValue(creditPerInvest.getRegcap()));
 				shareholderCells.add("企业状态");
 				shareholderCells.add(excNullValue(creditPerInvest.getEntstatus()));
-				quickTabeByList(i == 0 ? "对外投资——企业股东信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
+				// 暂不使用该方法,标红文字
+				// quickTabeByList(isShowTableName ? "对外投资——企业股东信息(暂未使用)" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
+				PdfPTable table = defaultTable(DEFAULT_VERTICAL_COLUMN_NUMBER);
+				PdfPCell cell = newCell(isShowTableName ? "对外投资——企业法人信息(暂未使用)" : "", new Font(defaultBaseFont(), DEFAULT_FONT_SIZE, Font.BOLD, BaseColor.RED));
+				cell.setColspan(table.getNumberOfColumns());
+				cell.setBorder(Rectangle.NO_BORDER);
+				table.addCell(cell);
+				quickTabeByList(table, shareholderCells, document);
+				isShowTableName = false;
 			}
 		}
 	}
@@ -708,7 +810,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				return conditions.get(key);
 			}
 		}
-		return excNullValue(value);
+		return excNullValue(null);
 	}
 
 	/**

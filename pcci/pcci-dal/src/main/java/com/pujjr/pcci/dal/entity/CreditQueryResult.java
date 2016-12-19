@@ -1,7 +1,10 @@
 package com.pujjr.pcci.dal.entity;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -10,9 +13,12 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
+import javax.persistence.MapKey;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.OrderBy;
+
+import com.pujjr.pcci.api.type.CreditQueryType;
 
 /**
  * @author wen
@@ -30,34 +36,36 @@ public class CreditQueryResult implements Serializable {
 	@Id
 	@Column(length = 64, nullable = true)
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private Long recordId;
+	private Long id;
 
 	@Column(length = 64, unique = true)
 	private String creditId;
 
 	/* 个人不良信息 */
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "credit_record_Id")
-	private List<CreditCrimeInfo> creditCrimeInfoList;
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditQueryResult")
+	private List<CreditCrimeInfo> creditCrimeInfoList = new ArrayList<>();
 
 	/* 失信被执行记录 */
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "credit_record_Id")
-	private List<CreditExecution> creditExecutionList;
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditQueryResult")
+	private List<CreditExecution> creditExecutionList = new ArrayList<>();
 
 	/* 对外投资 */
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "credit_record_Id")
-	private List<CreditPerInvest> creditPerInvestList;
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditQueryResult")
+	private List<CreditPerInvest> creditPerInvestList = new ArrayList<>();
 
 	/* 风险度 */
-	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "credit_record_Id")
-	private List<CreditRskdoo> creditRskdooList;
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditQueryResult")
+	private List<CreditRskdoo> creditRskdooList = new ArrayList<>();
 
-	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-	@JoinColumn(name = "credit_request_Id")
-	private CreditRequest creditRequest;
+	/* 查询任务状态 */
+	@OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditQueryResult")
+	@MapKey(name = "queryType")
+	@OrderBy("queryTypeName asc")
+	private Map<String, QueryTask> queryTaskMap = new LinkedHashMap<>();
+
+	/* 查询请求信息 */
+	@OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY, mappedBy = "creditQueryResult")
+	private CreditRequest creditRequest = new CreditRequest();
 
 	/* 信贷申请记录 */
 
@@ -156,6 +164,11 @@ public class CreditQueryResult implements Serializable {
 	private String useTimeScore;
 
 	/* 前海驾驶证 */
+	/**
+	 * 驾驶证号查询号
+	 */
+	@Column(length = 24)
+	private String queryId;
 
 	/**
 	 * 驾驶证号
@@ -176,16 +189,16 @@ public class CreditQueryResult implements Serializable {
 	/**
 	 * @return ID
 	 */
-	public Long getRecordId() {
-		return recordId;
+	public Long getId() {
+		return id;
 	}
 
 	/**
 	 * @param ID
 	 *            要设置的 recordId
 	 */
-	public void setRecordId(Long recordId) {
-		this.recordId = recordId;
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 	/**
@@ -246,6 +259,21 @@ public class CreditQueryResult implements Serializable {
 	 */
 	public void setCreditRskdooList(List<CreditRskdoo> creditRskdooList) {
 		this.creditRskdooList = creditRskdooList;
+	}
+
+	/**
+	 * @return queryTaskMap
+	 */
+	public Map<String, QueryTask> getQueryTaskMap() {
+		return queryTaskMap;
+	}
+
+	/**
+	 * @param queryTaskMap
+	 *            要设置的 queryTaskMap
+	 */
+	public void setQueryTaskMap(Map<String, QueryTask> queryTaskMap) {
+		this.queryTaskMap = queryTaskMap;
 	}
 
 	/**
@@ -521,6 +549,21 @@ public class CreditQueryResult implements Serializable {
 	/**
 	 * @return 前海驾驶证
 	 */
+	public String getQueryId() {
+		return queryId;
+	}
+
+	/**
+	 * @param 前海驾驶证
+	 *            要设置的 queryId
+	 */
+	public void setQueryId(String queryId) {
+		this.queryId = queryId;
+	}
+
+	/**
+	 * @return 前海驾驶证
+	 */
 	public String getChkDriverNo() {
 		return chkDriverNo;
 	}
@@ -576,5 +619,15 @@ public class CreditQueryResult implements Serializable {
 	 */
 	public void setCreditId(String creditId) {
 		this.creditId = creditId;
+	}
+
+	public QueryTask getQueryTask(CreditQueryType key) {
+		if (queryTaskMap.get(key.name()) != null) {
+			return queryTaskMap.get(key.name());
+		}
+		QueryTask queryTask = new QueryTask();
+		queryTask.init(key, this);
+		queryTaskMap.put(key.name(), queryTask);
+		return queryTask;
 	}
 }

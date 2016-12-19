@@ -107,13 +107,11 @@ public abstract class BaseDAO {
 		return findByPaged(paged, detachedCriteria);
 	}
 
-	public <T> PagedResult<T> findAll(final DetachedCriteria detachedCriteria) {
+	public <T> List<T> findAll(final DetachedCriteria detachedCriteria) {
 		detachedCriteria.setResultTransformer(CriteriaSpecification.ROOT_ENTITY);
 		Criteria criteria = detachedCriteria.getExecutableCriteria(getSession());
 		criteria.setProjection(null);
-		PagedResult<T> result = new PagedResult<T>();
-		result.setResults(criteria.list());
-		return result;
+		return criteria.list();
 	}
 
 	public <T> PagedResult<T> findByPaged(final Paged p, final DetachedCriteria detachedCriteria) {

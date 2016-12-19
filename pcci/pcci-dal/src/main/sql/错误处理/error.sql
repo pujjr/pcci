@@ -1,0 +1,10 @@
+SET FOREIGN_KEY_CHECKS = 0;
+SET SQL_SAFE_UPDATES = 0;
+DELETE FROM pujjr_credit_crime_info WHERE credit_record_Id IN (SELECT t2.record_id FROM pujjr_credit_request t1,pujjr_credit_query_result t2 WHERE t1.credit_id = t2.credit_id AND  t1.err_msg IS NOT NULL AND t1.err_msg != '');
+DELETE FROM pujjr_credit_execution WHERE credit_record_Id IN (SELECT t2.record_id FROM pujjr_credit_request t1,pujjr_credit_query_result t2 WHERE t1.credit_id = t2.credit_id AND  t1.err_msg IS NOT NULL AND t1.err_msg != '');
+DELETE FROM pujjr_credit_per_invest WHERE credit_record_Id IN (SELECT t2.record_id FROM pujjr_credit_request t1,pujjr_credit_query_result t2 WHERE t1.credit_id = t2.credit_id AND  t1.err_msg IS NOT NULL AND t1.err_msg != '');
+DELETE FROM pujjr_credit_rskdoo WHERE credit_record_Id IN (SELECT t2.record_id FROM pujjr_credit_request t1,pujjr_credit_query_result t2 WHERE t1.credit_id = t2.credit_id AND  t1.err_msg IS NOT NULL AND t1.err_msg != '');
+DELETE FROM pujjr_query_task WHERE credit_record_Id IN (SELECT t2.record_id FROM pujjr_credit_request t1,pujjr_credit_query_result t2 WHERE t1.credit_id = t2.credit_id AND  t1.err_msg IS NOT NULL AND t1.err_msg != '');
+DELETE t1,t2 FROM pujjr_credit_request t1,pujjr_credit_query_result t2 WHERE t1.credit_id = t2.credit_id AND  t1.err_msg IS NOT NULL AND t1.err_msg != '';
+SET FOREIGN_KEY_CHECKS = 1;
+SET SQL_SAFE_UPDATES = 1;

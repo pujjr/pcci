@@ -38,6 +38,11 @@ public class BeanPropertyUtils {
 		}
 	}
 
+	/**
+	 * 自动为常见类型填入默认值
+	 * 
+	 * @param bean
+	 */
 	public static void autoSetDefaultValue(Object bean) {
 		PropertyDescriptor[] PropertyDescriptorArray = PropertyUtils.getPropertyDescriptors(bean);
 		for (PropertyDescriptor propertyDescriptor : PropertyDescriptorArray) {

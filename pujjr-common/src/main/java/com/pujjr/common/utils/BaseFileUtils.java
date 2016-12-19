@@ -45,6 +45,25 @@ public class BaseFileUtils {
 	}
 
 	/**
+	 * 将File文件转化为ByteArrayOutputStream
+	 * 
+	 * @param file
+	 * @return
+	 * @throws IOException
+	 */
+	public static ByteArrayOutputStream fileToByteArrayOutputStream(File file) throws IOException {
+		FileInputStream fis = new FileInputStream(file);
+		ByteArrayOutputStream bos = new ByteArrayOutputStream(1000);
+		byte[] b = new byte[1000];
+		int n;
+		while ((n = fis.read(b)) != -1) {
+			bos.write(b, 0, n);
+		}
+		fis.close();
+		return bos;
+	}
+
+	/**
 	 * 讲byte[]转化为文件
 	 * 
 	 * @param filePath
@@ -145,4 +164,5 @@ public class BaseFileUtils {
 			e.printStackTrace();
 		}
 	}
+
 }

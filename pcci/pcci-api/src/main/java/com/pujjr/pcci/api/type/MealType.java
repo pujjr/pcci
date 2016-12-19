@@ -27,10 +27,10 @@ public enum MealType {
 	/** 个人对外投资查询 */
 	PerInvest;
 
-	private static Map<MealType, MealType> codeMappingCache = new HashMap<MealType, MealType>();
+	private static Map<String, MealType> codeMappingCache = new HashMap<String, MealType>();
 	static {
 		for (MealType type : MealType.values()) {
-			codeMappingCache.put(type, type);
+			codeMappingCache.put(type.name(), type);
 		}
 	}
 

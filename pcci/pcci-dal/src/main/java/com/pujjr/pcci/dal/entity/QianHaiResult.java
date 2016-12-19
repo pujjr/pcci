@@ -10,7 +10,7 @@ import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
-import com.pujjr.common.type.credit.QueryProductType;
+import com.pujjr.pcci.api.type.QueryProductType;
 
 /**
  * @author wen

@@ -17,8 +17,8 @@ import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.pujjr.common.result.ResultInfo;
-import com.pujjr.common.type.credit.QueryProductType;
 import com.pujjr.pcci.api.bean.request.QianHaiRequestData;
+import com.pujjr.pcci.api.type.QueryProductType;
 import com.pujjr.pcci.common.qhcs.bean.HeaderBean;
 import com.pujjr.pcci.common.qhcs.bean.SecurityInfo;
 import com.pujjr.pcci.common.qhcs.utils.DataSecurityUtil;
@@ -67,7 +67,6 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 		requestData.setTransNo(transNo);
 		requestData.setBatchNo(transNo);
 		requestList.add(requestData);
-		System.out.println("------>" + JSON.toJSONString(requestData));
 		ResultInfo<List<QianHaiResult>> resultList = sand(transNo, requestList, productType);
 		if (resultList.isSuccess() && resultList.getData() != null && StringUtils.equalsIgnoreCase(resultList.getResultCode(), DEFAULT_SUCCESS_CODE)) {
 			QianHaiResult qianHaiResult = resultList.getData().get(0);
@@ -83,6 +82,8 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 					busiDatelist.add(qianHaiResultData.getBusiDate());
 				}
 				qianHaiResult.setBusiDate(JSON.toJSONString(busiDatelist));
+				resultInfo.setResultCode(resultList.getResultCode());
+				resultInfo.setMsg(resultList.getMsg());
 			} else {
 				resultInfo.setResultCode(resultList.getResultCode());
 				resultInfo.setMsg(resultList.getMsg());
@@ -122,6 +123,8 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 						busiDatelist.add(qianHaiResultData.getBusiDate());
 					}
 					qianHaiResult.setBusiDate(JSON.toJSONString(busiDatelist));
+					resultInfo.setResultCode(resultList.getResultCode());
+					resultInfo.setMsg(resultList.getMsg());
 				} else {
 					resultInfo.setResultCode(resultList.getResultCode());
 					resultInfo.setMsg(resultList.getMsg());
@@ -129,11 +132,10 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 				// qianHaiResultList.add(qianHaiResult);
 			}
 			return resultInfo.success(qianHaiResultList);
-		} else {
-			resultInfo.setResultCode(resultList.getResultCode());
-			resultInfo.fail(resultList.getMsg());
 		}
-		return resultInfo;
+		resultInfo.setResultCode(resultList.getResultCode());
+		resultInfo.setMsg(resultList.getMsg());
+		return resultInfo.fail();
 	}
 
 	/**
@@ -147,7 +149,6 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 	private ResultInfo<List<QianHaiResult>> sand(String transNo, List<QianHaiRequestData> requestList, QueryProductType productType) {
 		ResultInfo<List<QianHaiResult>> resultInfo = new ResultInfo<>();
 		String rtCode = "";
-		String sss = "";
 		try {
 
 			// 获得环境变量
@@ -172,16 +173,15 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			String message = JSON.toJSONString(requestMap);
 			// 发送查询请求
 			String res = HttpRequestUtil.sendJsonWithHttps(setting.getServiceURL(), message);
-			sss = res;
 			// 验签
 			JSONObject msgJSON = JSON.parseObject(res);
 			rtCode = msgJSON.getJSONObject("header").getString("rtCode");
 			DataSecurityUtil.verifyData(msgJSON.getString("busiData"), msgJSON.getJSONObject("securityInfo").getString("signatureValue"), setting.getPublicKeyPath());
 			// 转为明文
 			String responseBusiDataStr = DataSecurityUtil.decrypt(msgJSON.getString("busiData"), setting.getCheckCode());
-			System.out.println(responseBusiDataStr);
 			JSONObject responseBusiDataJSON = JSON.parseObject(responseBusiDataStr);
 			JSONArray recordsJSON = responseBusiDataJSON.getJSONArray("records");
+			System.out.println("前海------>" + recordsJSON.toJSONString());
 			// 填装完整数据,并保存返回结果
 			List<QianHaiResult> resultDataList = new ArrayList<>();
 			for (int i = 0; i < recordsJSON.size(); i++) {
@@ -195,11 +195,9 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			resultInfo.setResultCode(msgJSON.getJSONObject("header").getString("rtCode"));
 			resultInfo.success(resultDataList);
 		} catch (Exception e) {
-			if (productType.equals(QueryProductType.MSC8037)) {
-				System.out.println(sss);
-			}
 			logger.error("请求前海征信报文错误" + productType, e);
-			resultInfo.fail(productType + ":" + rtCode);
+			resultInfo.setResultCode(rtCode);
+			resultInfo.fail(rtCode);
 		}
 		return resultInfo;
 	}

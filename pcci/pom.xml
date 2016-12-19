@@ -5,7 +5,7 @@
 
 	<groupId>com.pujjr</groupId>
 	<artifactId>pcci</artifactId>
-	<version>0.5.1</version>
+	<version>0.6.1</version>
 	<packaging>pom</packaging>
 
 	<name>pcci</name>

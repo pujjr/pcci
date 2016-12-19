@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.5.1</version>
+		<version>0.6.1</version>
 	</parent>
 	<artifactId>pcci-dal</artifactId>
 	<name>pcci-dal</name>
@@ -86,7 +86,7 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-common</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>junit</groupId>
@@ -103,16 +103,21 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-config</artifactId>
-			<version>0.5.1</version>
+			<version>0.6.1</version>
 		</dependency>
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pujjr-common</artifactId>
-			<version>1.0</version>
+			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>brApi</groupId>
 			<artifactId>brApi</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-api</artifactId>
+			<version>0.6.1</version>
 		</dependency>
 	</dependencies>
 </project>

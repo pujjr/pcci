@@ -12,6 +12,11 @@ public class CreditQueryResultVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	/** 驾驶证任务查询结果 成功 */
+	public static final int QUERY_STATUS_SUCCESS = 1;
+	/** 驾驶证任务查询结果 失败 */
+	public static final int QUERY_STATUS_FAIL = 0;
+
 	/**
 	 * ID
 	 */
@@ -133,6 +138,16 @@ public class CreditQueryResultVO implements Serializable {
 	private String useTimeScore;
 
 	/* 前海驾驶证 */
+
+	/**
+	 * 驾驶证号查询号
+	 */
+	private String queryId;
+
+	/**
+	 * 驾驶证任务结果
+	 */
+	private Integer queryStatus;
 
 	/**
 	 * 驾驶证号
@@ -475,6 +490,36 @@ public class CreditQueryResultVO implements Serializable {
 	 */
 	public void setUseTimeScore(String useTimeScore) {
 		this.useTimeScore = useTimeScore;
+	}
+
+	/**
+	 * @return 前海驾驶证
+	 */
+	public String getQueryId() {
+		return queryId;
+	}
+
+	/**
+	 * @param 前海驾驶证
+	 *            要设置的 queryId
+	 */
+	public void setQueryId(String queryId) {
+		this.queryId = queryId;
+	}
+
+	/**
+	 * @return 驾驶证任务结果
+	 */
+	public Integer getQueryStatus() {
+		return queryStatus;
+	}
+
+	/**
+	 * @param 驾驶证任务结果
+	 *            要设置的 queryStatus
+	 */
+	public void setQueryStatus(Integer queryStatus) {
+		this.queryStatus = queryStatus;
 	}
 
 	/**

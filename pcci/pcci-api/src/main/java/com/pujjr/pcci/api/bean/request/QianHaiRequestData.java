@@ -3,8 +3,8 @@ package com.pujjr.pcci.api.bean.request;
 import java.io.Serializable;
 
 import com.pujjr.common.type.DrivingVehicleType;
-import com.pujjr.common.type.IdentityType;
-import com.pujjr.common.type.credit.QueryReasonType;
+import com.pujjr.pcci.api.type.IdentityType;
+import com.pujjr.pcci.api.type.QueryReasonType;
 
 /**
  * @author wen

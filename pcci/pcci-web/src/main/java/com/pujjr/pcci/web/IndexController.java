@@ -24,11 +24,10 @@ import org.springframework.web.multipart.MultipartFile;
 import com.pujjr.common.pager.Paged;
 import com.pujjr.common.pager.PagedResult;
 import com.pujjr.common.result.ResultInfo;
-import com.pujjr.common.type.IdentityType;
-import com.pujjr.common.type.credit.QueryReasonType;
 import com.pujjr.common.utils.document.ExcelUtils;
 import com.pujjr.pcci.api.bean.request.CreditRequestData;
-import com.pujjr.pcci.dal.entity.CreditQueryResult;
+import com.pujjr.pcci.api.type.IdentityType;
+import com.pujjr.pcci.api.type.QueryReasonType;
 import com.pujjr.pcci.dal.entity.CreditRequest;
 import com.pujjr.pcci.service.credit.CreditService;
 import com.pujjr.pcci.service.credit.ExcelService;
@@ -64,6 +63,12 @@ public class IndexController extends BaseController {
 
 	}
 
+	/**
+	 * 获得征信下载模板
+	 * 
+	 * @param request
+	 * @param response
+	 */
 	@RequestMapping(value = "/getUploadTemplate")
 	public void getUploadTemplate(HttpServletRequest request, HttpServletResponse response) {
 		ResultInfo<byte[]> excelResult = excelService.getUploadTemplate();
@@ -88,13 +93,44 @@ public class IndexController extends BaseController {
 				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 				OutputStream os = response.getOutputStream();
 				os.write(byteArray);
-				os.flush();
 				os.close();
 			}
 		} catch (Exception e) {
-			// TODO
 			e.printStackTrace();
 		}
+		return;
+	}
+
+	@RequestMapping(value = "/deleteAllError")
+	public void deleteAllError(HttpServletRequest request, HttpServletResponse response) {
+		ResultInfo<byte[]> excelResult = creditService.deleteAllError();
+		try {
+			if (excelResult.isSuccess()) {
+				byte[] byteArray = excelResult.getData();
+				response.setContentType("application/x-download");
+				response.setCharacterEncoding("utf-8");
+				String fileName = "被删除异常查询列表." + ExcelUtils.XLSX;
+				/**
+				 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
+				 * 
+				 */
+				// IE使用URLEncoder
+				String userAgent = request.getHeader("User-Agent").toLowerCase();
+				if (userAgent.contains("windows")) {
+					fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
+					// 其它使用转iso
+				} else {
+					fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
+				}
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				OutputStream os = response.getOutputStream();
+				os.write(byteArray);
+				os.close();
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return;
 	}
 
 	@RequestMapping(value = "/creditQueryByExcel")
@@ -202,6 +238,48 @@ public class IndexController extends BaseController {
 		}
 	}
 
+	@RequestMapping(value = "/downloadCreditZip")
+	public void downloadCreditZip(Long beginCreditId, Long endCreditId, String searchText, String stateTime, String endTime, HttpServletRequest request, HttpServletResponse response) {
+		OutputStream os = null;
+		try {
+			if (beginCreditId != null || endCreditId != null || StringUtils.isNotBlank(searchText) || (StringUtils.isNotBlank(stateTime) && StringUtils.isNotBlank(endTime))) {
+				ResultInfo<byte[]> downloadResult = creditService.downloadPdfZipPack(beginCreditId, endCreditId, searchText, stateTime, endTime);
+				if (downloadResult.isSuccess()) {
+					byte[] byteArray = downloadResult.getData();
+					response.setContentType("application/pdf");
+					response.setCharacterEncoding("utf-8");
+					String fileName = "征信查询文件-" + DateFormatUtils.format(new Date(), "yyyyMMdd") + ".ZIP";
+					/**
+					 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
+					 * 
+					 */
+					// IE使用URLEncoder
+					String userAgent = request.getHeader("User-Agent").toLowerCase();
+					if (userAgent.contains("windows")) {
+						fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
+						// 其它使用转iso
+					} else {
+						fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
+					}
+					response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+					os = response.getOutputStream();
+					os.write(byteArray);
+					os.flush();
+				}
+			}
+		} catch (Exception e) {
+			logger.error("下载文件异常:" + e.getLocalizedMessage());
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+
 	@RequestMapping(value = "/searchCredit")
 	public String searchCreditRequest(Integer page, Long beginCreditId, Long endCreditId, String searchText, String stateTime, String endTime) {
 
@@ -224,13 +302,46 @@ public class IndexController extends BaseController {
 		return "search";
 	}
 
-	@RequestMapping(value = "/refreshCredit/{creditId}")
+	@RequestMapping(value = "/refreshCredit/{id}")
 	@ResponseBody
-	public ResultInfo<CreditQueryResult> refreshCredit(@PathVariable String creditId) {
-		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
+	public ResultInfo<Void> refreshCredit(@PathVariable Long id, String queryType) {
+		ResultInfo<Void> resultInfo = new ResultInfo<>();
 		try {
-			if (StringUtils.isNotBlank(creditId)) {
-				resultInfo = creditService.creditQueryAgain(creditId);
+			if (id != null && id != 0) {
+				resultInfo = creditService.creditQueryAgain(id, queryType);
+			}
+		} catch (Exception e) {
+			resultInfo.fail(e);
+		}
+		return resultInfo;
+	}
+
+	/**
+	 * 征信查询更新页面
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@RequestMapping("/infoPage/{id}")
+	public String refreshPage(@PathVariable Long id) {
+		if (id != null && id != 0) {
+			ResultInfo<CreditRequest> resultInfo = creditService.findCredit(id);
+			if (resultInfo.isSuccess()) {
+				CreditRequest creditRequest = resultInfo.getData();
+				setAttribute("creditRequest", creditRequest);
+				setAttribute("queryTaskMap", creditRequest.getCreditQueryResult().getQueryTaskMap());
+			}
+		}
+		return "info";
+	}
+
+	@RequestMapping(value = "/deleteCredit/{id}")
+	@ResponseBody
+	public ResultInfo<Void> deleteCredit(@PathVariable Long id) {
+		ResultInfo<Void> resultInfo = new ResultInfo<>();
+		try {
+			if (id != null && id != 0) {
+				resultInfo = creditService.deleteCredit(id);
 			}
 		} catch (Exception e) {
 			resultInfo.fail(e);

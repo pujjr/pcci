@@ -1,12 +1,9 @@
 package com.pujjr.common.store;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.InputStream;
 
 import com.aliyun.oss.OSSClient;
 import com.aliyun.oss.model.OSSObject;
-import com.pujjr.common.utils.BaseFileUtils;
 
 /**
  * @author wen
@@ -36,10 +33,11 @@ public class AliyunStore {
 		setting.setBucketName(bucketName);
 		AliyunStore aliyunStore = new AliyunStore(setting);
 		try {
-			aliyunStore.upload("test-1", new FileInputStream("D://temp/test.txt"));
+			// aliyunStore.upload("test-1", new FileInputStream("D://temp/test.txt"));
 			InputStream downStream = aliyunStore.download("test-1");
-			aliyunStore.delete("test-1");
-			BaseFileUtils.inputToOutput(downStream, new FileOutputStream("D://temp/test2.txt"));
+			// aliyunStore.delete("test-1");
+			// BaseFileUtils.inputToOutput(downStream, new FileOutputStream("D://temp/test2.txt"));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

@@ -20,8 +20,8 @@ import com.br.bean.TerBean;
 import com.pujjr.common.pager.Paged;
 import com.pujjr.common.pager.PagedResult;
 import com.pujjr.common.result.ResultInfo;
-import com.pujjr.common.type.credit.MealType;
 import com.pujjr.common.utils.BaseStringUtils;
+import com.pujjr.pcci.api.type.MealType;
 import com.pujjr.pcci.dal.dao.HundredCreditRequestDAO;
 import com.pujjr.pcci.dal.entity.HundredCreditRequest;
 import com.pujjr.pcci.service.ParameterizedBaseService;
@@ -100,17 +100,21 @@ public class HundredCreditService extends ParameterizedBaseService<HundredCredit
 				String portrait_result = ms.getApiData(merchantBean);
 				// 保存请求结果
 				// hundredCreditRequestDAO.save(hundredCreditRequest);
-				JSONObject crimeInfoJSON = JSON.parseObject(portrait_result);
-				System.out.println("---100--->" + portrait_result);
-				if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600000", "00", "100002")) {
+				JSONObject json = JSON.parseObject(portrait_result);
+				System.out.println("百融------>" + json.toJSONString());
+				String code = json.getString("code");
+				resultInfo.setResultCode(code);
+				resultInfo.setMsg(code);
+				if (BaseStringUtils.equalsAny(code, "600000", "00", "100002")) {
 					return resultInfo.success(portrait_result);
 				}
-				if (BaseStringUtils.equalsAny(crimeInfoJSON.getString("code"), "600002", "100007")) {
+				if (BaseStringUtils.equalsAny(code, "600002", "100007")) {
 					hundredCreditRequest.setTokenid(refreshLogin());
 					count++;
 					continue;
 				}
-				return resultInfo.fail(crimeInfoJSON.getString("code"));
+
+				return resultInfo.fail();
 			} catch (Exception e) {
 				logger.error(e.getMessage());
 				resultInfo.fail(e.getMessage());

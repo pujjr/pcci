@@ -2,11 +2,15 @@ package com.pujjr.pcci.dal.entity;
 
 import java.io.Serializable;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.ManyToOne;
 
 /**
  * @author wen
@@ -29,6 +33,13 @@ public class CreditPerInvest implements Serializable {
 	@Column(length = 64, nullable = true)
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private Long id;
+
+	/**
+	 * 征信查询结果
+	 */
+	@ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JoinColumn(name = "fk_record_id")
+	private CreditQueryResult creditQueryResult;
 
 	/**
 	 * 投资类型
@@ -175,6 +186,21 @@ public class CreditPerInvest implements Serializable {
 	 */
 	public void setPerinvestType(String perinvestType) {
 		this.perinvestType = perinvestType;
+	}
+
+	/**
+	 * @return 征信查询结果
+	 */
+	public CreditQueryResult getCreditQueryResult() {
+		return creditQueryResult;
+	}
+
+	/**
+	 * @param 征信查询结果
+	 *            要设置的 creditQueryResult
+	 */
+	public void setCreditQueryResult(CreditQueryResult creditQueryResult) {
+		this.creditQueryResult = creditQueryResult;
 	}
 
 }
