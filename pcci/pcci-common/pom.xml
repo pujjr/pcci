@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.6.1</version>
+		<version>0.8.0</version>
 	</parent>
 	<artifactId>pcci-common</artifactId>
 	<name>pcci-common</name>

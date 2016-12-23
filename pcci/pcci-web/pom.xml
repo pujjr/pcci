@@ -6,13 +6,34 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.6.1</version>
+		<version>0.8.0</version>
 	</parent>
 	<artifactId>pcci-web</artifactId>
 	<packaging>war</packaging>
 	<name>pcci-web Maven Webapp</name>
 	<url>http://maven.apache.org</url>
 	<dependencies>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-service</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-common</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pujjr-common</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-core</artifactId>
@@ -58,6 +79,11 @@
 			<artifactId>spring-test</artifactId>
 		</dependency>
 		<!-- springframe end -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>servlet-api</artifactId>
+		</dependency>
+		
 
 		<!-- junit测试包 -->
 		<dependency>
@@ -72,42 +98,30 @@
 			<artifactId>fastjson</artifactId>
 		</dependency>
 
-		<!-- 日志文件管理包 -->
-		<!-- log start -->
+		<!-- log配置：Log4j2 + Slf4j -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-core</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
+		<dependency>    
+			<groupId>org.apache.logging.log4j</groupId>    
+			<artifactId>log4j-web</artifactId>    
+		</dependency> 
+		<!-- 桥接：告诉Slf4j使用Log4j2 -->
+		<dependency> 
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-log4j12</artifactId>
+		<!-- 桥接：告诉commons logging使用Log4j2 -->
+		<dependency> 
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
 		</dependency>
 		<!-- log end -->
-
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-service</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-common</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-config</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
-		</dependency>
-		
 		
 		<!-- only needed for spring-based features -->
 		
@@ -121,16 +135,6 @@
                         <artifactId>spring</artifactId>
                     </exclusion>
                 </exclusions>
-		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-api</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pujjr-common</artifactId>
-			<version>1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

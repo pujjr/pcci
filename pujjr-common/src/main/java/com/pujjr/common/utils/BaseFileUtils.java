@@ -160,7 +160,6 @@ public class BaseFileUtils {
 		try {
 			BaseFileUtils.openFile("C:/Program Files (x86)/Adobe/Acrobat DC/Acrobat/Acrobat.exe", "d://fileOut.pdf");
 		} catch (IOException e) {
-			// TODO 自动生成的 catch 块
 			e.printStackTrace();
 		}
 	}

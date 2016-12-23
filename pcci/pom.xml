@@ -5,7 +5,7 @@
 
 	<groupId>com.pujjr</groupId>
 	<artifactId>pcci</artifactId>
-	<version>0.6.1</version>
+	<version>0.8.0</version>
 	<packaging>pom</packaging>
 
 	<name>pcci</name>
@@ -17,9 +17,9 @@
 		<spring.version>4.2.5.RELEASE</spring.version>
 		<!-- mybatis版本号 -->
 		<mybatis.version>3.2.6</mybatis.version>
-		<!-- log4j日志文件管理包版本 -->
+		<!-- log4j -->
 		<slf4j.version>1.7.7</slf4j.version>
-		<log4j.version>2.0</log4j.version>
+		<log4j.version>2.4.1</log4j.version>
 		<!-- servlet版本 -->
 		<servlet.version>2.5</servlet.version>
 		<!-- aspect版本 -->
@@ -27,11 +27,37 @@
 		<hibernate.version>4.2.0.Final</hibernate.version>
 		<!-- 其他 -->
 		<brApi.version>2.5.0</brApi.version>
-
+		<!-- 公共工具 -->
+		<pujjr.common.version>1.2</pujjr.common.version>
 	</properties>
 
 	<dependencyManagement>
 		<dependencies>
+			<dependency>
+				<groupId>com.pujjr</groupId>
+				<artifactId>pujjr-common</artifactId>
+				<version>${pujjr.common.version}</version>
+			</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-common</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-dal</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-config</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-api</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 			<!-- spring核心包 -->
 			<!-- springframe start -->
 			<dependency>
@@ -119,24 +145,41 @@
 				<version>1.2.9</version>
 			</dependency>
 
-			<!-- 日志文件管理包 -->
-			<!-- log start -->
-			<dependency>
-				<groupId>org.apache.logging.log4j</groupId>
-				<artifactId>log4j-core</artifactId>
-				<version>${log4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-api</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.slf4j</groupId>
-				<artifactId>slf4j-log4j12</artifactId>
-				<version>${slf4j.version}</version>
-			</dependency>
-			<!-- log end -->
+			<!-- log配置：Log4j2 + Slf4j -->
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-api</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-core</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>    
+			<groupId>org.apache.logging.log4j</groupId>    
+			<artifactId>log4j-web</artifactId>    
+			<version>${log4j.version}</version>    
+		</dependency> 
+		<!-- 桥接：告诉Slf4j使用Log4j2 -->
+		<dependency> 
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-slf4j-impl</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<!-- 桥接：告诉commons logging使用Log4j2 -->
+		<dependency> 
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>${slf4j.version}</version>
+		</dependency>
+		<!-- log end -->
+		
 			<dependency>
 				<groupId>brApi</groupId>
 				<artifactId>brApi</artifactId>

@@ -21,28 +21,6 @@ public class AliyunStore {
 		this.storeSetting = setting;
 	}
 
-	public static void main(String[] args) {
-		AliyunStoreSetting setting = new AliyunStoreSetting();
-		String endpoint = "oss-cn-hzfinance.aliyuncs.com";
-		String accessKeyId = "A9aOBT2jgwLlIkPc";
-		String accessKeySecret = "AsO82796GQoeayzQxurziFwckw7JL9";
-		String bucketName = "pcms-test";
-		setting.setEndpoint(endpoint);
-		setting.setAccessKeyId(accessKeyId);
-		setting.setAccessKeySecret(accessKeySecret);
-		setting.setBucketName(bucketName);
-		AliyunStore aliyunStore = new AliyunStore(setting);
-		try {
-			// aliyunStore.upload("test-1", new FileInputStream("D://temp/test.txt"));
-			InputStream downStream = aliyunStore.download("test-1");
-			// aliyunStore.delete("test-1");
-			// BaseFileUtils.inputToOutput(downStream, new FileOutputStream("D://temp/test2.txt"));
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
 	public void upload(String ossKey, InputStream inputStream) throws Exception {
 		String bucketName = storeSetting.getBucketName();
 		upload(bucketName, ossKey, inputStream);

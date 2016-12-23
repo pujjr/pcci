@@ -6,7 +6,6 @@ import java.io.Serializable;
  * @author wen
  * @date 创建时间：2016年10月10日 上午10:43:35 失信被执行记录
  */
-
 public class CreditExecutionVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
@@ -14,6 +13,7 @@ public class CreditExecutionVO implements Serializable {
 	public static final String EXECUTION_TYPE_BAD = "BAD";
 
 	public static final String EXECUTION_TYPE_EXECUT = "EXECUT";
+
 	/**
 	 * ID
 	 */
@@ -29,52 +29,42 @@ public class CreditExecutionVO implements Serializable {
 	/**
 	 * 数据类型
 	 */
-
 	private String ex_bad_datatype;
 	/**
 	 * 执行法院
 	 */
-
 	private String ex_bad_court;
 	/**
 	 * 立案时间
 	 */
-
 	private String ex_bad_time;
 	/**
 	 * 执行案号
 	 */
-
 	private String ex_bad_casenum;
 	/**
 	 * 执行标的
 	 */
-
 	private String ex_bad_money;
 	/**
 	 * 执行依据文号
 	 */
-
 	private String ex_bad_base;
 	/**
 	 * 做出执行依据单位
 	 */
-
 	private String ex_bad_basecompany;
 	/**
 	 * 被执行人的履行情况
 	 */
-
 	private String ex_bad_performance;
 	/**
 	 * 失信被执行人行为具体情形
 	 */
-
 	private String ex_bad_concretesituation;
 	/**
 	 * 认定失信时间
 	 */
-
 	private String ex_bad_breaktime;
 
 	/* 被执行记录 */
@@ -82,42 +72,34 @@ public class CreditExecutionVO implements Serializable {
 	/**
 	 * 数据类型
 	 */
-
 	private String ex_execut_datatype;
 	/**
 	 * 执行法院
 	 */
-
 	private String ex_execut_court;
 	/**
 	 * 立案时间
 	 */
-
 	private String ex_execut_time;
 	/**
 	 * 执行案号
 	 */
-
 	private String ex_execut_casenum;
 	/**
 	 * 执行标的
 	 */
-
 	private String ex_execut_money;
 	/**
 	 * 案件状态
 	 */
-
 	private String ex_execut_statute;
 	/**
 	 * 执行依据
 	 */
-
 	private String ex_execut_basic;
 	/**
 	 * 做出执行依据的机构
 	 */
-
 	private String ex_execut_basiccourt;
 
 	/**

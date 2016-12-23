@@ -16,9 +16,7 @@ public class ResultInfo<T> implements Serializable {
 	private boolean success; // 操作是否成功
 	private String msg; // 操作失败的原因
 	private List<Object> otherInfoList; // 其他信息
-
 	private String resultCode;// 返回码
-
 	private T data;// 返回对象
 
 	/**
@@ -32,6 +30,7 @@ public class ResultInfo<T> implements Serializable {
 	public ResultInfo<T> resultFrom(ResultInfo<?> result) {
 		this.success = result.isSuccess();
 		this.msg = result.getMsg();
+		this.resultCode = result.getResultCode();
 		return this;
 	}
 

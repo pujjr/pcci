@@ -13,11 +13,6 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class BaseDateUtils {
 
-	private void DateFormat() {
-		// TODO 自动生成的方法存根
-
-	}
-
 	public static Date Format(String date, String pattern) throws ParseException {
 		SimpleDateFormat dateFormat = new SimpleDateFormat(pattern);
 		if (StringUtils.isNotBlank(date)) {

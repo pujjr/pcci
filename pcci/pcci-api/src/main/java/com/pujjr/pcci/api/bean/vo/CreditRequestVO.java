@@ -14,6 +14,12 @@ public class CreditRequestVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
+	/** 失败代码 成功 */
+	public static final int ERROR_STATUS_SUCCESS = 1;
+
+	/** 失败代码 成功 */
+	public static final int ERROR_STATUS_FAIL = 0;
+
 	/** 无数据 */
 	public static final int RISK_LEVEL_NONE = 0;
 	/** 低风险 */
@@ -96,14 +102,19 @@ public class CreditRequestVO implements Serializable {
 	private Integer criminalRecord;
 
 	/**
-	 * 错误消息记录
-	 */
-	private String errMsg;
-
-	/**
 	 * 云存储标识
 	 */
 	private String ossKey;
+
+	/**
+	 * 错误状态
+	 */
+	private Integer errStatus = 0;
+
+	/**
+	 * 征信查询结果
+	 */
+	private CreditQueryResultVO creditQueryResult;
 
 	/**
 	 * @return ID
@@ -211,30 +222,30 @@ public class CreditRequestVO implements Serializable {
 	}
 
 	/**
-	 * @return 证件类型{@linkIdentityType}
+	 * @return 证件类型{@link IdentityType}
 	 */
 	public String getIdType() {
 		return idType;
 	}
 
 	/**
-	 * @param 证件类型{@linkIdentityType}
-	 * 			要设置的 idType
+	 * @param 证件类型{@link
+	 * 			IdentityType} 要设置的 idType
 	 */
 	public void setIdType(String idType) {
 		this.idType = idType;
 	}
 
 	/**
-	 * @return 查询原因{@linkQueryReasonType}
+	 * @return 查询原因{@link QueryReasonType}
 	 */
 	public String getReasonCode() {
 		return reasonCode;
 	}
 
 	/**
-	 * @param 查询原因{@linkQueryReasonType}
-	 * 			要设置的 reasonCode
+	 * @param 查询原因{@link
+	 * 			QueryReasonType} 要设置的 reasonCode
 	 */
 	public void setReasonCode(String reasonCode) {
 		this.reasonCode = reasonCode;
@@ -316,21 +327,6 @@ public class CreditRequestVO implements Serializable {
 	}
 
 	/**
-	 * @return 错误消息记录
-	 */
-	public String getErrMsg() {
-		return errMsg;
-	}
-
-	/**
-	 * @param 错误消息记录
-	 *            要设置的 errMsg
-	 */
-	public void setErrMsg(String errMsg) {
-		this.errMsg = errMsg;
-	}
-
-	/**
 	 * @return 云存储标识
 	 */
 	public String getOssKey() {
@@ -343,6 +339,36 @@ public class CreditRequestVO implements Serializable {
 	 */
 	public void setOssKey(String ossKey) {
 		this.ossKey = ossKey;
+	}
+
+	/**
+	 * @return 错误状态
+	 */
+	public Integer getErrStatus() {
+		return errStatus;
+	}
+
+	/**
+	 * @param 错误状态
+	 *            要设置的 errStatus
+	 */
+	public void setErrStatus(Integer errStatus) {
+		this.errStatus = errStatus;
+	}
+
+	/**
+	 * @return 征信查询结果
+	 */
+	public CreditQueryResultVO getCreditQueryResult() {
+		return creditQueryResult;
+	}
+
+	/**
+	 * @param 征信查询结果
+	 *            要设置的 creditQueryResult
+	 */
+	public void setCreditQueryResult(CreditQueryResultVO creditQueryResult) {
+		this.creditQueryResult = creditQueryResult;
 	}
 
 }

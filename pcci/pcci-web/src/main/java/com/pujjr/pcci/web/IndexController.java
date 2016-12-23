@@ -59,7 +59,7 @@ public class IndexController extends BaseController {
 	@RequestMapping("/credit")
 	@ResponseBody
 	public Object credit() {
-		return creditService.creditQuery(new CreditRequestData());
+		return creditService.creditQueryAPI(new CreditRequestData());
 
 	}
 
@@ -78,38 +78,6 @@ public class IndexController extends BaseController {
 				response.setContentType("application/x-download");
 				response.setCharacterEncoding("utf-8");
 				String fileName = "征信查询上传模板." + ExcelUtils.XLSX;
-				/**
-				 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
-				 * 
-				 */
-				// IE使用URLEncoder
-				String userAgent = request.getHeader("User-Agent").toLowerCase();
-				if (userAgent.contains("windows")) {
-					fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
-					// 其它使用转iso
-				} else {
-					fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
-				}
-				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
-				OutputStream os = response.getOutputStream();
-				os.write(byteArray);
-				os.close();
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return;
-	}
-
-	@RequestMapping(value = "/deleteAllError")
-	public void deleteAllError(HttpServletRequest request, HttpServletResponse response) {
-		ResultInfo<byte[]> excelResult = creditService.deleteAllError();
-		try {
-			if (excelResult.isSuccess()) {
-				byte[] byteArray = excelResult.getData();
-				response.setContentType("application/x-download");
-				response.setCharacterEncoding("utf-8");
-				String fileName = "被删除异常查询列表." + ExcelUtils.XLSX;
 				/**
 				 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
 				 * 
@@ -196,6 +164,47 @@ public class IndexController extends BaseController {
 
 	}
 
+	@RequestMapping(value = "/deleteAllError")
+	public void deleteAllError(HttpServletRequest request, HttpServletResponse response) {
+		ResultInfo<byte[]> excelResult = creditService.deleteAllError();
+		OutputStream os = null;
+		try {
+			if (excelResult.isSuccess()) {
+				byte[] byteArray = excelResult.getData();
+				response.setContentType("application/x-download");
+				response.setCharacterEncoding("utf-8");
+				String fileName = "被删除异常查询列表." + ExcelUtils.XLSX;
+				/**
+				 * 1. IE浏览器，采用URLEncoder编码 2. Opera浏览器，采用filename*方式 3. Safari浏览器，采用ISO编码的中文输出 4. Chrome浏览器，采用Base64编码或ISO编码的中文输出 5. FireFox浏览器，采用Base64或filename*或ISO编码的中文输出
+				 * 
+				 */
+				// IE使用URLEncoder
+				String userAgent = request.getHeader("User-Agent").toLowerCase();
+				if (userAgent.contains("windows")) {
+					fileName = URLEncoder.encode(fileName, StandardCharsets.UTF_8.displayName());
+					// 其它使用转iso
+				} else {
+					fileName = new String((fileName).getBytes(StandardCharsets.UTF_8.displayName()), "ISO8859-1");
+				}
+				response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
+				os = response.getOutputStream();
+				os.write(byteArray);
+				os.close();
+			}
+		} catch (Exception e) {
+			logger.error("下载文件异常:" + e.getMessage());
+		} finally {
+			if (os != null) {
+				try {
+					os.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return;
+	}
+
 	@RequestMapping(value = "/downloadCredit/{id}")
 	public void downloadCredit(@PathVariable Long id, HttpServletRequest request, HttpServletResponse response) {
 		OutputStream os = null;
@@ -222,11 +231,11 @@ public class IndexController extends BaseController {
 					response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 					os = response.getOutputStream();
 					os.write(byteArray);
-					os.flush();
+					os.close();
 				}
 			}
 		} catch (Exception e) {
-			logger.error("下载文件异常:" + e.getLocalizedMessage());
+			logger.error("下载文件异常:" + e.getMessage());
 		} finally {
 			if (os != null) {
 				try {
@@ -236,6 +245,7 @@ public class IndexController extends BaseController {
 				}
 			}
 		}
+		return;
 	}
 
 	@RequestMapping(value = "/downloadCreditZip")
@@ -264,7 +274,7 @@ public class IndexController extends BaseController {
 					response.addHeader("Content-Disposition", "attachment;filename=" + fileName);
 					os = response.getOutputStream();
 					os.write(byteArray);
-					os.flush();
+					os.close();
 				}
 			}
 		} catch (Exception e) {
@@ -278,6 +288,7 @@ public class IndexController extends BaseController {
 				}
 			}
 		}
+		return;
 	}
 
 	@RequestMapping(value = "/searchCredit")

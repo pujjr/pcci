@@ -1,6 +1,10 @@
 package com.pujjr.common.utils.bean;
 
 import java.beans.PropertyDescriptor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.beanutils.PropertyUtils;
 
@@ -62,6 +66,31 @@ public class BeanPropertyUtils {
 				continue;
 			}
 		}
+	}
+
+	/**
+	 * bean 转化为 HashMap
+	 * 
+	 * @param obj
+	 * @return
+	 * @throws IllegalAccessException
+	 * @throws IllegalArgumentException
+	 * @throws InvocationTargetException
+	 */
+	public static Map<String, Object> beanToMap(Object obj) throws IllegalAccessException, IllegalArgumentException, InvocationTargetException {
+		Map<String, Object> map = new HashMap<String, Object>();
+		PropertyDescriptor[] propertyDescriptors = PropertyUtils.getPropertyDescriptors(obj);
+		for (PropertyDescriptor property : propertyDescriptors) {
+			String key = property.getName();
+			// 过滤class属性
+			if (!key.equals("class")) {
+				// 得到property对应的getter方法
+				Method getter = property.getReadMethod();
+				Object value = getter.invoke(obj);
+				map.put(key, value);
+			}
+		}
+		return map;
 	}
 
 }

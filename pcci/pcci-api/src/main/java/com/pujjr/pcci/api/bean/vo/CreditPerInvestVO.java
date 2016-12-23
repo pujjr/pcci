@@ -21,7 +21,7 @@ public class CreditPerInvestVO implements Serializable {
 	private Long id;
 
 	/**
-	 * 企业(机构)名称
+	 * 投资类型
 	 */
 	private String perinvestType;
 

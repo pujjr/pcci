@@ -195,7 +195,7 @@ public class QianHaiService extends ParameterizedBaseService<QianHaiService> {
 			resultInfo.setResultCode(msgJSON.getJSONObject("header").getString("rtCode"));
 			resultInfo.success(resultDataList);
 		} catch (Exception e) {
-			logger.error("请求前海征信报文错误" + productType, e);
+			logger.error("请求前海征信报文错误" + productType + ":" + rtCode);
 			resultInfo.setResultCode(rtCode);
 			resultInfo.fail(rtCode);
 		}

@@ -1,7 +1,12 @@
 package com.pujjr.pcci.api.bean.vo;
 
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.pujjr.pcci.api.type.CreditQueryType;
 
 /**
  * @author wen
@@ -12,29 +17,30 @@ public class CreditQueryResultVO implements Serializable {
 
 	private static final long serialVersionUID = 1L;
 
-	/** 驾驶证任务查询结果 成功 */
-	public static final int QUERY_STATUS_SUCCESS = 1;
-	/** 驾驶证任务查询结果 失败 */
-	public static final int QUERY_STATUS_FAIL = 0;
-
 	/**
 	 * ID
 	 */
-	private Long recordId;
+	private Long id;
 
 	private String creditId;
 
 	/* 个人不良信息 */
-	private List<CreditCrimeInfoVO> creditCrimeInfoList;
+	private List<CreditCrimeInfoVO> creditCrimeInfoList = new ArrayList<>();
 
 	/* 失信被执行记录 */
-	private List<CreditExecutionVO> creditExecutionList;
+	private List<CreditExecutionVO> creditExecutionList = new ArrayList<>();
 
 	/* 对外投资 */
-	private List<CreditPerInvestVO> creditPerInvestList;
+	private List<CreditPerInvestVO> creditPerInvestList = new ArrayList<>();
 
-	/* 请求记录 */
-	private CreditRequestVO creditRequest;
+	/* 风险度 */
+	private List<CreditRskdooVO> creditRskdooList = new ArrayList<>();
+
+	/* 查询任务状态 */
+	private Map<String, QueryTaskVO> queryTaskMap = new LinkedHashMap<>();
+
+	/* 查询请求信息 */
+	private CreditRequestVO creditRequest = new CreditRequestVO();
 
 	/* 信贷申请记录 */
 
@@ -49,12 +55,10 @@ public class CreditQueryResultVO implements Serializable {
 	/**
 	 * 6个月前海贷款申请次数
 	 */
-
 	private Integer qh_m6_id_loan_num = 0;
 	/**
 	 * 12个月前海贷款申请次数
 	 */
-
 	private Integer qh_m12_id_loan_num = 0;
 
 	/**
@@ -102,26 +106,6 @@ public class CreditQueryResultVO implements Serializable {
 	 */
 	private String isMachFraud;
 
-	/* 前海风险度 */
-
-	/**
-	 * 来源代码
-	 */
-	private String sourceId;
-	/**
-	 * 风险得分
-	 */
-	private String rskScore;
-
-	/**
-	 * 风险标记
-	 */
-	private String rskMark;
-	/**
-	 * 业务发生时间
-	 */
-	private String dataBuildTime;
-
 	/* 浅海一鉴通(手机号验证) */
 
 	/**
@@ -138,16 +122,10 @@ public class CreditQueryResultVO implements Serializable {
 	private String useTimeScore;
 
 	/* 前海驾驶证 */
-
 	/**
 	 * 驾驶证号查询号
 	 */
 	private String queryId;
-
-	/**
-	 * 驾驶证任务结果
-	 */
-	private Integer queryStatus;
 
 	/**
 	 * 驾驶证号
@@ -165,16 +143,106 @@ public class CreditQueryResultVO implements Serializable {
 	/**
 	 * @return ID
 	 */
-	public Long getRecordId() {
-		return recordId;
+	public Long getId() {
+		return id;
 	}
 
 	/**
 	 * @param ID
 	 *            要设置的 recordId
 	 */
-	public void setRecordId(Long recordId) {
-		this.recordId = recordId;
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	/**
+	 * @return creditCrimeInfoList
+	 */
+	public List<CreditCrimeInfoVO> getCreditCrimeInfoList() {
+		return creditCrimeInfoList;
+	}
+
+	/**
+	 * @param creditCrimeInfoList
+	 *            要设置的 creditCrimeInfoList
+	 */
+	public void setCreditCrimeInfoList(List<CreditCrimeInfoVO> creditCrimeInfoList) {
+		this.creditCrimeInfoList = creditCrimeInfoList;
+	}
+
+	/**
+	 * @return creditExecutionList
+	 */
+	public List<CreditExecutionVO> getCreditExecutionList() {
+		return creditExecutionList;
+	}
+
+	/**
+	 * @param creditExecutionList
+	 *            要设置的 creditExecutionList
+	 */
+	public void setCreditExecutionList(List<CreditExecutionVO> creditExecutionList) {
+		this.creditExecutionList = creditExecutionList;
+	}
+
+	/**
+	 * @return creditPerInvestList
+	 */
+	public List<CreditPerInvestVO> getCreditPerInvestList() {
+		return creditPerInvestList;
+	}
+
+	/**
+	 * @param creditPerInvestList
+	 *            要设置的 creditPerInvestList
+	 */
+	public void setCreditPerInvestList(List<CreditPerInvestVO> creditPerInvestList) {
+		this.creditPerInvestList = creditPerInvestList;
+	}
+
+	/**
+	 * @return creditRskdooList
+	 */
+	public List<CreditRskdooVO> getCreditRskdooList() {
+		return creditRskdooList;
+	}
+
+	/**
+	 * @param creditRskdooList
+	 *            要设置的 creditRskdooList
+	 */
+	public void setCreditRskdooList(List<CreditRskdooVO> creditRskdooList) {
+		this.creditRskdooList = creditRskdooList;
+	}
+
+	/**
+	 * @return queryTaskMap
+	 */
+	public Map<String, QueryTaskVO> getQueryTaskMap() {
+		return queryTaskMap;
+	}
+
+	/**
+	 * @param queryTaskMap
+	 *            要设置的 queryTaskMap
+	 */
+	public void setQueryTaskMap(Map<String, QueryTaskVO> queryTaskMap) {
+		this.queryTaskMap = queryTaskMap;
+	}
+
+	/**
+	 * @return creditRequest
+	 */
+	public CreditRequestVO getCreditRequest() {
+		return creditRequest;
+	}
+
+	/**
+	 * @param creditRequest
+	 *            要设置的 creditRequest
+	 */
+	public void setCreditRequest(CreditRequestVO creditRequest) {
+		this.creditRequest = creditRequest;
 	}
 
 	/**
@@ -388,66 +456,6 @@ public class CreditQueryResultVO implements Serializable {
 	}
 
 	/**
-	 * @return 前海风险度
-	 */
-	public String getSourceId() {
-		return sourceId;
-	}
-
-	/**
-	 * @param 前海风险度
-	 *            要设置的 sourceId
-	 */
-	public void setSourceId(String sourceId) {
-		this.sourceId = sourceId;
-	}
-
-	/**
-	 * @return 风险得分
-	 */
-	public String getRskScore() {
-		return rskScore;
-	}
-
-	/**
-	 * @param 风险得分
-	 *            要设置的 rskScore
-	 */
-	public void setRskScore(String rskScore) {
-		this.rskScore = rskScore;
-	}
-
-	/**
-	 * @return 风险标记
-	 */
-	public String getRskMark() {
-		return rskMark;
-	}
-
-	/**
-	 * @param 风险标记
-	 *            要设置的 rskMark
-	 */
-	public void setRskMark(String rskMark) {
-		this.rskMark = rskMark;
-	}
-
-	/**
-	 * @return 业务发生时间
-	 */
-	public String getDataBuildTime() {
-		return dataBuildTime;
-	}
-
-	/**
-	 * @param 业务发生时间
-	 *            要设置的 dataBuildTime
-	 */
-	public void setDataBuildTime(String dataBuildTime) {
-		this.dataBuildTime = dataBuildTime;
-	}
-
-	/**
 	 * @return 浅海一鉴通(手机号验证)
 	 */
 	public String getIsOwnerMobile() {
@@ -505,21 +513,6 @@ public class CreditQueryResultVO implements Serializable {
 	 */
 	public void setQueryId(String queryId) {
 		this.queryId = queryId;
-	}
-
-	/**
-	 * @return 驾驶证任务结果
-	 */
-	public Integer getQueryStatus() {
-		return queryStatus;
-	}
-
-	/**
-	 * @param 驾驶证任务结果
-	 *            要设置的 queryStatus
-	 */
-	public void setQueryStatus(Integer queryStatus) {
-		this.queryStatus = queryStatus;
 	}
 
 	/**
@@ -583,63 +576,12 @@ public class CreditQueryResultVO implements Serializable {
 	}
 
 	/**
-	 * @return creditCrimeInfoList
+	 * 根据征信查询接口类型获取接口查询状态
+	 * 
+	 * @param key
+	 * @return
 	 */
-	public List<CreditCrimeInfoVO> getCreditCrimeInfoList() {
-		return creditCrimeInfoList;
+	public QueryTaskVO getQueryTask(CreditQueryType key) {
+		return queryTaskMap.get(key.name());
 	}
-
-	/**
-	 * @param creditCrimeInfoList
-	 *            要设置的 creditCrimeInfoList
-	 */
-	public void setCreditCrimeInfoList(List<CreditCrimeInfoVO> creditCrimeInfoList) {
-		this.creditCrimeInfoList = creditCrimeInfoList;
-	}
-
-	/**
-	 * @return creditExecutionList
-	 */
-	public List<CreditExecutionVO> getCreditExecutionList() {
-		return creditExecutionList;
-	}
-
-	/**
-	 * @param creditExecutionList
-	 *            要设置的 creditExecutionList
-	 */
-	public void setCreditExecutionList(List<CreditExecutionVO> creditExecutionList) {
-		this.creditExecutionList = creditExecutionList;
-	}
-
-	/**
-	 * @return creditPerInvestList
-	 */
-	public List<CreditPerInvestVO> getCreditPerInvestList() {
-		return creditPerInvestList;
-	}
-
-	/**
-	 * @param creditPerInvestList
-	 *            要设置的 creditPerInvestList
-	 */
-	public void setCreditPerInvestList(List<CreditPerInvestVO> creditPerInvestList) {
-		this.creditPerInvestList = creditPerInvestList;
-	}
-
-	/**
-	 * @return creditRequest
-	 */
-	public CreditRequestVO getCreditRequest() {
-		return creditRequest;
-	}
-
-	/**
-	 * @param creditRequest
-	 *            要设置的 creditRequest
-	 */
-	public void setCreditRequest(CreditRequestVO creditRequest) {
-		this.creditRequest = creditRequest;
-	}
-
 }

@@ -3,6 +3,7 @@ package com.pujjr.pcci.service.credit;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +15,7 @@ import org.apache.commons.compress.archivers.ArchiveStreamFactory;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.utils.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -35,7 +37,6 @@ import com.pujjr.common.type.DrivingLicenceStatusType;
 import com.pujjr.common.utils.BaseFileUtils;
 import com.pujjr.common.utils.BaseIterableUtils;
 import com.pujjr.common.utils.bean.BeanPropertyUtils;
-import com.pujjr.pcci.dal.dao.CreditQueryResultDAO;
 import com.pujjr.pcci.dal.dao.CreditRequestDAO;
 import com.pujjr.pcci.dal.entity.CreditCrimeInfo;
 import com.pujjr.pcci.dal.entity.CreditExecution;
@@ -106,9 +107,6 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	@Autowired
 	private CreditRequestDAO creditRequestDAO;
 
-	@Autowired
-	private CreditQueryResultDAO creditQueryResultDAO;
-
 	/**
 	 * 获得默认的pdf字体
 	 * 
@@ -121,10 +119,6 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			font = new Font(defaultBaseFont(), DEFAULT_FONT_SIZE, Font.NORMAL);
 		}
 		return font;
-	}
-
-	private Font getFont(float size, int style) {
-		return new Font(defaultBaseFont(), size, style);
 	}
 
 	/**
@@ -247,7 +241,19 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 	 * @throws DocumentException
 	 */
 	private PdfPCell newTitleCell(PdfPTable table, String text) {
-		PdfPCell cell = newCell(text, getFont(DEFAULT_FONT_SIZE, Font.BOLD));
+		return newTitleCell(table, text, BaseColor.BLACK);
+	}
+
+	/**
+	 * 获得一个新标题的cell
+	 * 
+	 * @param text
+	 * @return
+	 * @throws IOException
+	 * @throws DocumentException
+	 */
+	private PdfPCell newTitleCell(PdfPTable table, String text, BaseColor color) {
+		PdfPCell cell = newCell(text, new Font(defaultBaseFont(), DEFAULT_FONT_SIZE, Font.BOLD, color));
 		cell.setColspan(table.getNumberOfColumns());
 		cell.setBorder(Rectangle.NO_BORDER);
 		return cell;
@@ -288,29 +294,6 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				nullTable(table, document);
 			}
 		}
-	}
-
-	/**
-	 * 根据list集合快速生成表格
-	 * 
-	 * @param tableName
-	 * @param table
-	 * @param cells
-	 * @param document
-	 */
-	private void quickTabeByList(PdfPTable table, List<String> cells, Document document) {
-		try {
-			for (String cellValue : cells) {
-				table.addCell(newCell(cellValue));
-			}
-			document.add(table);
-		} catch (NullPointerException e) {
-			nullTable(table, document);
-		} catch (Exception e) {
-			logger.error("生成征信表格错误", e);
-			nullTable(table, document);
-		}
-
 	}
 
 	private void nullTable(PdfPTable table, Document document) {
@@ -747,6 +730,7 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 			creditPerInvestList.add(creditPerInvest);
 		}
 
+		DecimalFormat decimalFormat = new DecimalFormat("####,##0.#######");
 		boolean isShowTableName = true;
 		// 对外投资 企业法人信息
 		for (int i = 0; creditPerInvestList != null && i < creditPerInvestList.size(); i++) {
@@ -758,15 +742,14 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				legalPersonCells.add("企业(机构)类型");
 				legalPersonCells.add(excNullValue(creditPerInvest.getEnttype()));
 				legalPersonCells.add("注册资本(万元)");
-				legalPersonCells.add(excNullValue(creditPerInvest.getEntstatus()));
+				// 注册资本格式化
+				String regcap = creditPerInvest.getRegcap();
+				if (NumberUtils.isNumber(regcap)) {
+					regcap = decimalFormat.format(Double.valueOf(regcap));
+				}
+				legalPersonCells.add(excNullValue(regcap));
 				// 暂不使用该方法,标红文字
-				// quickTabeByList(isShowTableName ? "对外投资——企业股东信息(暂未使用)" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
-				PdfPTable table = defaultTable(DEFAULT_VERTICAL_COLUMN_NUMBER);
-				PdfPCell cell = newCell(isShowTableName ? "对外投资——企业法人信息(暂未使用)" : "", new Font(defaultBaseFont(), DEFAULT_FONT_SIZE, Font.BOLD, BaseColor.RED));
-				cell.setColspan(table.getNumberOfColumns());
-				cell.setBorder(Rectangle.NO_BORDER);
-				table.addCell(cell);
-				quickTabeByList(table, legalPersonCells, document);
+				quickTabeByList(isShowTableName ? "对外投资——企业股东信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, legalPersonCells, document);
 				isShowTableName = false;
 			}
 		}
@@ -780,17 +763,16 @@ public class PdfService extends ParameterizedBaseService<PdfService> {
 				shareholderCells.add("企业(机构)类型");
 				shareholderCells.add(excNullValue(creditPerInvest.getEnttype()));
 				shareholderCells.add("注册资本(万元)");
-				shareholderCells.add(excNullValue(creditPerInvest.getRegcap()));
+				// 注册资本格式化
+				String regcap = creditPerInvest.getRegcap();
+				if (NumberUtils.isNumber(regcap)) {
+					regcap = decimalFormat.format(Double.valueOf(regcap));
+				}
+				shareholderCells.add(excNullValue(regcap));
 				shareholderCells.add("企业状态");
 				shareholderCells.add(excNullValue(creditPerInvest.getEntstatus()));
 				// 暂不使用该方法,标红文字
-				// quickTabeByList(isShowTableName ? "对外投资——企业股东信息(暂未使用)" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
-				PdfPTable table = defaultTable(DEFAULT_VERTICAL_COLUMN_NUMBER);
-				PdfPCell cell = newCell(isShowTableName ? "对外投资——企业法人信息(暂未使用)" : "", new Font(defaultBaseFont(), DEFAULT_FONT_SIZE, Font.BOLD, BaseColor.RED));
-				cell.setColspan(table.getNumberOfColumns());
-				cell.setBorder(Rectangle.NO_BORDER);
-				table.addCell(cell);
-				quickTabeByList(table, shareholderCells, document);
+				quickTabeByList(isShowTableName ? "对外投资——企业股东信息" : "", DEFAULT_VERTICAL_COLUMN_NUMBER, shareholderCells, document);
 				isShowTableName = false;
 			}
 		}

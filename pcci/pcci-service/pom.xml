@@ -6,7 +6,7 @@
 	<parent>
 		<groupId>com.pujjr</groupId>
 		<artifactId>pcci</artifactId>
-		<version>0.6.1</version>
+		<version>0.8.0</version>
 	</parent>
 	<artifactId>pcci-service</artifactId>
 	<name>pcci-service</name>
@@ -18,7 +18,22 @@
 		<dependency>
 			<groupId>com.pujjr</groupId>
 			<artifactId>pcci-common</artifactId>
-			<version>0.6.1</version>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-dal</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-config</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pcci-api</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.pujjr</groupId>
+			<artifactId>pujjr-common</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>com.alibaba</groupId>
@@ -32,16 +47,7 @@
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-lang3</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-dal</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-config</artifactId>
-			<version>0.6.1</version>
-		</dependency>
+		
 		<dependency>
 			<groupId>com.whalin</groupId>
 			<artifactId>Memcached-Java-Client</artifactId>
@@ -50,17 +56,6 @@
 			<groupId>brApi</groupId>
 			<artifactId>brApi</artifactId>
 		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pcci-api</artifactId>
-			<version>0.6.1</version>
-		</dependency>
-		<dependency>
-			<groupId>com.pujjr</groupId>
-			<artifactId>pujjr-common</artifactId>
-			<version>1.1</version>
-		</dependency>
-
 		<dependency>
 			<groupId>net.sf.ehcache</groupId>
 			<artifactId>ehcache-core</artifactId>

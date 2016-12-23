@@ -223,7 +223,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 */
 	public ResultInfo<String> creditQueryAndStore(CreditRequestData creditRequestData) {
 		ResultInfo<String> resultInfo = new ResultInfo<>();
-		ResultInfo<CreditQueryResult> queryResult = creditQuery(creditRequestData);
+		ResultInfo<CreditQueryResult> queryResult = creditQueryAPI(creditRequestData);
 		if (queryResult.isSuccess()) {
 			CreditQueryResult creditQueryResult = queryResult.getData();
 			return pdfService.createPDF(creditQueryResult.getCreditRequest());
@@ -241,7 +241,6 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		ResultInfo<String> resultInfo = new ResultInfo<>();
 		try {
 			Assert.notNull(creditRequestData, "征信请求数据不能为空");
-			// TODO 唯一标识暂时自动生成
 			// Assert.isTrue(StringUtils.isNotBlank(creditRequestData.getCreditId()), "征信唯一流水号不能为空");
 			Assert.isTrue(StringUtils.isNotBlank(creditRequestData.getRequestUserId()), "请求用户编号/工号不能为空");
 			Assert.isTrue(StringUtils.isNotBlank(creditRequestData.getIdNo()), "被查询用户证件号不能为空");
@@ -391,8 +390,13 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param creditRequestData
 	 * @return
 	 */
-	public ResultInfo<CreditQueryResult> creditQuery(CreditRequestData creditRequestData) {
-		return creditQuery(creditRequestData, null);
+	public ResultInfo<CreditQueryResult> creditQueryAPI(CreditRequestData creditRequestData) {
+		CreditRequest repetitionCreditRequest = findCreditByThreeElement(creditRequestData.getName(), creditRequestData.getMobileNo(), creditRequestData.getIdNo());
+		if (repetitionCreditRequest == null) {
+			return creditQuery(creditRequestData, null);
+		}
+		ResultInfo<CreditQueryResult> resultInfo = new ResultInfo<>();
+		return resultInfo.success(repetitionCreditRequest.getCreditQueryResult());
 	}
 
 	/**
@@ -406,7 +410,7 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 		// 开始调用
 		CreditQueryResult creditQueryResult = new CreditQueryResult();
 		CreditRequest creditRequest = new CreditRequest();
-		// TODO 验证结果
+		// 验证请求
 		ResultInfo<String> validateResult = creditRequestValidate(creditRequestData);
 		if (validateResult.isSuccess()) {
 			BeanUtils.copyProperties(creditRequestData, creditRequest);
@@ -509,9 +513,9 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 				applyloanQuery(creditQueryResult, hcRequestData);
 			}
 
-			// TODO 对外投资 太贵了 查不起 暂时注释掉
+			// 对外投资
 			if (isExecute(creditQueryTypeStr, CreditQueryType.perinvest)) {
-				// perinvestQuery(creditQueryResult, hcRequestData);
+				perinvestQuery(creditQueryResult, hcRequestData);
 			}
 
 			/*************** 前海相关 ****************/
@@ -1063,7 +1067,6 @@ public class CreditService extends ParameterizedBaseService<CreditService> {
 	 * @param creditQueryResult
 	 * @param hcRequestData
 	 */
-	@SuppressWarnings("unused")
 	private QueryTask perinvestQuery(CreditQueryResult creditQueryResult, HundredCreditRequest hcRequestData) {
 		QueryTask queryTask = creditQueryResult.getQueryTask(CreditQueryType.perinvest);
 		ResultInfo<String> perInvestResult = hundredCreditService.hundredCreditDasRequest(hcRequestData, MealType.PerInvest);

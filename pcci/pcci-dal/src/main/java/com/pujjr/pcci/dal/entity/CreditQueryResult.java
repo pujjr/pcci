@@ -621,6 +621,12 @@ public class CreditQueryResult implements Serializable {
 		this.creditId = creditId;
 	}
 
+	/**
+	 * 根据征信查询接口类型获取接口查询状态
+	 * 
+	 * @param key
+	 * @return
+	 */
 	public QueryTask getQueryTask(CreditQueryType key) {
 		if (queryTaskMap.get(key.name()) != null) {
 			return queryTaskMap.get(key.name());
